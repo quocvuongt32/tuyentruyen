@@ -1,0 +1,22 @@
+[build]
+  command = "node scripts/build-events.js"
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Trang public: chính sách bảo mật chặt (không CDN, không script ngoài).
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'"
+
+# Trang /admin cần tải Decap CMS + Netlify Identity từ CDN và gọi API Identity/Git Gateway.
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data: https:; script-src 'self' https://identity.netlify.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https://api.netlify.com https://*.netlify.app https://identity.netlify.com; frame-src https://identity.netlify.com"

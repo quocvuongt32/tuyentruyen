@@ -1,0 +1,94 @@
+# Hồ sơ tuyên truyền An ninh mạng — Timeline
+
+Website tĩnh (HTML/CSS/JS thuần, không framework) hiển thị dòng thời gian các buổi
+tuyên truyền An ninh mạng. Nội dung được quản lý qua [Decap CMS](https://decapcms.org/)
+tại `/admin`, lưu trực tiếp vào GitHub dưới dạng file JSON.
+
+## Kiến trúc
+
+```
+index.html, css/, js/      → trang public, 100% tĩnh, không gọi CDN, không server
+content/events/*.json      → mỗi file = 1 sự kiện, do Decap CMS tạo/sửa/xóa
+scripts/build-events.js    → gộp content/events/*.json → data/events.json (chạy khi Netlify build)
+admin/                     → giao diện Decap CMS (chỉ trang này gọi CDN + Netlify Identity)
+uploads/                   → ảnh minh chứng do Decap CMS tải lên
+netlify.toml                → cấu hình build + security headers (CSP, X-Frame-Options,…)
+```
+
+Trang public không có bất kỳ logic ghi/xóa nào — CRUD chỉ xảy ra qua `/admin`,
+được xác thực bởi Netlify Identity + Git Gateway. Vì vậy bề mặt tấn công phía
+người dùng gần như bằng 0 (không database, không API tự viết, không cổng backend).
+
+## 1. Đẩy code lên GitHub
+
+```bash
+git init -b main
+git add .
+git commit -m "Khởi tạo website timeline tuyên truyền An ninh mạng"
+```
+
+Tạo repo trống trên GitHub (không thêm README/gitignore), rồi:
+
+```bash
+git remote add origin https://github.com/<ban>/<ten-repo>.git
+git push -u origin main
+```
+
+## 2. Kết nối Netlify
+
+1. Đăng nhập [Netlify](https://app.netlify.com) bằng tài khoản GitHub của bạn.
+2. **Add new site → Import an existing project → GitHub** → chọn repo vừa tạo.
+3. Build command: `node scripts/build-events.js` — Publish directory: `.`
+   (đã có sẵn trong `netlify.toml`, Netlify sẽ tự nhận).
+4. Deploy site.
+
+## 3. Bật Netlify Identity + Git Gateway (bắt buộc để `/admin` hoạt động)
+
+1. Vào **Site configuration → Identity → Enable Identity**.
+2. **Identity → Registration**: chọn **Invite only** (không cho ai tự đăng ký).
+3. **Identity → Services → Git Gateway → Enable Git Gateway** (cho phép Identity
+   commit thay bạn vào repo GitHub mà không cần cấp token cá nhân cho CMS).
+4. **Identity → Invite users** → nhập **đúng email quản trị của bạn**
+   (vd. địa chỉ Gmail bạn dùng để đăng nhập). Chỉ email được mời mới đăng nhập được —
+   đây là cơ chế giới hạn "chỉ duy nhất tài khoản của tôi" theo yêu cầu bảo mật.
+
+### Tùy chọn: đăng nhập bằng đúng tài khoản GitHub của bạn thay vì email/mật khẩu
+
+1. Tạo GitHub OAuth App tại **GitHub → Settings → Developer settings → OAuth Apps → New OAuth App**:
+   - Homepage URL: `https://<ten-site>.netlify.app`
+   - Authorization callback URL: `https://api.netlify.com/auth/done`
+2. Copy **Client ID** và **Client Secret** vào Netlify:
+   **Identity → Services → External providers → GitHub**.
+3. Khi đó nút đăng nhập ở `/admin` sẽ dùng OAuth GitHub — chỉ tài khoản GitHub được
+   bạn mời (bước 4 ở trên, dùng email gắn với tài khoản GitHub đó) mới vào được.
+
+## 4. Sử dụng trang quản trị
+
+Truy cập `https://<ten-site>.netlify.app/admin/`, đăng nhập bằng tài khoản đã mời,
+thêm/sửa/xóa sự kiện trong collection **"Sự kiện tuyên truyền"**. Mỗi lần lưu,
+Decap CMS commit thẳng vào `content/events/` trên GitHub → Netlify tự động build lại
+(`scripts/build-events.js` gộp dữ liệu) → trang timeline cập nhật sau ~1 phút.
+
+Có thể xóa sự kiện mẫu `content/events/2026-08-17-buoi-tuyen-truyen-mau.json` ngay
+trong `/admin` sau khi thử.
+
+## 5. Xem thử ở máy local
+
+```bash
+node scripts/build-events.js
+python -m http.server 8080
+```
+
+Mở `http://localhost:8080`. (Trang `/admin` cần chạy trên Netlify vì phụ thuộc
+Identity + Git Gateway — không hoạt động đầy đủ ở local.)
+
+## Ghi chú bảo mật
+
+- `netlify.toml` đặt Content-Security-Policy chặt cho toàn site; chỉ `/admin/*`
+  được nới để tải Decap CMS + Netlify Identity từ CDN chính chủ.
+- `scripts/build-events.js` escape HTML và chỉ whitelist một tập thẻ markdown cơ bản
+  khi dựng `bodyHtml`, chặn chèn script từ nội dung nhập trong CMS.
+- Ảnh chỉ được chấp nhận nếu nằm trong `/uploads/` (do chính Git Gateway ghi vào),
+  link tham khảo chỉ được chấp nhận nếu bắt đầu bằng `http://`/`https://`.
+- Không có tài khoản nào đăng ký tự do — **Invite only** + (tùy chọn) GitHub OAuth
+  giới hạn admin đúng 1 người.

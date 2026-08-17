@@ -1,0 +1,63 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "uploads"
+public_folder: "/uploads"
+
+# Chỉ tài khoản được mời qua Netlify Identity (Invite only) mới đăng nhập được.
+# Xem README.md để bật Identity + Git Gateway và giới hạn theo email/GitHub của bạn.
+
+collections:
+  - name: "events"
+    label: "Sự kiện tuyên truyền"
+    label_singular: "Sự kiện"
+    folder: "content/events"
+    create: true
+    delete: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    format: "json"
+    identifier_field: "title"
+    summary: "{{date}} — {{title}}"
+    sortable_fields: ["date", "title"]
+    fields:
+      - label: "Tiêu đề buổi tuyên truyền"
+        name: "title"
+        widget: "string"
+        required: true
+
+      - label: "Thời gian"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        required: true
+
+      - label: "Địa điểm"
+        name: "location"
+        widget: "string"
+        required: true
+
+      - label: "Nội dung tóm tắt"
+        name: "body"
+        widget: "markdown"
+        required: false
+        minimal: true
+        buttons: ["bold", "italic", "link", "bulleted-list", "heading-two"]
+
+      - label: "Ảnh minh chứng"
+        name: "images"
+        widget: "list"
+        required: false
+        summary: "{{fields.image}}"
+        field:
+          label: "Ảnh"
+          name: "image"
+          widget: "image"
+
+      - label: "Link bài viết tham khảo"
+        name: "link"
+        widget: "string"
+        required: false
+        pattern: ['^(https?:\/\/).+$', "Link phải bắt đầu bằng http:// hoặc https://"]
