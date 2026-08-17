@@ -4,8 +4,8 @@
     {
       "name": "static-preview",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8080"],
-      "port": 8080
+      "runtimeArgs": ["-m", "http.server", "8990"],
+      "port": 8990
     }
   ]
 }
