@@ -34,37 +34,6 @@ a { color: inherit; }
   padding: 64px 20px;
 }
 
-/* ---------- Masthead (nhan dien don vi) ---------- */
-
-.masthead {
-  background: var(--bg-alt);
-  border-bottom: 1px solid var(--border);
-  padding: 6px 16px;
-}
-
-.masthead-inner {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  text-align: center;
-  font-size: 0.72rem;
-  letter-spacing: 0.2px;
-  line-height: 1.5;
-}
-
-.masthead-unit {
-  color: var(--text-dim);
-}
-
-.masthead-sep {
-  margin: 0 8px;
-  color: var(--border);
-}
-
-.masthead-org {
-  color: var(--accent-dim);
-  font-weight: 600;
-}
-
 /* ---------- Header / Nav ---------- */
 
 .site-header {
@@ -759,10 +728,6 @@ a { color: inherit; }
   .timeline { padding-left: 20px; }
   .event-dot { left: -26px; }
   .event-summary { align-items: flex-start; }
-
-  .masthead-unit,
-  .masthead-org { display: block; }
-  .masthead-sep { display: none; }
 
   .banner { margin: 0 auto 28px; border-radius: 8px; }
   .stats-row { margin-top: 32px; }
