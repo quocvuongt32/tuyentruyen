@@ -109,6 +109,19 @@ nhúng bằng header `X-Frame-Options`/`frame-ancestors` — đây là cơ chế
 trang đó, không thể và không nên can thiệp để vượt qua. Khi gặp trường hợp này, modal sẽ
 trống hoặc báo lỗi; dùng nút "Mở tab mới ↗" ở góc modal để xem bình thường.
 
+## 8. Banner ảnh nổi bật ở trang chủ
+
+Trong `/admin` (hoặc `Them-su-kien.bat`), mỗi ảnh minh chứng của một sự kiện có thể
+đánh dấu **"Ảnh nổi bật"**. Trang chủ sẽ gom tất cả ảnh được đánh dấu (từ mọi sự kiện)
+thành banner tự động chuyển ảnh mỗi 3 giây, có dấu chấm điều hướng, bấm vào ảnh sẽ
+cuộn xuống và mở đúng sự kiện chứa ảnh đó trong dòng thời gian. Không tạo hệ thống
+upload riêng — dùng lại `uploads/` sẵn có. Nếu chưa có ảnh nào được đánh dấu, khu vực
+banner tự ẩn hoàn toàn, không chừa khoảng trắng.
+
+Khu vực thống kê ngay dưới banner (số buổi tuyên truyền, số ảnh minh chứng, thời gian
+cập nhật gần nhất) được tính tự động từ `content/events/*.json` mỗi lần build, không
+cần nhập tay.
+
 ## Ghi chú bảo mật
 
 - `netlify.toml` đặt Content-Security-Policy chặt cho toàn site; chỉ `/admin/*`

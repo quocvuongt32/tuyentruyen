@@ -34,6 +34,37 @@ a { color: inherit; }
   padding: 64px 20px;
 }
 
+/* ---------- Masthead (nhan dien don vi) ---------- */
+
+.masthead {
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 16px;
+}
+
+.masthead-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+}
+
+.masthead-unit {
+  color: var(--text-dim);
+}
+
+.masthead-sep {
+  margin: 0 8px;
+  color: var(--border);
+}
+
+.masthead-org {
+  color: var(--accent-dim);
+  font-weight: 600;
+}
+
 /* ---------- Header / Nav ---------- */
 
 .site-header {
@@ -159,6 +190,90 @@ a { color: inherit; }
   pointer-events: none;
 }
 
+/* Banner anh noi bat, chon tay tu kho anh trong /admin */
+.banner {
+  position: relative;
+  max-width: var(--max-width);
+  height: clamp(200px, 32vw, 380px);
+  margin: 0 auto 36px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.banner[hidden] { display: none; }
+
+.banner-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.banner-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  cursor: pointer;
+}
+
+.banner-slide.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.banner-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.banner-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 34px 20px 14px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: #fff;
+  text-align: left;
+  font-size: 0.86rem;
+}
+
+.banner-caption strong {
+  display: block;
+  font-size: 0.98rem;
+  margin-bottom: 2px;
+}
+
+.banner-dots {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+
+.banner-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+.banner-dot.active {
+  width: 20px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
 .hero-inner {
   position: relative;
   max-width: 640px;
@@ -207,6 +322,36 @@ a { color: inherit; }
 .hero-cta:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px var(--accent-soft);
+}
+
+.stats-row {
+  position: relative;
+  max-width: var(--max-width);
+  margin: 48px auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.stat-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 12px;
+}
+
+.stat-tile strong {
+  display: block;
+  font-size: 1.6rem;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+}
+
+.stat-tile span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
 }
 
 /* ---------- About ---------- */
@@ -417,30 +562,40 @@ a { color: inherit; }
 
 .event-link:hover { text-decoration: underline; }
 
-/* ---------- Footer ---------- */
+/* ---------- Footer (gon, trang trong, dung nhan dien Hoc vien/CAND) ---------- */
 
 .site-footer {
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--accent-dim);
   background: var(--bg-alt);
 }
 
 .footer-inner {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 10px 20px;
   text-align: center;
+}
+
+.footer-line-1 {
+  margin: 0 0 2px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.footer-line-2 {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.3px;
   color: var(--text-dim);
-  font-size: 0.85rem;
 }
 
-.footer-brand {
-  justify-content: center;
-  margin-bottom: 14px;
+.footer-sep {
+  margin: 0 6px;
+  color: var(--border);
 }
-
-.site-footer a { color: var(--accent-dim); }
-.site-footer p { margin: 4px 0; }
-.copyright { color: var(--text-dim); }
 
 /* ---------- Lightbox ---------- */
 
@@ -565,6 +720,7 @@ a { color: inherit; }
 
 @media (max-width: 720px) {
   .about-points { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
@@ -603,4 +759,11 @@ a { color: inherit; }
   .timeline { padding-left: 20px; }
   .event-dot { left: -26px; }
   .event-summary { align-items: flex-start; }
+
+  .masthead-unit,
+  .masthead-org { display: block; }
+  .masthead-sep { display: none; }
+
+  .banner { margin: 0 auto 28px; border-radius: 8px; }
+  .stats-row { margin-top: 32px; }
 }

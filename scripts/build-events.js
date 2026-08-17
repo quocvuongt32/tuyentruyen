@@ -70,6 +70,28 @@ function isSafeImagePath(src) {
   return typeof src === "string" && (src.startsWith("/uploads/") || src.startsWith("uploads/"));
 }
 
+function slugFromFilename(file) {
+  const base = path.basename(file, ".json");
+  return base.replace(/[^a-zA-Z0-9-]+/g, "-");
+}
+
+// Chap nhan ca dinh dang cu (images: ["/uploads/a.jpg"]) lan dinh dang moi
+// (images: [{image, featured}]) de khong hong du lieu cu.
+function normalizeImages(rawImages) {
+  if (!Array.isArray(rawImages)) return [];
+  return rawImages
+    .map((item) => {
+      if (typeof item === "string") {
+        return isSafeImagePath(item) ? { src: item, featured: false } : null;
+      }
+      if (item && typeof item === "object" && isSafeImagePath(item.image)) {
+        return { src: item.image, featured: item.featured === true };
+      }
+      return null;
+    })
+    .filter(Boolean);
+}
+
 fs.mkdirSync(outDir, { recursive: true });
 
 let files = [];
@@ -89,18 +111,46 @@ const events = files
       console.warn(`Bỏ qua file lỗi định dạng: ${file}`);
       return null;
     }
-    const images = Array.isArray(data.images) ? data.images.filter(isSafeImagePath) : [];
     return {
+      slug: slugFromFilename(file),
       title: typeof data.title === "string" ? data.title : "",
       date: typeof data.date === "string" ? data.date : "",
       location: typeof data.location === "string" ? data.location : "",
       bodyHtml: markdownToHtml(data.body || ""),
-      images,
+      images: normalizeImages(data.images),
       link: isSafeUrl(data.link) ? data.link : "",
     };
   })
   .filter(Boolean)
   .sort((a, b) => (a.date < b.date ? 1 : -1));
 
-fs.writeFileSync(outFile, JSON.stringify(events, null, 2), "utf8");
-console.log(`Đã tạo ${events.length} sự kiện vào ${path.relative(process.cwd(), outFile)}`);
+const featured = [];
+let imageCount = 0;
+for (const ev of events) {
+  for (const img of ev.images) {
+    imageCount++;
+    if (img.featured) {
+      featured.push({
+        src: img.src,
+        eventSlug: ev.slug,
+        eventTitle: ev.title,
+        eventDate: ev.date,
+      });
+    }
+  }
+}
+
+const payload = {
+  generatedAt: new Date().toISOString(),
+  stats: {
+    eventCount: events.length,
+    imageCount,
+  },
+  featured,
+  events,
+};
+
+fs.writeFileSync(outFile, JSON.stringify(payload, null, 2), "utf8");
+console.log(
+  `Đã tạo ${events.length} sự kiện (${imageCount} ảnh, ${featured.length} ảnh nổi bật) vào ${path.relative(process.cwd(), outFile)}`
+);

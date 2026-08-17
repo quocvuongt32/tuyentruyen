@@ -122,9 +122,26 @@ async function main() {
       }
       const destName = `${date}-${slugify(title)}-${i + 1}${ext}`;
       fs.copyFileSync(srcPath, path.join(uploadsDir, destName));
-      images.push(`/uploads/${destName}`);
-      console.log(`  -> Đã sao chép: ${destName}`);
+      images.push({ image: `/uploads/${destName}`, featured: false });
+      console.log(`  -> Đã sao chép (${images.length}): ${destName}`);
     });
+  }
+
+  if (images.length > 0) {
+    const raw = (
+      await ask(
+        `Đánh dấu ảnh nổi bật cho banner trang chủ? Nhập số thứ tự (vd: 1,3), để trống nếu không có: `
+      )
+    ).trim();
+    if (raw) {
+      raw
+        .split(",")
+        .map((n) => parseInt(n.trim(), 10))
+        .filter((n) => Number.isInteger(n) && n >= 1 && n <= images.length)
+        .forEach((n) => {
+          images[n - 1].featured = true;
+        });
+    }
   }
 
   let link = "";

@@ -3,12 +3,24 @@ async function loadEvents() {
   try {
     const res = await fetch("data/events.json", { cache: "no-store" });
     if (!res.ok) throw new Error("Không tải được dữ liệu sự kiện");
-    const events = await res.json();
-    render(events);
+    const payload = await res.json();
+    render(payload.events);
+    renderStats(payload.stats, payload.generatedAt);
+    setupBanner(payload.featured);
   } catch (err) {
     container.innerHTML = '<p class="error">Chưa có dữ liệu hoặc lỗi tải dữ liệu.</p>';
     console.error(err);
   }
+}
+
+function renderStats(stats, generatedAt) {
+  const eventsEl = document.getElementById("stat-events");
+  const imagesEl = document.getElementById("stat-images");
+  const updatedEl = document.getElementById("stat-updated");
+  if (!stats || !eventsEl) return;
+  eventsEl.textContent = String(stats.eventCount || 0);
+  imagesEl.textContent = String(stats.imageCount || 0);
+  updatedEl.textContent = formatDate(generatedAt ? generatedAt.slice(0, 10) : "");
 }
 
 function render(events) {
@@ -26,6 +38,7 @@ function render(events) {
 function buildCard(ev, openByDefault) {
   const article = document.createElement("article");
   article.className = "event-card" + (openByDefault ? " open" : "");
+  if (ev.slug) article.id = `event-${ev.slug}`;
 
   const dot = document.createElement("div");
   dot.className = "event-dot";
@@ -106,7 +119,9 @@ function buildCard(ev, openByDefault) {
   if (Array.isArray(ev.images) && ev.images.length) {
     const gallery = document.createElement("div");
     gallery.className = "event-gallery";
-    for (const src of ev.images) {
+    for (const item of ev.images) {
+      const src = item && item.src;
+      if (!src) continue;
       const img = document.createElement("img");
       img.src = src;
       img.alt = ev.title || "";
@@ -174,6 +189,103 @@ function setupLinkModal() {
     const lightbox = document.getElementById("lightbox");
     if (lightbox.classList.contains("active")) closeLightbox();
   });
+}
+
+function openEventCard(slug) {
+  const card = document.getElementById(`event-${slug}`);
+  if (!card) return;
+  card.classList.add("open");
+  const summary = card.querySelector(".event-summary");
+  if (summary) summary.setAttribute("aria-expanded", "true");
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function setupBanner(featured) {
+  const banner = document.getElementById("banner");
+  const track = document.getElementById("banner-track");
+  const dotsWrap = document.getElementById("banner-dots");
+  if (!banner || !track || !dotsWrap) return;
+
+  const slides = Array.isArray(featured) ? featured.filter((f) => f && f.src) : [];
+  if (slides.length === 0) {
+    banner.hidden = true;
+    return;
+  }
+
+  track.innerHTML = "";
+  dotsWrap.innerHTML = "";
+  const slideEls = [];
+  const dotEls = [];
+  let index = 0;
+  let timer = null;
+
+  slides.forEach((item, i) => {
+    const slide = document.createElement("a");
+    slide.className = "banner-slide" + (i === 0 ? " active" : "");
+    slide.href = item.eventSlug ? `#event-${item.eventSlug}` : "#timeline-section";
+
+    const img = document.createElement("img");
+    img.src = item.src;
+    img.alt = item.eventTitle || "";
+    img.loading = i === 0 ? "eager" : "lazy";
+    slide.appendChild(img);
+
+    if (item.eventTitle) {
+      const caption = document.createElement("div");
+      caption.className = "banner-caption";
+      caption.innerHTML = `<strong></strong>`;
+      caption.querySelector("strong").textContent = item.eventTitle;
+      if (item.eventDate) {
+        caption.appendChild(document.createTextNode(formatDate(item.eventDate)));
+      }
+      slide.appendChild(caption);
+    }
+
+    slide.addEventListener("click", (e) => {
+      if (item.eventSlug) {
+        e.preventDefault();
+        openEventCard(item.eventSlug);
+      }
+    });
+
+    track.appendChild(slide);
+    slideEls.push(slide);
+
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "banner-dot" + (i === 0 ? " active" : "");
+    dot.setAttribute("aria-label", `Ảnh ${i + 1}`);
+    dot.addEventListener("click", () => goTo(i));
+    dotsWrap.appendChild(dot);
+    dotEls.push(dot);
+  });
+
+  banner.hidden = false;
+
+  function goTo(i) {
+    slideEls[index].classList.remove("active");
+    dotEls[index].classList.remove("active");
+    index = (i + slides.length) % slides.length;
+    slideEls[index].classList.add("active");
+    dotEls[index].classList.add("active");
+  }
+
+  function next() {
+    goTo(index + 1);
+  }
+
+  function start() {
+    if (slides.length > 1) timer = setInterval(next, 3000);
+  }
+
+  function stop() {
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+
+  banner.addEventListener("mouseenter", stop);
+  banner.addEventListener("mouseleave", start);
+  start();
 }
 
 function setupNav() {

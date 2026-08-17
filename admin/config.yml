@@ -51,10 +51,15 @@ collections:
         widget: "list"
         required: false
         summary: "{{fields.image}}"
-        field:
-          label: "Ảnh"
-          name: "image"
-          widget: "image"
+        fields:
+          - label: "Ảnh"
+            name: "image"
+            widget: "image"
+          - label: "Đánh dấu là ảnh nổi bật (hiển thị ở banner trang chủ)"
+            name: "featured"
+            widget: "boolean"
+            default: false
+            required: false
 
       - label: "Link bài viết tham khảo"
         name: "link"
