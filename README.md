@@ -8,10 +8,13 @@ tại `/admin`, lưu trực tiếp vào GitHub dưới dạng file JSON.
 
 ```
 index.html, css/, js/      → trang public, 100% tĩnh, không gọi CDN, không server
-content/events/*.json      → mỗi file = 1 sự kiện, do Decap CMS tạo/sửa/xóa
+content/events/*.json      → mỗi file = 1 sự kiện, do Decap CMS hoặc scripts/add-event.js tạo/sửa/xóa
 scripts/build-events.js    → gộp content/events/*.json → data/events.json (chạy khi Netlify build)
+scripts/add-event.js       → CLI thêm sự kiện khi thử ở máy local (xem mục 6)
+Chay-thu.bat                → bấm đúp để chạy thử web ở máy local
+Them-su-kien.bat            → bấm đúp để thêm sự kiện khi thử ở máy local
 admin/                     → giao diện Decap CMS (chỉ trang này gọi CDN + Netlify Identity)
-uploads/                   → ảnh minh chứng do Decap CMS tải lên
+uploads/                   → ảnh minh chứng do Decap CMS / scripts/add-event.js tải lên
 netlify.toml                → cấu hình build + security headers (CSP, X-Frame-Options,…)
 ```
 
@@ -74,13 +77,37 @@ trong `/admin` sau khi thử.
 
 ## 5. Xem thử ở máy local
 
+Cách nhanh nhất: bấm đúp file **[Chay-thu.bat](Chay-thu.bat)**. Script sẽ tự cập nhật
+dữ liệu, mở server tại `http://localhost:8990` và mở trình duyệt sẵn cho bạn.
+Đóng cửa sổ cmd hiện ra (tên "TUYEN_TRUYEN - server") để tắt server.
+
+Chạy tay tương đương:
+
 ```bash
 node scripts/build-events.js
-python -m http.server 8080
+python -m http.server 8990
 ```
 
-Mở `http://localhost:8080`. (Trang `/admin` cần chạy trên Netlify vì phụ thuộc
+Mở `http://localhost:8990`. (Trang `/admin` cần chạy trên Netlify vì phụ thuộc
 Identity + Git Gateway — không hoạt động đầy đủ ở local.)
+
+## 6. Thêm sự kiện
+
+- **Đã deploy lên Netlify**: dùng `/admin` (Decap CMS) như mục 4 — thao tác từ xa,
+  nhiều thiết bị, có xác thực Identity.
+- **Đang thử ở máy local, chưa deploy**: bấm đúp **[Them-su-kien.bat](Them-su-kien.bat)**
+  (chạy `scripts/add-event.js`). Cửa sổ cmd sẽ hỏi lần lượt: tiêu đề, ngày, địa điểm,
+  nội dung (kết thúc bằng dòng chỉ có dấu `.`), đường dẫn ảnh trên máy (cách nhau bằng
+  dấu phẩy, ảnh sẽ được copy vào `uploads/`), và link tham khảo. Script tự ghi file vào
+  `content/events/` và cập nhật lại `data/events.json` — chỉ cần F5 lại trang đang xem thử.
+
+## 7. Xem link tham khảo ngay trong trang
+
+Bấm "Xem bài viết tham khảo" mở một cửa sổ (modal) nhúng trang đó bằng `<iframe>` ngay
+trong web, không mở tab mới. **Lưu ý:** nhiều trang (Facebook, báo điện tử,…) tự chặn bị
+nhúng bằng header `X-Frame-Options`/`frame-ancestors` — đây là cơ chế bảo mật của chính
+trang đó, không thể và không nên can thiệp để vượt qua. Khi gặp trường hợp này, modal sẽ
+trống hoặc báo lỗi; dùng nút "Mở tab mới ↗" ở góc modal để xem bình thường.
 
 ## Ghi chú bảo mật
 

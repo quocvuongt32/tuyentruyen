@@ -86,10 +86,12 @@ function buildCard(ev, openByDefault) {
   if (ev.link) {
     const a = document.createElement("a");
     a.href = ev.link;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
     a.className = "event-link";
     a.textContent = "Xem bài viết tham khảo →";
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      openLinkModal(ev.link);
+    });
     panelInner.appendChild(a);
   }
 
@@ -140,6 +142,40 @@ function closeLightbox() {
   document.getElementById("lightbox-img").src = "";
 }
 
+function openLinkModal(url) {
+  const overlay = document.getElementById("link-modal");
+  const iframe = document.getElementById("link-modal-iframe");
+  const openBtn = document.getElementById("link-modal-open");
+  const titleEl = document.getElementById("link-modal-title");
+  iframe.src = url;
+  openBtn.href = url;
+  titleEl.textContent = url;
+  overlay.classList.add("active");
+}
+
+function closeLinkModal() {
+  const overlay = document.getElementById("link-modal");
+  overlay.classList.remove("active");
+  document.getElementById("link-modal-iframe").src = "about:blank";
+}
+
+function setupLinkModal() {
+  const overlay = document.getElementById("link-modal");
+  const closeBtn = document.getElementById("link-modal-close");
+  if (!overlay || !closeBtn) return;
+
+  closeBtn.addEventListener("click", closeLinkModal);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeLinkModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (overlay.classList.contains("active")) closeLinkModal();
+    const lightbox = document.getElementById("lightbox");
+    if (lightbox.classList.contains("active")) closeLightbox();
+  });
+}
+
 function setupNav() {
   const toggle = document.getElementById("nav-toggle");
   const nav = document.getElementById("site-nav");
@@ -162,6 +198,7 @@ function setupNav() {
 document.addEventListener("DOMContentLoaded", () => {
   loadEvents();
   setupNav();
+  setupLinkModal();
   document.getElementById("lightbox").addEventListener("click", closeLightbox);
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
