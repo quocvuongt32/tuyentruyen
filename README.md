@@ -75,6 +75,21 @@ Decap CMS commit thẳng vào `content/events/` trên GitHub → Netlify tự đ
 Có thể xóa sự kiện mẫu `content/events/2026-08-17-buoi-tuyen-truyen-mau.json` ngay
 trong `/admin` sau khi thử.
 
+`/admin` chỉ hoạt động **sau khi đã deploy lên Netlify và bật Identity + Git Gateway**
+(mục 3) — chạy ở máy local (`localhost`) sẽ không đăng nhập được vì không có backend
+Identity thật đứng sau. Kéo-thả ảnh vào ô ảnh (image widget) đã được Decap CMS hỗ trợ
+sẵn, không cần thêm gì. Việc sắp xếp lại thứ tự sự kiện bằng kéo-thả thì Decap CMS
+không hỗ trợ cho loại collection dạng thư mục (mỗi sự kiện 1 file) như ở đây — thứ tự
+hiển thị trên trang là tự động theo `date` mới nhất lên đầu; trong `/admin` có thể bấm
+tiêu đề cột **Date/Title** ở danh sách để sắp xếp lại cách xem, không phải kéo-thả.
+
+### Đổi mật khẩu
+
+Vào **[Đổi mật khẩu](/admin/doi-mat-khau.html)** (cũng có link ở menu chính) — đăng
+nhập bằng tài khoản Identity, tự nhập mật khẩu mới. Trang này gọi thẳng API của
+Netlify Identity từ trình duyệt của bạn; mật khẩu không đi qua hay lưu ở bất kỳ đâu
+khác ngoài chính tài khoản Identity của bạn.
+
 ## 5. Xem thử ở máy local
 
 Cách nhanh nhất: bấm đúp file **[Chay-thu.bat](Chay-thu.bat)**. Script sẽ tự cập nhật

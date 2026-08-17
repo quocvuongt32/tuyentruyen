@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Đổi mật khẩu quản trị</title>
+<link rel="stylesheet" href="../css/style.css" />
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  .auth-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 26px;
+  }
+  .auth-card h1 { font-size: 1.15rem; margin: 0 0 6px; }
+  .auth-card .hint { color: var(--text-dim); font-size: 0.85rem; margin: 0 0 22px; }
+  .auth-card label { display: block; font-size: 0.85rem; color: var(--text-dim); margin: 14px 0 6px; }
+  .auth-card input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font: inherit;
+  }
+  .auth-card input:focus { outline: 1px solid var(--accent-dim); }
+  .auth-card button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 11px;
+    background: var(--accent);
+    color: #06120c;
+    font-weight: 600;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .auth-card button:disabled { opacity: 0.6; cursor: default; }
+  .auth-card .secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+    margin-top: 10px;
+  }
+  .auth-user { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 4px; }
+  .auth-msg { margin-top: 14px; font-size: 0.85rem; }
+  .auth-msg.ok { color: var(--accent); }
+  .auth-msg.err { color: var(--danger); }
+  .back-link { display: block; text-align: center; margin-top: 16px; font-size: 0.82rem; color: var(--text-dim); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="auth-card">
+  <h1>Đổi mật khẩu quản trị</h1>
+  <p class="hint">Áp dụng cho tài khoản đăng nhập /admin qua Netlify Identity.</p>
+
+  <div id="logged-out" hidden>
+    <p class="hint">Bạn cần đăng nhập trước khi đổi mật khẩu.</p>
+    <button type="button" id="btn-login">Đăng nhập</button>
+  </div>
+
+  <div id="logged-in" hidden>
+    <p class="auth-user">Đang đăng nhập: <strong id="user-email"></strong></p>
+
+    <form id="pw-form">
+      <label for="pw1">Mật khẩu mới (tối thiểu 8 ký tự)</label>
+      <input type="password" id="pw1" autocomplete="new-password" required minlength="8" />
+
+      <label for="pw2">Nhập lại mật khẩu mới</label>
+      <input type="password" id="pw2" autocomplete="new-password" required minlength="8" />
+
+      <button type="submit" id="btn-submit">Cập nhật mật khẩu</button>
+      <button type="button" id="btn-logout" class="secondary">Đăng xuất</button>
+    </form>
+
+    <p id="msg" class="auth-msg" hidden></p>
+  </div>
+
+  <a href="/admin/" class="back-link">← Quay lại trang quản trị</a>
+</div>
+
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script>
+  var loggedOutEl = document.getElementById("logged-out");
+  var loggedInEl = document.getElementById("logged-in");
+  var userEmailEl = document.getElementById("user-email");
+  var form = document.getElementById("pw-form");
+  var msgEl = document.getElementById("msg");
+  var submitBtn = document.getElementById("btn-submit");
+
+  function showMessage(text, isError) {
+    msgEl.hidden = false;
+    msgEl.textContent = text;
+    msgEl.className = "auth-msg " + (isError ? "err" : "ok");
+  }
+
+  function renderUser(user) {
+    if (user) {
+      loggedOutEl.hidden = true;
+      loggedInEl.hidden = false;
+      userEmailEl.textContent = user.email || "";
+    } else {
+      loggedOutEl.hidden = false;
+      loggedInEl.hidden = true;
+    }
+  }
+
+  if (window.netlifyIdentity) {
+    netlifyIdentity.on("init", renderUser);
+    netlifyIdentity.on("login", renderUser);
+    netlifyIdentity.on("logout", function () { renderUser(null); });
+    netlifyIdentity.init();
+    // netlify-identity-widget tu goi init() ngay khi script tai xong, co the
+    // xay ra truoc khi listener "init" o tren duoc gan (bo lo su kien). Goi
+    // truc tiep currentUser() lam fallback de UI luon dung trang thai.
+    renderUser(netlifyIdentity.currentUser());
+
+    document.getElementById("btn-login").addEventListener("click", function () {
+      netlifyIdentity.open("login");
+    });
+
+    document.getElementById("btn-logout").addEventListener("click", function () {
+      netlifyIdentity.logout();
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var pw1 = document.getElementById("pw1").value;
+      var pw2 = document.getElementById("pw2").value;
+
+      if (pw1.length < 8) {
+        showMessage("Mật khẩu phải có ít nhất 8 ký tự.", true);
+        return;
+      }
+      if (pw1 !== pw2) {
+        showMessage("Hai mật khẩu nhập lại không khớp.", true);
+        return;
+      }
+
+      var user = netlifyIdentity.currentUser();
+      if (!user) {
+        showMessage("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.", true);
+        renderUser(null);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Đang cập nhật...";
+
+      user
+        .update({ password: pw1 })
+        .then(function () {
+          showMessage("Đổi mật khẩu thành công.", false);
+          form.reset();
+        })
+        .catch(function (err) {
+          showMessage("Lỗi: " + (err && err.message ? err.message : "không thể đổi mật khẩu."), true);
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Cập nhật mật khẩu";
+        });
+    });
+  }
+</script>
+</body>
+</html>
