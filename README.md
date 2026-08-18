@@ -137,6 +137,27 @@ Khu vực thống kê ngay dưới banner (số buổi tuyên truyền, số ả
 cập nhật gần nhất) được tính tự động từ `content/events/*.json` mỗi lần build, không
 cần nhập tay.
 
+## 9. Thống kê lượt truy cập
+
+Mặc định **tắt hoàn toàn** — không có script theo dõi nào chạy cho tới khi bạn tự bật.
+Dùng [GoatCounter](https://www.goatcounter.com/) vì miễn phí, không cookie, không thu
+thập dữ liệu cá nhân (phù hợp GDPR), và không cần backend riêng. Vì cần tạo tài khoản
+trên dịch vụ bên thứ ba, bước này **bạn phải tự làm** (không thể tự động hoá thay bạn):
+
+1. Đăng ký miễn phí tại [goatcounter.com](https://www.goatcounter.com/), đặt một "site code"
+   (ví dụ `tuyentruyen-anm` → sẽ có dashboard tại `tuyentruyen-anm.goatcounter.com`).
+2. Mở [index.html](index.html), tìm khối comment **"THONG KE TRUY CAP"** ở cuối file
+   (ngay trước `</body>`), thay `REPLACE-ME` bằng site code vừa tạo.
+3. Xoá dòng `<!-- THONG KE...` đầu khối và dòng `-->` cuối khối để bỏ comment, kích hoạt
+   script.
+4. Commit + push — Netlify tự build lại. `netlify.toml` đã sẵn CSP cho phép
+   `gc.zgo.at` (script) và `*.goatcounter.com` (gửi dữ liệu).
+
+Ngoài lượt xem trang, `js/main.js` đã gắn sẵn các sự kiện tuỳ chỉnh để biết **mục nào
+được xem/bấm nhiều nhất**: mở một mốc trong dòng thời gian, bấm ảnh banner, bấm link
+tham khảo, bấm mục nào trong menu điều hướng — tất cả tự động lên dashboard GoatCounter
+dưới dạng "Events" một khi bước 1–4 hoàn tất, không cần chỉnh sửa gì thêm.
+
 ## Ghi chú bảo mật
 
 - `netlify.toml` đặt Content-Security-Policy chặt cho toàn site; chỉ `/admin/*`

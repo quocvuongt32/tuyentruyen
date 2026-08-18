@@ -13,7 +13,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), camera=(), microphone=()"
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-src https:; frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data: https://*.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.goatcounter.com; frame-src https:; frame-ancestors 'none'"
 
 # Trang /admin cần tải Decap CMS + Netlify Identity từ CDN và gọi API Identity/Git Gateway.
 [[headers]]

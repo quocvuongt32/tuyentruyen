@@ -85,6 +85,7 @@ function buildCard(ev, openByDefault) {
     const willOpen = !article.classList.contains("open");
     article.classList.toggle("open", willOpen);
     summary.setAttribute("aria-expanded", String(willOpen));
+    if (willOpen) trackEvent(`/su-kien/${ev.slug || "khong-slug"}`, ev.title);
   });
 
   article.appendChild(summary);
@@ -138,6 +139,12 @@ function buildCard(ev, openByDefault) {
   return article;
 }
 
+function trackEvent(path, title) {
+  if (window.goatcounter && typeof window.goatcounter.count === "function") {
+    window.goatcounter.count({ path, title, event: true });
+  }
+}
+
 function formatDate(iso) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -166,6 +173,7 @@ function openLinkModal(url) {
   openBtn.href = url;
   titleEl.textContent = url;
   overlay.classList.add("active");
+  trackEvent(`/lien-ket-tham-khao`, url);
 }
 
 function closeLinkModal() {
@@ -245,6 +253,7 @@ function setupBanner(featured) {
       if (item.eventSlug) {
         e.preventDefault();
         openEventCard(item.eventSlug);
+        trackEvent(`/banner/${item.eventSlug}`, item.eventTitle);
       }
     });
 
@@ -303,6 +312,12 @@ function setupNav() {
     link.addEventListener("click", () => {
       nav.classList.remove("open");
       toggle.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  nav.querySelectorAll(":scope > a").forEach((link) => {
+    link.addEventListener("click", () => {
+      trackEvent(`/menu${link.getAttribute("href")}`, link.textContent.trim());
     });
   });
 }
