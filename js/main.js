@@ -1,3 +1,13 @@
+// Netlify gui link moi/quen mat khau ve trang goc (vd: "/#invite_token=...")
+// nhung Identity widget chi duoc nap o /admin/. Neu khong chuyen huong, token
+// nam yen tren trang chu va khong bao gio duoc xu ly -> tai khoan khong bao
+// gio duoc xac nhan, du dat mat khau gi cung se bao "Email not confirmed".
+(function redirectIdentityTokens() {
+  if (/(invite_token|recovery_token|confirmation_token)=/.test(window.location.hash)) {
+    window.location.replace("/admin/" + window.location.hash);
+  }
+})();
+
 async function loadEvents() {
   const container = document.getElementById("timeline");
   try {
