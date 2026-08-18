@@ -105,11 +105,60 @@ a { color: inherit; }
   color: var(--accent);
 }
 
-.site-nav a.nav-admin {
+/* Menu quan tri (Quan tri / Doi mat khau) gom vao 1 icon nho, kin dao
+   de khong lam giao dien thien ve "san pham quan ly" khi chia se cong khai. */
+.admin-menu {
+  position: relative;
+}
+
+.admin-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.admin-toggle:hover,
+.admin-toggle[aria-expanded="true"] {
   color: var(--accent);
-  border: 1px solid var(--accent-dim);
-  padding: 6px 14px;
-  border-radius: 999px;
+  border-color: var(--accent-dim);
+}
+
+.admin-links {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 168px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+  z-index: 60;
+}
+
+.admin-links.open {
+  display: flex;
+}
+
+.admin-links a {
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.admin-links a:hover {
+  background: var(--bg-alt);
+  color: var(--accent);
 }
 
 .nav-toggle {
@@ -710,17 +759,23 @@ a { color: inherit; }
     transition: max-height 0.25s ease;
   }
 
-  .site-nav.open { max-height: 320px; }
+  .site-nav.open { max-height: 420px; }
 
   .site-nav a {
     padding: 14px 20px;
     border-top: 1px solid var(--border);
   }
 
-  .site-nav a.nav-admin {
-    margin: 12px 20px;
-    text-align: center;
-    border-radius: 8px;
+  .admin-toggle { display: none; }
+
+  .admin-links {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
   }
 
   .section-inner { padding: 44px 18px; }

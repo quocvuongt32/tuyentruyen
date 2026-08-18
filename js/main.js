@@ -307,9 +307,38 @@ function setupNav() {
   });
 }
 
+function setupAdminMenu() {
+  const menu = document.getElementById("admin-menu");
+  const toggle = document.getElementById("admin-toggle");
+  const links = document.getElementById("admin-links");
+  if (!menu || !toggle || !links) return;
+
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const willOpen = !links.classList.contains("open");
+    links.classList.toggle("open", willOpen);
+    toggle.setAttribute("aria-expanded", String(willOpen));
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!menu.contains(e.target)) {
+      links.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      links.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadEvents();
   setupNav();
+  setupAdminMenu();
   setupLinkModal();
   document.getElementById("lightbox").addEventListener("click", closeLightbox);
   const yearEl = document.getElementById("year");
