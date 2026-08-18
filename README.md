@@ -1,8 +1,11 @@
-# Hồ sơ tuyên truyền An ninh mạng — Timeline
+# Chuyển đổi số & Đổi mới sáng tạo — Khoa Toán - Tin học và Ứng dụng KHCN
 
-Website tĩnh (HTML/CSS/JS thuần, không framework) hiển thị dòng thời gian các buổi
-tuyên truyền An ninh mạng. Nội dung được quản lý qua [Decap CMS](https://decapcms.org/)
-tại `/admin`, lưu trực tiếp vào GitHub dưới dạng file JSON.
+Website tĩnh (HTML/CSS/JS thuần, không framework) hiển thị dòng thời gian các hoạt
+động ứng dụng khoa học công nghệ, chuyển đổi số, đổi mới sáng tạo và tuyên truyền
+An ninh mạng của Khoa. Mỗi hoạt động được gắn **nhãn phân loại** (An ninh mạng /
+Chuyển đổi số / Đổi mới sáng tạo / Nghiên cứu khoa học / Khác), có bộ lọc trên
+trang chủ. Nội dung được quản lý qua [Decap CMS](https://decapcms.org/) tại
+`/admin`, lưu trực tiếp vào GitHub dưới dạng file JSON.
 
 ## Kiến trúc
 
@@ -111,10 +114,13 @@ Identity + Git Gateway — không hoạt động đầy đủ ở local.)
 - **Đã deploy lên Netlify**: dùng `/admin` (Decap CMS) như mục 4 — thao tác từ xa,
   nhiều thiết bị, có xác thực Identity.
 - **Đang thử ở máy local, chưa deploy**: bấm đúp **[Them-su-kien.bat](Them-su-kien.bat)**
-  (chạy `scripts/add-event.js`). Cửa sổ cmd sẽ hỏi lần lượt: tiêu đề, ngày, địa điểm,
-  nội dung (kết thúc bằng dòng chỉ có dấu `.`), đường dẫn ảnh trên máy (cách nhau bằng
-  dấu phẩy, ảnh sẽ được copy vào `uploads/`), và link tham khảo. Script tự ghi file vào
-  `content/events/` và cập nhật lại `data/events.json` — chỉ cần F5 lại trang đang xem thử.
+  (chạy `scripts/add-event.js`). Cửa sổ cmd sẽ hỏi lần lượt: tiêu đề, **phân loại**
+  (chọn số thứ tự), ngày, địa điểm, nội dung (kết thúc bằng dòng chỉ có dấu `.`),
+  đường dẫn ảnh trên máy (cách nhau bằng dấu phẩy, ảnh sẽ được copy vào `uploads/`),
+  link tham khảo, và **link video** (YouTube/Google Drive, nhúng trực tiếp trong
+  trang nếu nhận diện được — không nhận diện được thì hiện dạng link thường). Script
+  tự ghi file vào `content/events/` và cập nhật lại `data/events.json` — chỉ cần F5
+  lại trang đang xem thử.
 
 ## 7. Xem link tham khảo ngay trong trang
 

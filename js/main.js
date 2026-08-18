@@ -17,6 +17,7 @@ async function loadEvents() {
     render(payload.events);
     renderStats(payload.stats, payload.generatedAt);
     setupBanner(payload.featured);
+    setupCategoryFilter(payload.categories);
   } catch (err) {
     container.innerHTML = '<p class="error">Chưa có dữ liệu hoặc lỗi tải dữ liệu.</p>';
     console.error(err);
@@ -49,6 +50,7 @@ function buildCard(ev, openByDefault) {
   const article = document.createElement("article");
   article.className = "event-card" + (openByDefault ? " open" : "");
   if (ev.slug) article.id = `event-${ev.slug}`;
+  if (ev.category) article.dataset.category = ev.category;
 
   const dot = document.createElement("div");
   dot.className = "event-dot";
@@ -68,6 +70,12 @@ function buildCard(ev, openByDefault) {
   const dateEl = document.createElement("div");
   dateEl.className = "event-date";
   dateEl.textContent = formatDate(ev.date);
+  if (ev.categoryLabel) {
+    const catEl = document.createElement("span");
+    catEl.className = "event-category";
+    catEl.textContent = ev.categoryLabel;
+    dateEl.appendChild(catEl);
+  }
   summaryText.appendChild(dateEl);
 
   const titleEl = document.createElement("h3");
@@ -106,6 +114,30 @@ function buildCard(ev, openByDefault) {
 
   const panelInner = document.createElement("div");
   panelInner.className = "event-panel-inner";
+
+  if (ev.videoEmbedUrl) {
+    const videoWrap = document.createElement("div");
+    videoWrap.className = "event-video";
+    const iframe = document.createElement("iframe");
+    iframe.src = ev.videoEmbedUrl;
+    iframe.title = ev.title || "Video";
+    iframe.loading = "lazy";
+    iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
+    iframe.setAttribute("allowfullscreen", "");
+    iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+    videoWrap.appendChild(iframe);
+    panelInner.appendChild(videoWrap);
+  } else if (ev.videoUrl) {
+    const a = document.createElement("a");
+    a.href = ev.videoUrl;
+    a.className = "event-link";
+    a.textContent = "Xem video →";
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      openLinkModal(ev.videoUrl);
+    });
+    panelInner.appendChild(a);
+  }
 
   if (ev.link) {
     const a = document.createElement("a");
@@ -147,6 +179,43 @@ function buildCard(ev, openByDefault) {
   article.appendChild(panel);
 
   return article;
+}
+
+function setupCategoryFilter(categories) {
+  const wrap = document.getElementById("category-filter");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+  const cards = () => document.querySelectorAll("#timeline .event-card");
+
+  const allBtn = document.createElement("button");
+  allBtn.type = "button";
+  allBtn.className = "category-pill active";
+  allBtn.textContent = "Tất cả";
+  allBtn.dataset.value = "";
+  wrap.appendChild(allBtn);
+
+  (Array.isArray(categories) ? categories : []).forEach((c) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "category-pill";
+    btn.textContent = c.label;
+    btn.dataset.value = c.value;
+    wrap.appendChild(btn);
+  });
+
+  wrap.querySelectorAll(".category-pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      wrap.querySelectorAll(".category-pill").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const value = btn.dataset.value;
+      cards().forEach((card) => {
+        const match = !value || card.dataset.category === value;
+        card.classList.toggle("filtered-out", !match);
+      });
+      trackEvent(`/loc/${value || "tat-ca"}`, btn.textContent);
+    });
+  });
 }
 
 function trackEvent(path, title) {

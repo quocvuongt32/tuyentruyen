@@ -66,6 +66,56 @@ function isSafeUrl(url) {
   return typeof url === "string" && /^https?:\/\//i.test(url);
 }
 
+const CATEGORIES = [
+  { value: "an-ninh-mang", label: "An ninh mạng" },
+  { value: "chuyen-doi-so", label: "Chuyển đổi số" },
+  { value: "doi-moi-sang-tao", label: "Đổi mới sáng tạo" },
+  { value: "nghien-cuu-khoa-hoc", label: "Nghiên cứu khoa học" },
+  { value: "khac", label: "Khác" },
+];
+const CATEGORY_VALUES = new Set(CATEGORIES.map((c) => c.value));
+const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((c) => [c.value, c.label]));
+
+// Du lieu cu (truoc khi co truong category) mac dinh la "An ninh mang" vi
+// toan bo su kien tao truoc do deu thuoc chu de nay.
+function normalizeCategory(value) {
+  return typeof value === "string" && CATEGORY_VALUES.has(value) ? value : "an-ninh-mang";
+}
+
+// Chuyen link YouTube/Google Drive dang xem thuong sang dang embed de nhung
+// truc tiep bang iframe. Link khong nhan dien duoc van giu lai o videoUrl
+// de hien thi nhu link thuong (mo qua modal), chi videoEmbedUrl la null.
+function toEmbedUrl(url) {
+  if (!isSafeUrl(url)) return null;
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+
+    if (host === "youtu.be") {
+      const id = u.pathname.slice(1);
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      if (u.pathname === "/watch") {
+        const id = u.searchParams.get("v");
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+      if (u.pathname.startsWith("/embed/")) return url;
+      if (u.pathname.startsWith("/shorts/")) {
+        const id = u.pathname.split("/")[2];
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+    }
+    if (host === "drive.google.com") {
+      const match = u.pathname.match(/\/file\/d\/([^/]+)/);
+      if (match) return `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
+
 function isSafeImagePath(src) {
   return typeof src === "string" && (src.startsWith("/uploads/") || src.startsWith("uploads/"));
 }
@@ -111,14 +161,20 @@ const events = files
       console.warn(`Bỏ qua file lỗi định dạng: ${file}`);
       return null;
     }
+    const category = normalizeCategory(data.category);
+    const videoUrl = isSafeUrl(data.video) ? data.video : "";
     return {
       slug: slugFromFilename(file),
       title: typeof data.title === "string" ? data.title : "",
+      category,
+      categoryLabel: CATEGORY_LABELS[category],
       date: typeof data.date === "string" ? data.date : "",
       location: typeof data.location === "string" ? data.location : "",
       bodyHtml: markdownToHtml(data.body || ""),
       images: normalizeImages(data.images),
       link: isSafeUrl(data.link) ? data.link : "",
+      videoUrl,
+      videoEmbedUrl: videoUrl ? toEmbedUrl(videoUrl) : null,
     };
   })
   .filter(Boolean)
@@ -146,6 +202,7 @@ const payload = {
     eventCount: events.length,
     imageCount,
   },
+  categories: CATEGORIES,
   featured,
   events,
 };

@@ -30,6 +30,14 @@ function stripQuotes(p) {
   return t;
 }
 
+const CATEGORIES = [
+  { label: "An ninh mạng", value: "an-ninh-mang" },
+  { label: "Chuyển đổi số", value: "chuyen-doi-so" },
+  { label: "Đổi mới sáng tạo", value: "doi-moi-sang-tao" },
+  { label: "Nghiên cứu khoa học", value: "nghien-cuu-khoa-hoc" },
+  { label: "Khác", value: "khac" },
+];
+
 function todayIso() {
   const d = new Date();
   return d.toISOString().slice(0, 10);
@@ -61,12 +69,25 @@ function createLineReader() {
 async function main() {
   const { ask, close } = createLineReader();
 
-  console.log("=== Thêm sự kiện tuyên truyền An ninh mạng ===\n");
+  console.log("=== Thêm hoạt động (chuyển đổi số / đổi mới sáng tạo / An ninh mạng...) ===\n");
 
   let title = "";
   while (!title) {
-    title = (await ask("Tiêu đề buổi tuyên truyền: ")).trim();
+    title = (await ask("Tiêu đề hoạt động: ")).trim();
     if (!title) console.log("  -> Tiêu đề không được để trống.");
+  }
+
+  console.log("Phân loại:");
+  CATEGORIES.forEach((c, i) => console.log(`  ${i + 1}. ${c.label}`));
+  let category = "";
+  while (!category) {
+    const raw = (await ask(`Chọn số thứ tự [1-${CATEGORIES.length}]: `)).trim();
+    const idx = parseInt(raw, 10);
+    if (Number.isInteger(idx) && idx >= 1 && idx <= CATEGORIES.length) {
+      category = CATEGORIES[idx - 1].value;
+    } else {
+      console.log("  -> Nhập đúng số thứ tự trong danh sách.");
+    }
   }
 
   let date = "";
@@ -154,6 +175,18 @@ async function main() {
     console.log("  -> Link phải bắt đầu bằng http:// hoặc https://, hoặc để trống.");
   }
 
+  let video = "";
+  for (;;) {
+    const raw = (
+      await ask("Link video YouTube/Google Drive (để trống nếu không có): ")
+    ).trim();
+    if (!raw || /^https?:\/\/.+/i.test(raw)) {
+      video = raw;
+      break;
+    }
+    console.log("  -> Link phải bắt đầu bằng http:// hoặc https://, hoặc để trống.");
+  }
+
   close();
 
   fs.mkdirSync(eventsDir, { recursive: true });
@@ -164,7 +197,7 @@ async function main() {
     slug = `${baseSlug}-${n++}`;
   }
 
-  const data = { title, date, location, body, images, link };
+  const data = { title, category, date, location, body, images, link, video };
   const filePath = path.join(eventsDir, `${slug}.json`);
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
   console.log(`\nĐã lưu: content/events/${slug}.json`);

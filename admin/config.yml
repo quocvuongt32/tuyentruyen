@@ -10,21 +10,32 @@ public_folder: "/uploads"
 
 collections:
   - name: "events"
-    label: "Sự kiện tuyên truyền"
-    label_singular: "Sự kiện"
+    label: "Hoạt động"
+    label_singular: "Hoạt động"
     folder: "content/events"
     create: true
     delete: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     format: "json"
     identifier_field: "title"
-    summary: "{{date}} — {{title}}"
-    sortable_fields: ["date", "title"]
+    summary: "{{date}} — [{{category}}] {{title}}"
+    sortable_fields: ["date", "title", "category"]
     fields:
-      - label: "Tiêu đề buổi tuyên truyền"
+      - label: "Tiêu đề hoạt động"
         name: "title"
         widget: "string"
         required: true
+
+      - label: "Phân loại"
+        name: "category"
+        widget: "select"
+        required: true
+        options:
+          - { label: "An ninh mạng", value: "an-ninh-mang" }
+          - { label: "Chuyển đổi số", value: "chuyen-doi-so" }
+          - { label: "Đổi mới sáng tạo", value: "doi-moi-sang-tao" }
+          - { label: "Nghiên cứu khoa học", value: "nghien-cuu-khoa-hoc" }
+          - { label: "Khác", value: "khac" }
 
       - label: "Thời gian"
         name: "date"
@@ -45,6 +56,13 @@ collections:
         required: false
         minimal: true
         buttons: ["bold", "italic", "link", "bulleted-list", "heading-two"]
+
+      - label: "Link video (YouTube hoặc Google Drive, chia sẻ công khai)"
+        name: "video"
+        widget: "string"
+        required: false
+        hint: "Dán link xem video (vd: https://youtu.be/... hoặc link chia sẻ Google Drive)"
+        pattern: ['^(https?:\/\/).+$', "Link phải bắt đầu bằng http:// hoặc https://"]
 
       - label: "Ảnh minh chứng"
         name: "images"
