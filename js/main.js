@@ -24,6 +24,25 @@ async function loadEvents() {
   }
 }
 
+// Hien so luot truy cap thuc te (GoatCounter). Can bat "Allow adding visitor
+// counts on your website" trong Settings cua GoatCounter truoc, neu chua bat
+// hoac loi mang thi lang le an tile nay di, khong lam vo trang.
+async function loadVisitCounter() {
+  const tile = document.getElementById("stat-visits-tile");
+  const el = document.getElementById("stat-visits");
+  if (!tile || !el) return;
+  try {
+    const res = await fetch("https://vuongnq.goatcounter.com/counter/TOTAL.json");
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || !data.count) return;
+    el.textContent = data.count;
+    tile.hidden = false;
+  } catch (err) {
+    // Am lang bo qua - tile van an, khong anh huong phan con lai cua trang.
+  }
+}
+
 function renderStats(stats, generatedAt) {
   const eventsEl = document.getElementById("stat-events");
   const imagesEl = document.getElementById("stat-images");
@@ -431,6 +450,7 @@ function setupAdminMenu() {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadEvents();
+  loadVisitCounter();
   setupNav();
   setupAdminMenu();
   setupLinkModal();
