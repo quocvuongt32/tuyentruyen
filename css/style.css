@@ -740,7 +740,7 @@ a { color: inherit; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: min(320px, 78vw);
+  width: min(260px, 70vw);
   margin: 0 auto 18px;
   filter: drop-shadow(0 0 28px var(--accent-soft));
 }
@@ -753,7 +753,7 @@ a { color: inherit; }
 
 .hero h1 {
   margin: 0 0 14px;
-  font-size: clamp(1.5rem, 4.6vw, 2.5rem);
+  font-size: clamp(1.35rem, 3.2vw, 1.9rem);
   letter-spacing: 0.3px;
   white-space: nowrap;
 }
@@ -796,31 +796,49 @@ a { color: inherit; }
 }
 
 .about h2 {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   font-size: 1.5rem;
 }
 
-.about > .section-inner > p {
+.about-top-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.about-intro-box {
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.about-intro-box p {
+  margin: 0;
   color: var(--text-dim);
-  max-width: 640px;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .partner-badges {
   display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 22px;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .partner-badge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 14px;
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
   border-radius: var(--radius);
   padding: 12px 18px;
   max-width: 100%;
+  flex: 1;
 }
 
 .badge-icon {
@@ -834,13 +852,15 @@ a { color: inherit; }
 .partner-badge span {
   color: var(--text-dim);
   font-size: 0.88rem;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .about-points {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-top: 28px;
+  margin-top: 16px;
 }
 
 .point {
@@ -848,10 +868,15 @@ a { color: inherit; }
   align-items: center;
   gap: 12px;
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
   border-radius: var(--radius);
   padding: 16px;
   font-size: 0.92rem;
+}
+
+.point span:last-child {
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .point-icon {
@@ -865,10 +890,10 @@ a { color: inherit; }
 }
 
 .directive-basis {
-  margin-top: 28px;
+  margin-top: 16px;
   padding: 18px 20px;
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
   border-left: 3px solid var(--accent-dim);
   border-radius: var(--radius);
 }
@@ -893,10 +918,16 @@ a { color: inherit; }
   font-size: 0.88rem;
   color: var(--text-dim);
   line-height: 1.55;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .directive-basis strong {
   color: var(--text);
+}
+
+@media (max-width: 720px) {
+  .about-top-grid { grid-template-columns: 1fr; }
 }
 
 /* ---------- Timeline section ---------- */

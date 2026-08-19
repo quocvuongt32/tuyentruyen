@@ -1,0 +1,46 @@
+{
+  "heading": "Giới thiệu",
+  "intro": "Khoa Toán - Tin học và Ứng dụng Khoa học công nghệ trong phòng, chống tội phạm tổ chức và tham gia nhiều hoạt động ứng dụng khoa học công nghệ, chuyển đổi số, đổi mới sáng tạo và tuyên truyền nâng cao nhận thức an toàn thông tin, góp phần xây dựng Học viện hiện đại, số hóa, thông minh.",
+  "partners": [
+    {
+      "icon": "img/logo-dang.png",
+      "text": "Thực hiện dưới sự lãnh đạo của Đảng ủy Học viện Cảnh sát nhân dân"
+    },
+    {
+      "icon": "img/logo-cong-an.png",
+      "text": "Hoạt động tuyên truyền phối hợp cùng lực lượng Công an nhân dân"
+    }
+  ],
+  "points": [
+    {
+      "icon": "shield",
+      "text": "Tuyên truyền An ninh mạng, an toàn thông tin"
+    },
+    {
+      "icon": "bulb",
+      "text": "Đổi mới sáng tạo, ứng dụng công nghệ mới (AI, dữ liệu số...)"
+    },
+    {
+      "icon": "refresh",
+      "text": "Chuyển đổi số trong quản lý, giảng dạy, nghiên cứu khoa học"
+    }
+  ],
+  "directiveTitle": "Căn cứ thực hiện",
+  "directives": [
+    {
+      "title": "Nghị quyết số 57-NQ/TW",
+      "date": "22/12/2024",
+      "description": "của Bộ Chính trị về đột phá phát triển khoa học, công nghệ, đổi mới sáng tạo và chuyển đổi số quốc gia."
+    },
+    {
+      "title": "Nghị quyết số 879-NQ/ĐU",
+      "date": "22/02/2023",
+      "description": "của Đảng ủy Học viện CSND về lãnh đạo công tác ứng dụng khoa học công nghệ và chuyển đổi số tại Học viện CSND đến năm 2025, định hướng đến năm 2030."
+    },
+    {
+      "title": "Kết luận số 1249-KL/ĐU",
+      "date": "13/7/2026",
+      "description": "của Đảng ủy Học viện về tiếp tục đẩy mạnh thực hiện Nghị quyết số 879-NQ/ĐU và bổ sung các nhiệm vụ mới trong công tác ứng dụng khoa học công nghệ, chuyển đổi số."
+    }
+  ]
+}

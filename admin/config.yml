@@ -9,6 +9,74 @@ public_folder: "/uploads"
 # Xem README.md để bật Identity + Git Gateway và giới hạn theo email/GitHub của bạn.
 
 collections:
+  - name: "gioi_thieu"
+    label: "Giới thiệu (trang chủ)"
+    files:
+      - name: "noi_dung"
+        label: "Nội dung mục Giới thiệu"
+        file: "content/gioi-thieu.json"
+        fields:
+          - label: "Tiêu đề mục"
+            name: "heading"
+            widget: "string"
+            default: "Giới thiệu"
+
+          - label: "Đoạn giới thiệu"
+            name: "intro"
+            widget: "text"
+
+          - label: "Đối tác / chỉ đạo (khung phải, có thể thêm/bớt)"
+            name: "partners"
+            widget: "list"
+            summary: "{{fields.text}}"
+            fields:
+              - label: "Huy hiệu / icon"
+                name: "icon"
+                widget: "image"
+              - label: "Nội dung"
+                name: "text"
+                widget: "string"
+
+          - label: "Điểm nổi bật (3 thẻ, có thể thêm/bớt)"
+            name: "points"
+            widget: "list"
+            summary: "{{fields.text}}"
+            fields:
+              - label: "Icon"
+                name: "icon"
+                widget: "select"
+                default: "shield"
+                options:
+                  - { label: "Khiên (an ninh mạng)", value: "shield" }
+                  - { label: "Bóng đèn (đổi mới sáng tạo)", value: "bulb" }
+                  - { label: "Làm mới (chuyển đổi số)", value: "refresh" }
+                  - { label: "Tài liệu", value: "doc" }
+                  - { label: "Máy tính", value: "computer" }
+                  - { label: "Ngôi sao", value: "star" }
+              - label: "Nội dung"
+                name: "text"
+                widget: "string"
+
+          - label: "Tiêu đề khối căn cứ thực hiện"
+            name: "directiveTitle"
+            widget: "string"
+            default: "Căn cứ thực hiện"
+
+          - label: "Căn cứ thực hiện (có thể thêm/bớt)"
+            name: "directives"
+            widget: "list"
+            summary: "{{fields.title}}"
+            fields:
+              - label: "Tên văn bản"
+                name: "title"
+                widget: "string"
+              - label: "Ngày ban hành"
+                name: "date"
+                widget: "string"
+              - label: "Nội dung"
+                name: "description"
+                widget: "text"
+
   - name: "events"
     label: "Hoạt động"
     label_singular: "Hoạt động"

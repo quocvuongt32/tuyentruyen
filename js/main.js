@@ -44,20 +44,18 @@ async function loadEvents() {
   }
 }
 
-// Hien so luot truy cap thuc te (GoatCounter). Can bat "Allow adding visitor
-// counts on your website" trong Settings cua GoatCounter truoc, neu chua bat
-// hoac loi mang thi lang le an tile nay di, khong lam vo trang.
+// Hien so luot truy cap thuc te (GoatCounter). O canh se hien san voi dau
+// "—", chi cap nhat so khi lay duoc du lieu. Can bat "Allow adding visitor
+// counts on your website" trong Settings cua GoatCounter de co so nay.
 async function loadVisitCounter() {
-  const tile = document.getElementById("stat-visits-tile");
   const el = document.getElementById("stat-visits");
-  if (!tile || !el) return;
+  if (!el) return;
   try {
     const res = await fetch("https://vuongnq.goatcounter.com/counter/TOTAL.json");
     if (!res.ok) return;
     const data = await res.json();
     if (!data || !data.count) return;
     el.textContent = data.count;
-    tile.hidden = false;
   } catch (err) {
     // Am lang bo qua - tile van an, khong anh huong phan con lai cua trang.
   }
@@ -678,6 +676,19 @@ function setupNav() {
   });
 }
 
+// Nhay ve dung dinh #trang-chu se cuon khung thoi su (nam tren header, khong
+// dinh sticky) ra khoi man hinh. Bam "Trang chu" (hoac logo) thi cuon thang
+// len dau trang de van thay duoc dai tin.
+function setupHomeLinks() {
+  document.querySelectorAll('a[href="#trang-chu"]').forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (history.pushState) history.pushState(null, "", "#trang-chu");
+    });
+  });
+}
+
 function setupAdminMenu() {
   const menu = document.getElementById("admin-menu");
   const toggle = document.getElementById("admin-toggle");
@@ -704,6 +715,105 @@ function setupAdminMenu() {
       toggle.setAttribute("aria-expanded", "false");
     }
   });
+}
+
+// Bo icon co san cho cac "diem noi bat" trong muc Gioi thieu — CMS chi cho
+// chon ten (khong cho dan SVG tuy y) de giu giao dien nhat quan.
+const ABOUT_ICON_PATHS = {
+  shield: ["M12 2.5 4.5 5.5v5.4c0 5.1 3.3 9 7.5 10.6 4.2-1.6 7.5-5.5 7.5-10.6V5.5L12 2.5Z"],
+  bulb: ["M9 18h6M10 21h4", "M12 3a6 6 0 0 0-3.5 10.9c.4.3.7.8.7 1.3v.3h5.6v-.3c0-.5.3-1 .7-1.3A6 6 0 0 0 12 3Z"],
+  refresh: ["M20 12a8 8 0 1 1-2.34-5.66", "M20 4v5h-5"],
+  doc: ["M7 3h7l4 4v14H7V3Z", "M14 3v4h4", "M9.5 12.5h5M9.5 15.5h5"],
+  computer: ["M4 5h16v10H4V5Z", "M9 19h6M12 15v4"],
+  star: ["m12 3 2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 17l-5.6 3.1 1.4-6.3-4.8-4.3 6.4-.6L12 3Z"],
+};
+
+function buildAboutIcon(key) {
+  const paths = ABOUT_ICON_PATHS[key] || ABOUT_ICON_PATHS.shield;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", "22");
+  svg.setAttribute("height", "22");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.6");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  paths.forEach((d) => {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    svg.appendChild(path);
+  });
+  return svg;
+}
+
+async function loadAbout() {
+  try {
+    const res = await fetch("data/about.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Không tải được nội dung Giới thiệu");
+    const data = await res.json();
+
+    const headingEl = document.getElementById("about-heading");
+    if (headingEl && data.heading) headingEl.textContent = data.heading;
+
+    const introEl = document.getElementById("about-intro");
+    if (introEl) introEl.textContent = data.intro || "";
+
+    const partnersEl = document.getElementById("about-partners");
+    if (partnersEl) {
+      partnersEl.innerHTML = "";
+      (Array.isArray(data.partners) ? data.partners : []).forEach((p) => {
+        const box = document.createElement("div");
+        box.className = "partner-badge";
+        const img = document.createElement("img");
+        img.className = "badge-icon";
+        img.src = p.icon;
+        img.alt = "";
+        img.loading = "lazy";
+        const span = document.createElement("span");
+        span.textContent = p.text;
+        box.appendChild(img);
+        box.appendChild(span);
+        partnersEl.appendChild(box);
+      });
+    }
+
+    const pointsEl = document.getElementById("about-points");
+    if (pointsEl) {
+      pointsEl.innerHTML = "";
+      (Array.isArray(data.points) ? data.points : []).forEach((p) => {
+        const box = document.createElement("div");
+        box.className = "point";
+        const iconWrap = document.createElement("span");
+        iconWrap.className = "point-icon";
+        iconWrap.setAttribute("aria-hidden", "true");
+        iconWrap.appendChild(buildAboutIcon(p.icon));
+        const span = document.createElement("span");
+        span.textContent = p.text;
+        box.appendChild(iconWrap);
+        box.appendChild(span);
+        pointsEl.appendChild(box);
+      });
+    }
+
+    const directiveTitleEl = document.getElementById("about-directive-title");
+    if (directiveTitleEl && data.directiveTitle) directiveTitleEl.textContent = data.directiveTitle;
+
+    const directiveListEl = document.getElementById("about-directive-list");
+    if (directiveListEl) {
+      directiveListEl.innerHTML = "";
+      (Array.isArray(data.directives) ? data.directives : []).forEach((d) => {
+        const li = document.createElement("li");
+        const strong = document.createElement("strong");
+        strong.textContent = d.title;
+        li.appendChild(strong);
+        li.appendChild(document.createTextNode(` ${d.date ? `(${d.date}) ` : ""}${d.description || ""}`));
+        directiveListEl.appendChild(li);
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 let tickerItems = [];
@@ -881,7 +991,18 @@ function syncHeroIconWidth() {
   const icon = document.getElementById("hero-icon");
   const title = document.getElementById("hero-title");
   if (!icon || !title) return;
-  const width = title.getBoundingClientRect().width;
+
+  // h1 la block nen getBoundingClientRect tra ve be rong ca khoi (bang container),
+  // khong phai be rong chu that. Dung Range de do dung phan chu da render.
+  let width = 0;
+  const textNode = title.firstChild;
+  if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+    const range = document.createRange();
+    range.selectNodeContents(textNode);
+    width = range.getBoundingClientRect().width;
+  }
+  if (!width) width = title.getBoundingClientRect().width;
+
   if (width > 0) icon.style.width = `${Math.round(width)}px`;
 }
 
@@ -912,6 +1033,7 @@ function setupThemeToggle() {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadEvents();
+  loadAbout();
   loadVisitCounter();
   loadTicker();
   setupNav();
@@ -923,6 +1045,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCornerWidgets();
   setupFeedbackForm();
   setupHeroIconSync();
+  setupHomeLinks();
   document.getElementById("lightbox").addEventListener("click", closeLightbox);
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());

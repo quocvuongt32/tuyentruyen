@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/build-events.js && node scripts/build-ticker.js"
+  command = "node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js"
   publish = "."
 
 [build.environment]
