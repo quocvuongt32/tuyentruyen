@@ -11,6 +11,7 @@
 // Tra cuu su kien theo slug (dung cho banner an noi bat - can biet su kien
 // nam o timeline Tuyen truyen hay o luoi Hoat dong khac de mo dung cho).
 let eventsBySlug = {};
+let allEvents = [];
 
 const ANM_CATEGORY = "an-ninh-mang";
 
@@ -26,6 +27,7 @@ async function loadEvents() {
     events.forEach((ev) => {
       if (ev.slug) eventsBySlug[ev.slug] = ev;
     });
+    allEvents = events;
 
     const anmEvents = events.filter((ev) => ev.category === ANM_CATEGORY);
     const otherEvents = events.filter((ev) => ev.category !== ANM_CATEGORY);
@@ -343,6 +345,106 @@ function setupActivityModal() {
   });
 }
 
+function collectMediaItems() {
+  const items = [];
+  for (const ev of allEvents) {
+    if (Array.isArray(ev.images)) {
+      for (const img of ev.images) {
+        if (img && img.src) items.push({ type: "image", src: img.src, ev });
+      }
+    }
+    if (ev.videoUrl) {
+      const thumb = Array.isArray(ev.images) && ev.images[0] ? ev.images[0].src : null;
+      items.push({ type: "video", thumb, ev });
+    }
+  }
+  return items;
+}
+
+function buildMediaLibrary() {
+  const grid = document.getElementById("media-library-grid");
+  if (!grid) return;
+  const items = collectMediaItems();
+  grid.innerHTML = "";
+
+  if (!items.length) {
+    grid.innerHTML = '<p class="empty">Chưa có ảnh hoặc video nào.</p>';
+    return;
+  }
+
+  items.forEach((item) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "media-library-item";
+
+    if (item.type === "image") {
+      const img = document.createElement("img");
+      img.src = item.src;
+      img.alt = item.ev.title || "";
+      img.loading = "lazy";
+      btn.appendChild(img);
+      btn.addEventListener("click", () => openLightbox(item.src));
+    } else {
+      if (item.thumb) {
+        const img = document.createElement("img");
+        img.src = item.thumb;
+        img.alt = item.ev.title || "";
+        img.loading = "lazy";
+        btn.appendChild(img);
+      }
+      const play = document.createElement("span");
+      play.className = "media-library-item-play";
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("width", "34");
+      svg.setAttribute("height", "34");
+      svg.setAttribute("fill", "currentColor");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M8 5.5v13l11-6.5-11-6.5Z");
+      svg.appendChild(path);
+      play.appendChild(svg);
+      btn.appendChild(play);
+      btn.addEventListener("click", () => {
+        closeMediaLibrary();
+        openActivityModal(item.ev);
+      });
+    }
+
+    const caption = document.createElement("span");
+    caption.className = "media-library-item-caption";
+    caption.textContent = item.ev.title || "";
+    btn.appendChild(caption);
+
+    grid.appendChild(btn);
+  });
+}
+
+function openMediaLibrary() {
+  const overlay = document.getElementById("media-library-modal");
+  if (!overlay) return;
+  buildMediaLibrary();
+  overlay.classList.add("active");
+  trackEvent("/thu-vien-anh-video", "Thư viện ảnh & video");
+}
+
+function closeMediaLibrary() {
+  const overlay = document.getElementById("media-library-modal");
+  if (overlay) overlay.classList.remove("active");
+}
+
+function setupMediaLibrary() {
+  const tile = document.getElementById("stat-media-tile");
+  const overlay = document.getElementById("media-library-modal");
+  const closeBtn = document.getElementById("media-library-close");
+  if (!tile || !overlay || !closeBtn) return;
+
+  tile.addEventListener("click", openMediaLibrary);
+  closeBtn.addEventListener("click", closeMediaLibrary);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeMediaLibrary();
+  });
+}
+
 function setupCategoryFilter(categories) {
   const wrap = document.getElementById("category-filter");
   if (!wrap) return;
@@ -439,6 +541,9 @@ function setupLinkModal() {
     if (lightbox.classList.contains("active")) closeLightbox();
     const activityModal = document.getElementById("activity-modal");
     if (activityModal && activityModal.classList.contains("active")) closeActivityModal();
+    const mediaLibrary = document.getElementById("media-library-modal");
+    if (mediaLibrary && mediaLibrary.classList.contains("active")) closeMediaLibrary();
+    closeCornerPanels();
   });
 }
 
@@ -598,46 +703,170 @@ function setupAdminMenu() {
   });
 }
 
+let tickerItems = [];
+
 async function loadTicker() {
   const wrap = document.getElementById("news-ticker");
   const track = document.getElementById("news-ticker-track");
-  if (!wrap || !track) return;
+  const panelList = document.getElementById("news-panel-list");
 
   try {
     const res = await fetch("data/ticker.json", { cache: "no-store" });
-    if (!res.ok) return;
+    if (!res.ok) throw new Error("Không tải được tin");
     const payload = await res.json();
     const items = Array.isArray(payload.items) ? payload.items.filter((it) => it && it.title && it.url) : [];
-    if (!items.length) return;
+    tickerItems = items;
 
-    const buildItem = (it) => {
-      const a = document.createElement("a");
-      a.className = "news-ticker-item";
-      a.href = it.url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
+    if (!items.length) {
+      if (panelList) panelList.innerHTML = '<p class="empty">Chưa có tin nào.</p>';
+      return;
+    }
 
-      const src = document.createElement("span");
-      src.className = "news-ticker-source";
-      src.textContent = it.source || "";
+    if (wrap && track) {
+      const buildItem = (it) => {
+        const a = document.createElement("a");
+        a.className = "news-ticker-item";
+        a.href = it.url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
 
-      const title = document.createElement("span");
-      title.textContent = it.title;
+        const src = document.createElement("span");
+        src.className = "news-ticker-source";
+        src.textContent = it.source || "";
 
-      a.appendChild(src);
-      a.appendChild(title);
-      a.addEventListener("click", () => trackEvent("/tin-lien-quan", it.title));
-      return a;
-    };
+        const title = document.createElement("span");
+        title.textContent = it.title;
 
-    // Nhan doi danh sach de vong lap CSS (translateX -50%) khong bi giat.
-    items.forEach((it) => track.appendChild(buildItem(it)));
-    items.forEach((it) => track.appendChild(buildItem(it)));
+        a.appendChild(src);
+        a.appendChild(title);
+        a.addEventListener("click", () => trackEvent("/tin-lien-quan", it.title));
+        return a;
+      };
 
-    wrap.hidden = false;
+      // Nhan doi danh sach de vong lap CSS (translateX -50%) khong bi giat.
+      items.forEach((it) => track.appendChild(buildItem(it)));
+      items.forEach((it) => track.appendChild(buildItem(it)));
+      wrap.hidden = false;
+    }
+
+    renderNewsPanel();
   } catch (e) {
-    // Khong tai duoc thi giu an dai tin, khong lam hong trang.
+    if (panelList) panelList.innerHTML = '<p class="empty">Không tải được tin lúc này.</p>';
+    // Khong tai duoc thi giu an dai tin chay, khong lam hong trang.
   }
+}
+
+function renderNewsPanel() {
+  const panelList = document.getElementById("news-panel-list");
+  if (!panelList) return;
+  panelList.innerHTML = "";
+
+  if (!tickerItems.length) {
+    panelList.innerHTML = '<p class="empty">Chưa có tin nào.</p>';
+    return;
+  }
+
+  tickerItems.forEach((it) => {
+    const a = document.createElement("a");
+    a.className = "news-panel-item";
+    a.href = it.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+
+    const source = document.createElement("span");
+    source.className = "news-panel-item-source";
+    source.textContent = it.source || "";
+
+    const title = document.createElement("span");
+    title.className = "news-panel-item-title";
+    title.textContent = it.title;
+
+    a.appendChild(source);
+    a.appendChild(title);
+
+    if (it.date) {
+      const date = document.createElement("span");
+      date.className = "news-panel-item-date";
+      date.textContent = formatDate(it.date);
+      a.appendChild(date);
+    }
+
+    a.addEventListener("click", () => trackEvent("/tin-lien-quan", it.title));
+    panelList.appendChild(a);
+  });
+}
+
+function closeCornerPanels() {
+  document.querySelectorAll(".corner-panel").forEach((panel) => {
+    panel.hidden = true;
+  });
+}
+
+function setupCornerWidgets() {
+  const widgets = document.getElementById("corner-widgets");
+  if (!widgets) return;
+
+  const togglePanel = (panelId, btn) => {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    const willOpen = panel.hidden;
+    closeCornerPanels();
+    panel.hidden = !willOpen;
+    if (willOpen) {
+      trackEvent(`/widget/${panelId}`, btn ? btn.title : panelId);
+    }
+  };
+
+  const newsFab = document.getElementById("news-fab");
+  const feedbackFab = document.getElementById("feedback-fab");
+  if (newsFab) newsFab.addEventListener("click", () => togglePanel("news-panel", newsFab));
+  if (feedbackFab) feedbackFab.addEventListener("click", () => togglePanel("feedback-panel", feedbackFab));
+
+  widgets.querySelectorAll("[data-close-panel]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const panel = document.getElementById(btn.dataset.closePanel);
+      if (panel) panel.hidden = true;
+    });
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!widgets.contains(e.target)) closeCornerPanels();
+  });
+}
+
+function setupFeedbackForm() {
+  const form = document.getElementById("feedback-form");
+  const submitBtn = document.getElementById("feedback-submit");
+  const note = document.getElementById("feedback-note");
+  if (!form || !submitBtn || !note) return;
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    note.hidden = true;
+
+    const body = new URLSearchParams(new FormData(form)).toString();
+
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Gửi thất bại");
+        note.textContent = "Cảm ơn bạn đã góp ý! Chúng tôi đã ghi nhận.";
+        note.hidden = false;
+        form.reset();
+        trackEvent("/hom-thu-gop-y", "Gửi góp ý");
+      })
+      .catch(() => {
+        note.textContent = "Gửi không thành công, vui lòng thử lại sau.";
+        note.hidden = false;
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+      });
+  });
 }
 
 function setupThemeToggle() {
@@ -665,6 +894,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupThemeToggle();
   setupLinkModal();
   setupActivityModal();
+  setupMediaLibrary();
+  setupCornerWidgets();
+  setupFeedbackForm();
   document.getElementById("lightbox").addEventListener("click", closeLightbox);
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
