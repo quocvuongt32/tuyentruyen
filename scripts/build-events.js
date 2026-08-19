@@ -172,6 +172,7 @@ const events = files
       location: typeof data.location === "string" ? data.location : "",
       bodyHtml: markdownToHtml(data.body || ""),
       images: normalizeImages(data.images),
+      featuredImage: isSafeImagePath(data.featuredImage) ? data.featuredImage : "",
       link: isSafeUrl(data.link) ? data.link : "",
       videoUrl,
       videoEmbedUrl: videoUrl ? toEmbedUrl(videoUrl) : null,
@@ -193,6 +194,14 @@ for (const ev of events) {
         eventDate: ev.date,
       });
     }
+  }
+  if (ev.featuredImage) {
+    featured.push({
+      src: ev.featuredImage,
+      eventSlug: ev.slug,
+      eventTitle: ev.title,
+      eventDate: ev.date,
+    });
   }
 }
 

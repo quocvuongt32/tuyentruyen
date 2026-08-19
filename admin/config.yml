@@ -189,17 +189,18 @@ collections:
         name: "images"
         widget: "list"
         required: false
-        summary: "{{fields.image}}"
-        fields:
-          - label: "Ảnh"
-            name: "image"
-            widget: "image"
-            hint: "Nén ảnh xuống dưới 1MB trước khi tải lên (vd: giảm chiều ngang còn ~1600px), nếu không sẽ báo lỗi 'Failed to persist entry' khi lưu."
-          - label: "Đánh dấu là ảnh nổi bật (hiển thị ở banner trang chủ)"
-            name: "featured"
-            widget: "boolean"
-            default: false
-            required: false
+        allow_add: true
+        hint: "Có thể chọn/kéo-thả NHIỀU ảnh cùng lúc để thêm 1 lần. Nén mỗi ảnh xuống dưới 1MB trước khi tải lên (vd: giảm chiều ngang còn ~1600px), nếu không sẽ báo lỗi 'Failed to persist entry' khi lưu."
+        field:
+          label: "Ảnh"
+          name: "image"
+          widget: "image"
+
+      - label: "Ảnh đại diện nổi bật (hiển thị ở banner trang chủ)"
+        name: "featuredImage"
+        widget: "image"
+        required: false
+        hint: "Không bắt buộc — chỉ chọn nếu muốn ảnh này của hoạt động này xuất hiện trong banner trượt ở trang chủ."
 
       - label: "Link bài viết tham khảo"
         name: "link"
