@@ -38,7 +38,10 @@ collections:
             widget: "object"
             fields:
               - { label: "Tiêu đề lớn", name: "title", widget: "string" }
-              - { label: "Đoạn mô tả", name: "subtitle", widget: "text" }
+              - label: "Đoạn mô tả"
+                name: "subtitle"
+                widget: "text"
+                hint: "Nhấn Enter ở đâu thì trang sẽ xuống dòng đúng ở đó — tự chủ động ngắt dòng cho đẹp, không để trình duyệt tự ngắt."
               - { label: "Nút bấm (chữ)", name: "ctaText", widget: "string" }
 
           - label: "Mục Tuyên truyền An ninh mạng"

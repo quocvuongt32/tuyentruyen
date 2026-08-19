@@ -734,7 +734,7 @@ a { color: inherit; }
 
 .hero-inner {
   position: relative;
-  max-width: 640px;
+  max-width: 760px;
   margin: 0 auto;
 }
 
@@ -767,7 +767,8 @@ a { color: inherit; }
 .hero p {
   color: var(--text-dim);
   margin: 0 auto 28px;
-  max-width: 520px;
+  max-width: 680px;
+  white-space: pre-line;
 }
 
 .hero-cta {
