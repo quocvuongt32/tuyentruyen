@@ -12,9 +12,30 @@
   --gold-soft: rgba(232, 185, 35, 0.15);
   --on-accent: #fff6f0;
   --danger: #ff6b6b;
+  --header-bg: rgba(7, 12, 23, 0.85);
+  --hero-glow: #0f1a30;
   --radius: 10px;
   --max-width: 960px;
   --header-h: 64px;
+}
+
+/* Nen sang: trang anh vang, tinh than "co do sao vang" */
+:root[data-theme="light"] {
+  --bg: #fdf8ec;
+  --bg-alt: #f7ecd2;
+  --bg-card: #fffdf7;
+  --border: #e6d6a8;
+  --text: #241a10;
+  --text-dim: #6e5f42;
+  --accent: #d62828;
+  --accent-soft: rgba(214, 40, 40, 0.10);
+  --accent-dim: #b32626;
+  --gold: #9c6f0b;
+  --gold-soft: rgba(184, 134, 11, 0.14);
+  --on-accent: #fff8f0;
+  --danger: #c62828;
+  --header-bg: rgba(253, 248, 236, 0.88);
+  --hero-glow: #ffe9ae;
 }
 
 * { box-sizing: border-box; }
@@ -27,9 +48,109 @@ body {
   color: var(--text);
   font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+body, .site-header, .hero, .banner, .stat-tile, .badge-icon, .partner-badges,
+.timeline-section, .activity-section, .activity-card, .site-footer,
+.admin-links, .activity-modal-box, .activity-modal-close, .news-ticker {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 a { color: inherit; }
+
+/* ---------- Dai tin chay (thoi su chinh thong) ---------- */
+
+.news-ticker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent-dim);
+  border-bottom: 1px solid var(--gold);
+  padding: 7px 0;
+  overflow: hidden;
+}
+
+.news-ticker[hidden] { display: none; }
+
+.news-ticker-label {
+  flex-shrink: 0;
+  margin-left: 16px;
+  padding: 3px 10px;
+  background: var(--gold);
+  color: #1a1206;
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.news-ticker-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent, black 28px, black calc(100% - 12px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 28px, black calc(100% - 12px), transparent);
+}
+
+.news-ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 44px;
+  width: max-content;
+  white-space: nowrap;
+  animation: news-ticker-scroll 55s linear infinite;
+}
+
+.news-ticker:hover .news-ticker-track,
+.news-ticker-track:focus-within {
+  animation-play-state: paused;
+}
+
+.news-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--on-accent);
+  font-size: 0.82rem;
+}
+
+.news-ticker-item:hover,
+.news-ticker-item:focus-visible {
+  text-decoration: underline;
+}
+
+.news-ticker-source {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+@keyframes news-ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-ticker-track {
+    animation: none;
+  }
+  .news-ticker-viewport {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .news-ticker-label { margin-left: 10px; }
+  .news-ticker-item { font-size: 0.78rem; }
+}
 
 .section-inner {
   max-width: var(--max-width);
@@ -44,7 +165,7 @@ a { color: inherit; }
   top: 0;
   z-index: 50;
   height: var(--header-h);
-  background: rgba(7, 12, 23, 0.85);
+  background: var(--header-bg);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
 }
@@ -112,6 +233,29 @@ a { color: inherit; }
 .site-nav a:focus-visible {
   color: var(--accent);
 }
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.theme-toggle .theme-icon-sun { display: none; }
+.theme-toggle .theme-icon-moon { display: flex; }
+:root[data-theme="light"] .theme-toggle .theme-icon-sun { display: flex; }
+:root[data-theme="light"] .theme-toggle .theme-icon-moon { display: none; }
 
 /* Menu quan tri (Quan tri / Doi mat khau) gom vao 1 icon nho, kin dao
    de khong lam giao dien thien ve "san pham quan ly" khi chia se cong khai. */
@@ -202,7 +346,7 @@ a { color: inherit; }
   overflow: hidden;
   padding: 88px 20px 96px;
   text-align: center;
-  background: radial-gradient(ellipse at top, #0f1a30 0%, var(--bg) 65%);
+  background: radial-gradient(ellipse at top, var(--hero-glow) 0%, var(--bg) 65%);
 }
 
 .hero-grid {
@@ -1015,6 +1159,23 @@ a { color: inherit; }
   .site-nav a {
     padding: 14px 20px;
     border-top: 1px solid var(--border);
+  }
+
+  .theme-toggle {
+    width: 100%;
+    height: auto;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 14px 20px;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+  }
+
+  .theme-toggle::after {
+    content: "Giao diện sáng / tối";
+    font-size: 0.92rem;
+    color: var(--text-dim);
   }
 
   .admin-toggle { display: none; }

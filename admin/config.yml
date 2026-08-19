@@ -84,3 +84,41 @@ collections:
         widget: "string"
         required: false
         pattern: ['^(https?:\/\/).+$', "Link phải bắt đầu bằng http:// hoặc https://"]
+
+  - name: "ticker"
+    label: "Tin liên quan (dải chạy đầu trang)"
+    label_singular: "Tin liên quan"
+    folder: "content/ticker"
+    create: true
+    delete: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    format: "json"
+    identifier_field: "title"
+    summary: "{{date}} — {{title}}"
+    sortable_fields: ["date", "title"]
+    fields:
+      - label: "Tiêu đề tin (hiển thị trên dải chạy)"
+        name: "title"
+        widget: "string"
+        required: true
+
+      - label: "Link bài viết gốc"
+        name: "url"
+        widget: "string"
+        required: true
+        hint: "Dán link bài viết trên trang chính thống (Học viện CSND, báo Đảng, Bộ Công an...)"
+        pattern: ['^(https?:\/\/).+$', "Link phải bắt đầu bằng http:// hoặc https://"]
+
+      - label: "Nguồn tin"
+        name: "source"
+        widget: "string"
+        required: true
+        hint: "Vd: Học viện CSND, Báo điện tử Đảng Cộng sản Việt Nam..."
+
+      - label: "Ngày đăng"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        required: true

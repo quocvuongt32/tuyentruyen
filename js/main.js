@@ -598,11 +598,71 @@ function setupAdminMenu() {
   });
 }
 
+async function loadTicker() {
+  const wrap = document.getElementById("news-ticker");
+  const track = document.getElementById("news-ticker-track");
+  if (!wrap || !track) return;
+
+  try {
+    const res = await fetch("data/ticker.json", { cache: "no-store" });
+    if (!res.ok) return;
+    const payload = await res.json();
+    const items = Array.isArray(payload.items) ? payload.items.filter((it) => it && it.title && it.url) : [];
+    if (!items.length) return;
+
+    const buildItem = (it) => {
+      const a = document.createElement("a");
+      a.className = "news-ticker-item";
+      a.href = it.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+
+      const src = document.createElement("span");
+      src.className = "news-ticker-source";
+      src.textContent = it.source || "";
+
+      const title = document.createElement("span");
+      title.textContent = it.title;
+
+      a.appendChild(src);
+      a.appendChild(title);
+      a.addEventListener("click", () => trackEvent("/tin-lien-quan", it.title));
+      return a;
+    };
+
+    // Nhan doi danh sach de vong lap CSS (translateX -50%) khong bi giat.
+    items.forEach((it) => track.appendChild(buildItem(it)));
+    items.forEach((it) => track.appendChild(buildItem(it)));
+
+    wrap.hidden = false;
+  } catch (e) {
+    // Khong tai duoc thi giu an dai tin, khong lam hong trang.
+  }
+}
+
+function setupThemeToggle() {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    if (isLight) {
+      document.documentElement.removeAttribute("data-theme");
+      try { localStorage.setItem("theme", "dark"); } catch (e) {}
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+      try { localStorage.setItem("theme", "light"); } catch (e) {}
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadEvents();
   loadVisitCounter();
+  loadTicker();
   setupNav();
   setupAdminMenu();
+  setupThemeToggle();
   setupLinkModal();
   setupActivityModal();
   document.getElementById("lightbox").addEventListener("click", closeLightbox);

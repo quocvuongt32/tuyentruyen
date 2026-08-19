@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+  try {
+    if (localStorage.getItem("theme") === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  } catch (e) {}
+</script>
 <title>Cẩm nang An toàn số | Khoa Toán - Tin học và Ứng dụng KHCN, Học viện CSND</title>
 <meta name="description" content="Không gian tuyên truyền kỹ năng an ninh mạng và an toàn thông tin, cập nhật hoạt động chuyển đổi số, đổi mới sáng tạo của Khoa Toán - Tin học và Ứng dụng KHCN trong phòng, chống tội phạm" />
 <link rel="icon" type="image/png" href="img/favicon.png" />
@@ -19,6 +26,13 @@
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+
+<div class="news-ticker" id="news-ticker" hidden>
+  <span class="news-ticker-label">Thời sự</span>
+  <div class="news-ticker-viewport">
+    <div class="news-ticker-track" id="news-ticker-track"></div>
+  </div>
+</div>
 
 <header class="site-header" id="site-header">
   <div class="header-inner">
@@ -42,6 +56,16 @@
       <a href="#timeline-section">Tuyên truyền</a>
       <a href="#hoat-dong-khac-section">Hoạt động khác</a>
       <a href="#lien-he">Liên hệ</a>
+
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Chuyển giao diện sáng/tối">
+        <svg class="theme-icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path d="M20.7 14.9A8.5 8.5 0 1 1 9.1 3.3a7 7 0 0 0 11.6 11.6Z" />
+        </svg>
+        <svg class="theme-icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" />
+        </svg>
+      </button>
 
       <div class="admin-menu" id="admin-menu">
         <button type="button" class="admin-toggle" id="admin-toggle" aria-haspopup="true" aria-expanded="false" aria-label="Quản trị">
