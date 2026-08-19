@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Cẩm nang An toàn số | Khoa Toán - Tin học và Ứng dụng KHCN, Học viện CSND</title>
 <meta name="description" content="Không gian tuyên truyền kỹ năng an ninh mạng và an toàn thông tin, cập nhật hoạt động chuyển đổi số, đổi mới sáng tạo của Khoa Toán - Tin học và Ứng dụng KHCN trong phòng, chống tội phạm" />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="apple-touch-icon" href="img/favicon.png" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://tuyentruyen.khoaktt.vn/" />
+<meta property="og:title" content="Cẩm nang An toàn số | Khoa Toán - Tin học và Ứng dụng KHCN, Học viện CSND" />
+<meta property="og:description" content="Không gian tuyên truyền kỹ năng an ninh mạng và an toàn thông tin, cập nhật hoạt động chuyển đổi số, đổi mới sáng tạo của Khoa Toán - Tin học và Ứng dụng KHCN trong phòng, chống tội phạm" />
+<meta property="og:image" content="https://tuyentruyen.khoaktt.vn/img/og-image.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Cẩm nang An toàn số" />
+<meta name="twitter:description" content="Không gian tuyên truyền an ninh mạng và an toàn thông tin của Khoa Toán - Tin học và Ứng dụng KHCN, Học viện CSND." />
+<meta name="twitter:image" content="https://tuyentruyen.khoaktt.vn/img/og-image.png" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -13,10 +24,7 @@
   <div class="header-inner">
     <a href="#trang-chu" class="brand">
       <span class="logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 5.2c2.2-1 4.8-1 8 0v14c-3.2-1-5.8-1-8 0V5.2Z" />
-          <path d="M20 5.2c-2.2-1-4.8-1-8 0v14c3.2-1 5.8-1 8 0V5.2Z" />
-        </svg>
+        <img src="img/badge.png" alt="" width="36" height="36" />
       </span>
       <span class="brand-text">
         <strong>Cẩm nang</strong>
@@ -31,7 +39,8 @@
     <nav class="site-nav" id="site-nav">
       <a href="#trang-chu">Trang chủ</a>
       <a href="#gioi-thieu">Giới thiệu</a>
-      <a href="#timeline-section">Dòng thời gian</a>
+      <a href="#timeline-section">Tuyên truyền</a>
+      <a href="#hoat-dong-khac-section">Hoạt động khác</a>
       <a href="#lien-he">Liên hệ</a>
 
       <div class="admin-menu" id="admin-menu">
@@ -63,16 +72,13 @@
 
     <div class="hero-inner">
       <div class="hero-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 5.2c2.2-1 4.8-1 8 0v14c-3.2-1-5.8-1-8 0V5.2Z" />
-          <path d="M20 5.2c-2.2-1-4.8-1-8 0v14c3.2-1 5.8-1 8 0V5.2Z" />
-        </svg>
+        <img src="img/badge.png" alt="" width="104" height="104" />
       </div>
       <h1>Cẩm nang<br />An toàn số</h1>
       <p>Không gian tuyên truyền kỹ năng an ninh mạng và an toàn thông tin, đồng thời
         cập nhật hoạt động chuyển đổi số, đổi mới sáng tạo của Khoa Toán - Tin học và
         Ứng dụng KHCN trong phòng, chống tội phạm.</p>
-      <a href="#timeline-section" class="hero-cta">Xem dòng thời gian <span aria-hidden="true">↓</span></a>
+      <a href="#timeline-section" class="hero-cta">Xem Cẩm nang <span aria-hidden="true">↓</span></a>
     </div>
 
     <div class="stats-row" id="stats-row">
@@ -167,10 +173,20 @@
 
   <section id="timeline-section" class="timeline-section">
     <div class="section-inner">
-      <h2>Dòng thời gian hoạt động</h2>
+      <h2>Tuyên truyền An ninh mạng</h2>
       <p class="section-hint">Bấm vào từng mốc để xem/ẩn chi tiết, ảnh minh chứng và video.</p>
-      <div class="category-filter" id="category-filter"></div>
       <div id="timeline" class="timeline">
+        <p class="loading">Đang tải dữ liệu…</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="hoat-dong-khac-section" class="activity-section">
+    <div class="section-inner">
+      <h2>Hoạt động khác</h2>
+      <p class="section-hint">Chuyển đổi số, đổi mới sáng tạo và các hoạt động khác của Khoa. Bấm vào một thẻ để xem chi tiết.</p>
+      <div class="category-filter" id="category-filter"></div>
+      <div id="activity-grid" class="activity-grid">
         <p class="loading">Đang tải dữ liệu…</p>
       </div>
     </div>
@@ -200,6 +216,13 @@
     </div>
     <p class="link-modal-note">Một số trang có thể chặn hiển thị ở đây — dùng "Mở tab mới" nếu không thấy nội dung.</p>
     <iframe id="link-modal-iframe" src="" title="Nội dung liên kết" loading="lazy"></iframe>
+  </div>
+</div>
+
+<div id="activity-modal" class="activity-modal">
+  <div class="activity-modal-box">
+    <button type="button" id="activity-modal-close" class="activity-modal-close" aria-label="Đóng">✕</button>
+    <div class="activity-modal-content" id="activity-modal-content"></div>
   </div>
 </div>
 

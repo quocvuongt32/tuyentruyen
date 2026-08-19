@@ -5,9 +5,12 @@
   --border: #22304a;
   --text: #e6ebf5;
   --text-dim: #9aa7c2;
-  --accent: #3ddc97;
-  --accent-soft: rgba(61, 220, 151, 0.15);
-  --accent-dim: #1f6f52;
+  --accent: #d62828;
+  --accent-soft: rgba(214, 40, 40, 0.16);
+  --accent-dim: #7a1a1a;
+  --gold: #e8b923;
+  --gold-soft: rgba(232, 185, 35, 0.15);
+  --on-accent: #fff6f0;
   --danger: #ff6b6b;
   --radius: 10px;
   --max-width: 960px;
@@ -67,8 +70,13 @@ a { color: inherit; }
 
 .brand .logo {
   display: flex;
-  color: var(--accent);
   flex-shrink: 0;
+}
+
+.brand .logo img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
 
 .brand-text {
@@ -201,8 +209,8 @@ a { color: inherit; }
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(61, 220, 151, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(61, 220, 151, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(214, 40, 40, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214, 40, 40, 0.08) 1px, transparent 1px);
   background-size: 42px 42px;
   mask-image: radial-gradient(ellipse at top, black 0%, transparent 70%);
   pointer-events: none;
@@ -302,14 +310,14 @@ a { color: inherit; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-dim);
   margin-bottom: 22px;
-  box-shadow: 0 0 40px var(--accent-soft);
+  filter: drop-shadow(0 0 28px var(--accent-soft));
+}
+
+.hero-icon img {
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
 }
 
 .hero h1 {
@@ -329,7 +337,7 @@ a { color: inherit; }
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  color: #06120c;
+  color: var(--on-accent);
   background: var(--accent);
   font-weight: 600;
   padding: 12px 24px;
@@ -361,7 +369,7 @@ a { color: inherit; }
 .stat-tile strong {
   display: block;
   font-size: 1.6rem;
-  color: var(--accent);
+  color: var(--gold);
   letter-spacing: 0.3px;
 }
 
@@ -523,7 +531,7 @@ a { color: inherit; }
 .category-pill.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #06120c;
+  color: var(--on-accent);
   font-weight: 600;
 }
 
@@ -694,6 +702,134 @@ a { color: inherit; }
 }
 
 .event-link:hover { text-decoration: underline; }
+
+/* ---------- Hoat dong khac (luoi the dang tap chi) ---------- */
+
+.activity-section {
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+.activity-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.activity-card:hover {
+  border-color: var(--accent-dim);
+  transform: translateY(-2px);
+}
+
+.activity-thumb,
+.activity-thumb-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  object-fit: cover;
+  background: var(--bg-alt);
+}
+
+.activity-thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-dim);
+  background: linear-gradient(135deg, var(--accent-soft), transparent 70%);
+}
+
+.activity-body {
+  padding: 14px 16px 16px;
+}
+
+.activity-cat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.activity-title {
+  margin: 6px 0 4px;
+  font-size: 0.96rem;
+  line-height: 1.35;
+}
+
+.activity-meta {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.activity-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 110;
+}
+
+.activity-modal.active { display: flex; }
+
+.activity-modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 22px 26px;
+}
+
+.activity-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.activity-modal-content .event-title {
+  padding-right: 32px;
+}
+
+.activity-modal-content .event-location {
+  margin-bottom: 14px;
+}
+
+@media (max-width: 640px) {
+  .activity-modal { padding: 0; }
+  .activity-modal-box { max-width: none; max-height: 100vh; height: 100vh; border-radius: 0; }
+}
 
 /* ---------- Footer (gon, trang trong, dung nhan dien Hoc vien/CAND) ---------- */
 

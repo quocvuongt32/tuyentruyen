@@ -8,16 +8,34 @@
   }
 })();
 
+// Tra cuu su kien theo slug (dung cho banner an noi bat - can biet su kien
+// nam o timeline Tuyen truyen hay o luoi Hoat dong khac de mo dung cho).
+let eventsBySlug = {};
+
+const ANM_CATEGORY = "an-ninh-mang";
+
 async function loadEvents() {
   const container = document.getElementById("timeline");
   try {
     const res = await fetch("data/events.json", { cache: "no-store" });
     if (!res.ok) throw new Error("Không tải được dữ liệu sự kiện");
     const payload = await res.json();
-    render(payload.events);
+    const events = Array.isArray(payload.events) ? payload.events : [];
+
+    eventsBySlug = {};
+    events.forEach((ev) => {
+      if (ev.slug) eventsBySlug[ev.slug] = ev;
+    });
+
+    const anmEvents = events.filter((ev) => ev.category === ANM_CATEGORY);
+    const otherEvents = events.filter((ev) => ev.category !== ANM_CATEGORY);
+    const otherCategories = (payload.categories || []).filter((c) => c.value !== ANM_CATEGORY);
+
+    render(anmEvents);
+    renderActivityGrid(otherEvents);
     renderStats(payload.stats, payload.generatedAt);
     setupBanner(payload.featured);
-    setupCategoryFilter(payload.categories);
+    setupCategoryFilter(otherCategories);
   } catch (err) {
     container.innerHTML = '<p class="error">Chưa có dữ liệu hoặc lỗi tải dữ liệu.</p>';
     console.error(err);
@@ -133,6 +151,18 @@ function buildCard(ev, openByDefault) {
 
   const panelInner = document.createElement("div");
   panelInner.className = "event-panel-inner";
+  panelInner.appendChild(buildDetailFragment(ev));
+
+  panel.appendChild(panelInner);
+  article.appendChild(panel);
+
+  return article;
+}
+
+// Video/link/noi dung/anh minh chung - dung chung cho the o Dong thoi gian
+// (Tuyen truyen) va modal chi tiet o Hoat dong khac, tranh trung lap code.
+function buildDetailFragment(ev) {
+  const frag = document.createDocumentFragment();
 
   if (ev.videoEmbedUrl) {
     const videoWrap = document.createElement("div");
@@ -145,7 +175,7 @@ function buildCard(ev, openByDefault) {
     iframe.setAttribute("allowfullscreen", "");
     iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
     videoWrap.appendChild(iframe);
-    panelInner.appendChild(videoWrap);
+    frag.appendChild(videoWrap);
   } else if (ev.videoUrl) {
     const a = document.createElement("a");
     a.href = ev.videoUrl;
@@ -155,7 +185,7 @@ function buildCard(ev, openByDefault) {
       e.preventDefault();
       openLinkModal(ev.videoUrl);
     });
-    panelInner.appendChild(a);
+    frag.appendChild(a);
   }
 
   if (ev.link) {
@@ -167,7 +197,7 @@ function buildCard(ev, openByDefault) {
       e.preventDefault();
       openLinkModal(ev.link);
     });
-    panelInner.appendChild(a);
+    frag.appendChild(a);
   }
 
   if (ev.bodyHtml) {
@@ -175,7 +205,7 @@ function buildCard(ev, openByDefault) {
     bodyEl.className = "event-body";
     // bodyHtml is escaped + whitelisted at build time (see scripts/build-events.js)
     bodyEl.innerHTML = ev.bodyHtml;
-    panelInner.appendChild(bodyEl);
+    frag.appendChild(bodyEl);
   }
 
   if (Array.isArray(ev.images) && ev.images.length) {
@@ -191,13 +221,126 @@ function buildCard(ev, openByDefault) {
       img.addEventListener("click", () => openLightbox(src));
       gallery.appendChild(img);
     }
-    panelInner.appendChild(gallery);
+    frag.appendChild(gallery);
   }
 
-  panel.appendChild(panelInner);
-  article.appendChild(panel);
+  return frag;
+}
 
-  return article;
+function renderActivityGrid(events) {
+  const container = document.getElementById("activity-grid");
+  if (!container) return;
+  container.innerHTML = "";
+  if (!Array.isArray(events) || events.length === 0) {
+    container.innerHTML = '<p class="empty">Chưa có hoạt động nào ở mục này.</p>';
+    return;
+  }
+  events.forEach((ev) => container.appendChild(buildActivityCard(ev)));
+}
+
+function buildActivityCard(ev) {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "activity-card";
+  if (ev.slug) card.id = `activity-${ev.slug}`;
+  if (ev.category) card.dataset.category = ev.category;
+
+  const firstImage = Array.isArray(ev.images) ? ev.images.find((im) => im && im.src) : null;
+  if (firstImage) {
+    const img = document.createElement("img");
+    img.className = "activity-thumb";
+    img.src = firstImage.src;
+    img.alt = ev.title || "";
+    img.loading = "lazy";
+    card.appendChild(img);
+  } else {
+    const placeholder = document.createElement("div");
+    placeholder.className = "activity-thumb-placeholder";
+    placeholder.setAttribute("aria-hidden", "true");
+    placeholder.innerHTML =
+      '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m3.5 15 4.5-4.5 3 3 5-5 4.5 4.5"/><circle cx="8" cy="9" r="1.3"/></svg>';
+    card.appendChild(placeholder);
+  }
+
+  const body = document.createElement("div");
+  body.className = "activity-body";
+
+  if (ev.categoryLabel) {
+    const cat = document.createElement("div");
+    cat.className = "activity-cat";
+    cat.textContent = ev.categoryLabel;
+    body.appendChild(cat);
+  }
+
+  const title = document.createElement("h3");
+  title.className = "activity-title";
+  title.textContent = ev.title || "";
+  body.appendChild(title);
+
+  const meta = document.createElement("div");
+  meta.className = "activity-meta";
+  meta.textContent = [formatDate(ev.date), ev.location].filter(Boolean).join(" · ");
+  body.appendChild(meta);
+
+  card.appendChild(body);
+
+  card.addEventListener("click", () => {
+    openActivityModal(ev);
+    trackEvent(`/hoat-dong/${ev.slug || "khong-slug"}`, ev.title);
+  });
+
+  return card;
+}
+
+function openActivityModal(ev) {
+  const overlay = document.getElementById("activity-modal");
+  const content = document.getElementById("activity-modal-content");
+  if (!overlay || !content) return;
+
+  content.innerHTML = "";
+
+  const dateEl = document.createElement("div");
+  dateEl.className = "event-date";
+  dateEl.textContent = formatDate(ev.date);
+  if (ev.categoryLabel) {
+    const catEl = document.createElement("span");
+    catEl.className = "event-category";
+    catEl.textContent = ev.categoryLabel;
+    dateEl.appendChild(catEl);
+  }
+  content.appendChild(dateEl);
+
+  const titleEl = document.createElement("h3");
+  titleEl.className = "event-title";
+  titleEl.textContent = ev.title || "";
+  content.appendChild(titleEl);
+
+  if (ev.location) {
+    const locEl = document.createElement("div");
+    locEl.className = "event-location";
+    locEl.textContent = `\u{1F4CD} ${ev.location}`;
+    content.appendChild(locEl);
+  }
+
+  content.appendChild(buildDetailFragment(ev));
+
+  overlay.classList.add("active");
+}
+
+function closeActivityModal() {
+  const overlay = document.getElementById("activity-modal");
+  if (overlay) overlay.classList.remove("active");
+}
+
+function setupActivityModal() {
+  const overlay = document.getElementById("activity-modal");
+  const closeBtn = document.getElementById("activity-modal-close");
+  if (!overlay || !closeBtn) return;
+
+  closeBtn.addEventListener("click", closeActivityModal);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeActivityModal();
+  });
 }
 
 function setupCategoryFilter(categories) {
@@ -205,7 +348,7 @@ function setupCategoryFilter(categories) {
   if (!wrap) return;
 
   wrap.innerHTML = "";
-  const cards = () => document.querySelectorAll("#timeline .event-card");
+  const cards = () => document.querySelectorAll("#activity-grid .activity-card");
 
   const allBtn = document.createElement("button");
   allBtn.type = "button";
@@ -294,10 +437,17 @@ function setupLinkModal() {
     if (overlay.classList.contains("active")) closeLinkModal();
     const lightbox = document.getElementById("lightbox");
     if (lightbox.classList.contains("active")) closeLightbox();
+    const activityModal = document.getElementById("activity-modal");
+    if (activityModal && activityModal.classList.contains("active")) closeActivityModal();
   });
 }
 
 function openEventCard(slug) {
+  const ev = eventsBySlug[slug];
+  if (ev && ev.category !== ANM_CATEGORY) {
+    openActivityModal(ev);
+    return;
+  }
   const card = document.getElementById(`event-${slug}`);
   if (!card) return;
   card.classList.add("open");
@@ -454,6 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupNav();
   setupAdminMenu();
   setupLinkModal();
+  setupActivityModal();
   document.getElementById("lightbox").addEventListener("click", closeLightbox);
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
