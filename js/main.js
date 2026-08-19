@@ -47,28 +47,29 @@ async function loadEvents() {
 // Hien so luot truy cap thuc te (GoatCounter). O canh se hien san voi dau
 // "—", chi cap nhat so khi lay duoc du lieu. Can bat "Allow adding visitor
 // counts on your website" trong Settings cua GoatCounter de co so nay.
+function setAllText(className, value) {
+  document.querySelectorAll(`.${className}`).forEach((el) => {
+    el.textContent = value;
+  });
+}
+
 async function loadVisitCounter() {
-  const el = document.getElementById("stat-visits");
-  if (!el) return;
   try {
     const res = await fetch("https://vuongnq.goatcounter.com/counter/TOTAL.json");
     if (!res.ok) return;
     const data = await res.json();
     if (!data || !data.count) return;
-    el.textContent = data.count;
+    setAllText("js-stat-visits", data.count);
   } catch (err) {
-    // Am lang bo qua - tile van an, khong anh huong phan con lai cua trang.
+    // Am lang bo qua - tile van hien dau "—", khong anh huong phan con lai cua trang.
   }
 }
 
 function renderStats(stats, generatedAt) {
-  const eventsEl = document.getElementById("stat-events");
-  const imagesEl = document.getElementById("stat-images");
-  const updatedEl = document.getElementById("stat-updated");
-  if (!stats || !eventsEl) return;
-  eventsEl.textContent = String(stats.eventCount || 0);
-  imagesEl.textContent = String(stats.imageCount || 0);
-  updatedEl.textContent = formatDate(generatedAt ? generatedAt.slice(0, 10) : "");
+  if (!stats) return;
+  setAllText("js-stat-events", String(stats.eventCount || 0));
+  setAllText("js-stat-images", String(stats.imageCount || 0));
+  setAllText("js-stat-updated", formatDate(generatedAt ? generatedAt.slice(0, 10) : ""));
 }
 
 function render(events) {
@@ -161,9 +162,37 @@ function buildCard(ev, openByDefault) {
 
 // Video/link/noi dung/anh minh chung - dung chung cho the o Dong thoi gian
 // (Tuyen truyen) va modal chi tiet o Hoat dong khac, tranh trung lap code.
+function buildEventCoverPlaceholder() {
+  const placeholder = document.createElement("div");
+  placeholder.className = "event-cover event-cover-placeholder";
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.4");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M4 5.2c2.2-1 4.8-1 8 0v14c-3.2-1-5.8-1-8 0V5.2Z");
+  const path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path2.setAttribute("d", "M20 5.2c-2.2-1-4.8-1-8 0v14c3.2-1 5.8-1 8 0V5.2Z");
+  svg.appendChild(path);
+  svg.appendChild(path2);
+  const label = document.createElement("span");
+  label.textContent = "Ảnh minh chứng đang được cập nhật";
+  placeholder.appendChild(svg);
+  placeholder.appendChild(label);
+  return placeholder;
+}
+
 function buildDetailFragment(ev) {
   const frag = document.createDocumentFragment();
+  const images = Array.isArray(ev.images) ? ev.images.filter((it) => it && it.src) : [];
+  let galleryImages = images;
 
+  // Uu tien video lam anh bia (da rat truc quan); neu khong co video thi
+  // dung anh dau tien lam anh bia lon, cac anh con lai xep thanh dai duoi
+  // than bai; neu chua co gi thi hien khung giu cho thay vi de trong.
   if (ev.videoEmbedUrl) {
     const videoWrap = document.createElement("div");
     videoWrap.className = "event-video";
@@ -176,7 +205,23 @@ function buildDetailFragment(ev) {
     iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
     videoWrap.appendChild(iframe);
     frag.appendChild(videoWrap);
-  } else if (ev.videoUrl) {
+  } else if (images.length) {
+    const cover = document.createElement("div");
+    cover.className = "event-cover";
+    const coverSrc = images[0].src;
+    const img = document.createElement("img");
+    img.src = coverSrc;
+    img.alt = ev.title || "";
+    img.loading = "lazy";
+    img.addEventListener("click", () => openLightbox(coverSrc));
+    cover.appendChild(img);
+    frag.appendChild(cover);
+    galleryImages = images.slice(1);
+  } else if (!ev.videoUrl) {
+    frag.appendChild(buildEventCoverPlaceholder());
+  }
+
+  if (ev.videoUrl && !ev.videoEmbedUrl) {
     const a = document.createElement("a");
     a.href = ev.videoUrl;
     a.className = "event-link";
@@ -208,10 +253,10 @@ function buildDetailFragment(ev) {
     frag.appendChild(bodyEl);
   }
 
-  if (Array.isArray(ev.images) && ev.images.length) {
+  if (galleryImages.length) {
     const gallery = document.createElement("div");
     gallery.className = "event-gallery";
-    for (const item of ev.images) {
+    for (const item of galleryImages) {
       const src = item && item.src;
       if (!src) continue;
       const img = document.createElement("img");
@@ -431,14 +476,16 @@ function closeMediaLibrary() {
 }
 
 function setupMediaLibrary() {
-  const tile = document.getElementById("stat-media-tile");
+  const tiles = document.querySelectorAll(".js-stat-media-tile");
   const overlay = document.getElementById("media-library-modal");
   const closeBtn = document.getElementById("media-library-close");
-  if (!tile || !overlay || !closeBtn) return;
+  if (!tiles.length || !overlay || !closeBtn) return;
 
-  tile.addEventListener("click", () => {
-    closeCornerPanels();
-    openMediaLibrary();
+  tiles.forEach((tile) => {
+    tile.addEventListener("click", () => {
+      closeCornerPanels();
+      openMediaLibrary();
+    });
   });
   closeBtn.addEventListener("click", closeMediaLibrary);
   overlay.addEventListener("click", (e) => {
