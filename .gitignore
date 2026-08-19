@@ -11,3 +11,6 @@ data/site.json
 /Thể lệ cuộc thi _ MD.md
 /scratch_docx/
 /logo/
+
+# Local Netlify folder
+.netlify
