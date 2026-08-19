@@ -1,0 +1,30 @@
+{
+  "brand": {
+    "line1": "Cẩm nang",
+    "line2": "An toàn số"
+  },
+  "nav": {
+    "trangChu": "Trang chủ",
+    "gioiThieu": "Giới thiệu",
+    "tuyenTruyen": "Tuyên truyền",
+    "hoatDongKhac": "Hoạt động khác",
+    "lienHe": "Liên hệ"
+  },
+  "hero": {
+    "title": "Cẩm nang An toàn số",
+    "subtitle": "Không gian tuyên truyền kỹ năng an ninh mạng và an toàn thông tin, đồng thời cập nhật hoạt động chuyển đổi số, đổi mới sáng tạo của Khoa Toán - Tin học và Ứng dụng KHCN trong phòng, chống tội phạm.",
+    "ctaText": "Xem Cẩm nang"
+  },
+  "timelineSection": {
+    "heading": "Tuyên truyền An ninh mạng",
+    "hint": "Bấm vào từng mốc để xem/ẩn chi tiết, ảnh minh chứng và video."
+  },
+  "activitySection": {
+    "heading": "Hoạt động khác",
+    "hint": "Chuyển đổi số, đổi mới sáng tạo và các hoạt động khác của Khoa. Bấm vào một thẻ để xem chi tiết."
+  },
+  "footer": {
+    "line1": "HỌC VIỆN CẢNH SÁT NHÂN DÂN",
+    "line2": "KHOA TOÁN - TIN HỌC VÀ ỨNG DỤNG KHOA HỌC CÔNG NGHỆ TRONG PHÒNG, CHỐNG TỘI PHẠM"
+  }
+}

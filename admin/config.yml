@@ -9,6 +9,59 @@ public_folder: "/uploads"
 # Xem README.md để bật Identity + Git Gateway và giới hạn theo email/GitHub của bạn.
 
 collections:
+  - name: "site"
+    label: "Nội dung chung trang web"
+    files:
+      - name: "cai_dat"
+        label: "Header, Trang chủ, Footer"
+        file: "content/site.json"
+        fields:
+          - label: "Tên thương hiệu (góc trên bên trái)"
+            name: "brand"
+            widget: "object"
+            fields:
+              - { label: "Dòng 1", name: "line1", widget: "string" }
+              - { label: "Dòng 2 (màu vàng)", name: "line2", widget: "string" }
+
+          - label: "Nhãn menu điều hướng"
+            name: "nav"
+            widget: "object"
+            fields:
+              - { label: "Trang chủ", name: "trangChu", widget: "string" }
+              - { label: "Giới thiệu", name: "gioiThieu", widget: "string" }
+              - { label: "Tuyên truyền", name: "tuyenTruyen", widget: "string" }
+              - { label: "Hoạt động khác", name: "hoatDongKhac", widget: "string" }
+              - { label: "Liên hệ", name: "lienHe", widget: "string" }
+
+          - label: "Khối đầu trang (Hero)"
+            name: "hero"
+            widget: "object"
+            fields:
+              - { label: "Tiêu đề lớn", name: "title", widget: "string" }
+              - { label: "Đoạn mô tả", name: "subtitle", widget: "text" }
+              - { label: "Nút bấm (chữ)", name: "ctaText", widget: "string" }
+
+          - label: "Mục Tuyên truyền An ninh mạng"
+            name: "timelineSection"
+            widget: "object"
+            fields:
+              - { label: "Tiêu đề mục", name: "heading", widget: "string" }
+              - { label: "Gợi ý dưới tiêu đề", name: "hint", widget: "string" }
+
+          - label: "Mục Hoạt động khác"
+            name: "activitySection"
+            widget: "object"
+            fields:
+              - { label: "Tiêu đề mục", name: "heading", widget: "string" }
+              - { label: "Gợi ý dưới tiêu đề", name: "hint", widget: "string" }
+
+          - label: "Footer"
+            name: "footer"
+            widget: "object"
+            fields:
+              - { label: "Dòng 1 (tên Học viện)", name: "line1", widget: "string" }
+              - { label: "Dòng 2 (tên Khoa)", name: "line2", widget: "string" }
+
   - name: "gioi_thieu"
     label: "Giới thiệu (trang chủ)"
     files:
@@ -141,6 +194,7 @@ collections:
           - label: "Ảnh"
             name: "image"
             widget: "image"
+            hint: "Nén ảnh xuống dưới 1MB trước khi tải lên (vd: giảm chiều ngang còn ~1600px), nếu không sẽ báo lỗi 'Failed to persist entry' khi lưu."
           - label: "Đánh dấu là ảnh nổi bật (hiển thị ở banner trang chủ)"
             name: "featured"
             widget: "boolean"

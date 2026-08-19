@@ -747,6 +747,56 @@ function buildAboutIcon(key) {
   return svg;
 }
 
+function setText(id, value) {
+  if (!value) return;
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+// Header, hero, tieu de muc, footer deu da co san chu dung trong HTML (de
+// khong bi trang rong/FOUC neu fetch loi hoac cham) — ham nay chi GHI DE
+// bang noi dung tu CMS khi tai xong, khong bat buoc.
+async function loadSite() {
+  try {
+    const res = await fetch("data/site.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Không tải được nội dung chung");
+    const data = await res.json();
+
+    const brand = data.brand || {};
+    setText("brand-line1", brand.line1);
+    setText("brand-line2", brand.line2);
+
+    const nav = data.nav || {};
+    setText("nav-trangchu", nav.trangChu);
+    setText("nav-gioithieu", nav.gioiThieu);
+    setText("nav-tuyentruyen", nav.tuyenTruyen);
+    setText("nav-hoatdongkhac", nav.hoatDongKhac);
+    setText("nav-lienhe", nav.lienHe);
+
+    const hero = data.hero || {};
+    setText("hero-title", hero.title);
+    setText("hero-subtitle", hero.subtitle);
+    setText("hero-cta-text", hero.ctaText);
+
+    const timelineSection = data.timelineSection || {};
+    setText("timeline-heading", timelineSection.heading);
+    setText("timeline-hint", timelineSection.hint);
+
+    const activitySection = data.activitySection || {};
+    setText("activity-heading", activitySection.heading);
+    setText("activity-hint", activitySection.hint);
+
+    const footer = data.footer || {};
+    setText("footer-line1", footer.line1);
+    setText("footer-line2", footer.line2);
+
+    // Tieu de hero co the doi -> can do lai be rong logo cho khop.
+    syncHeroIconWidth();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 async function loadAbout() {
   try {
     const res = await fetch("data/about.json", { cache: "no-store" });
@@ -1032,6 +1082,7 @@ function setupThemeToggle() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  loadSite();
   loadEvents();
   loadAbout();
   loadVisitCounter();
