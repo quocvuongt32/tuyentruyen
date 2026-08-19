@@ -4,8 +4,16 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>
+  // Neu nguoi dung da tung bam nut chuyen giao dien thi uu tien lua chon do.
+  // Neu chua, tu chon theo gio trong ngay: sang (6h-12h) = sang, con lai
+  // (chieu/toi/dem) = toi, roi luu lai de ca trang dung 1 gia tri thong nhat.
   try {
-    if (localStorage.getItem("theme") === "light") {
+    var savedTheme = localStorage.getItem("theme");
+    if (!savedTheme) {
+      var hour = new Date().getHours();
+      savedTheme = hour >= 6 && hour < 12 ? "light" : "dark";
+    }
+    if (savedTheme === "light") {
       document.documentElement.setAttribute("data-theme", "light");
     }
   } catch (e) {}
@@ -95,33 +103,14 @@
     </div>
 
     <div class="hero-inner">
-      <div class="hero-icon" aria-hidden="true">
-        <img src="img/badge.png" alt="" width="104" height="104" />
+      <div class="hero-icon" id="hero-icon" aria-hidden="true">
+        <img src="img/badge.png" alt="" />
       </div>
-      <h1>Cẩm nang<br />An toàn số</h1>
+      <h1 id="hero-title">Cẩm nang An toàn số</h1>
       <p>Không gian tuyên truyền kỹ năng an ninh mạng và an toàn thông tin, đồng thời
         cập nhật hoạt động chuyển đổi số, đổi mới sáng tạo của Khoa Toán - Tin học và
         Ứng dụng KHCN trong phòng, chống tội phạm.</p>
       <a href="#timeline-section" class="hero-cta">Xem Cẩm nang <span aria-hidden="true">↓</span></a>
-    </div>
-
-    <div class="stats-row" id="stats-row">
-      <div class="stat-tile">
-        <strong id="stat-events">0</strong>
-        <span>Hoạt động</span>
-      </div>
-      <button type="button" class="stat-tile stat-tile-link" id="stat-media-tile">
-        <strong id="stat-images">0</strong>
-        <span>Thư viện ảnh &amp; video</span>
-      </button>
-      <div class="stat-tile">
-        <strong id="stat-updated">—</strong>
-        <span>Cập nhật gần nhất</span>
-      </div>
-      <div class="stat-tile" id="stat-visits-tile" hidden>
-        <strong id="stat-visits">—</strong>
-        <span>Lượt truy cập</span>
-      </div>
     </div>
   </section>
 
@@ -262,6 +251,31 @@
 </div>
 
 <div class="corner-widgets" id="corner-widgets">
+  <div class="corner-panel" id="stats-panel" hidden>
+    <div class="corner-panel-header">
+      <span>Số liệu nổi bật</span>
+      <button type="button" class="corner-panel-close" data-close-panel="stats-panel" aria-label="Đóng">✕</button>
+    </div>
+    <div class="corner-panel-body corner-stats-body">
+      <div class="corner-stat">
+        <strong id="stat-events">0</strong>
+        <span>Hoạt động</span>
+      </div>
+      <button type="button" class="corner-stat corner-stat-link" id="stat-media-tile">
+        <strong id="stat-images">0</strong>
+        <span>Thư viện ảnh &amp; video</span>
+      </button>
+      <div class="corner-stat">
+        <strong id="stat-updated">—</strong>
+        <span>Cập nhật gần nhất</span>
+      </div>
+      <div class="corner-stat" id="stat-visits-tile" hidden>
+        <strong id="stat-visits">—</strong>
+        <span>Lượt truy cập</span>
+      </div>
+    </div>
+  </div>
+
   <div class="corner-panel" id="news-panel" hidden>
     <div class="corner-panel-header">
       <span>Thời sự liên quan</span>
@@ -296,6 +310,11 @@
     </div>
   </div>
 
+  <button type="button" class="corner-fab" id="stats-fab" aria-label="Xem số liệu nổi bật" title="Số liệu nổi bật">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 20V10M10 20V4M16 20v-7M4 20h16" />
+    </svg>
+  </button>
   <button type="button" class="corner-fab" id="news-fab" aria-label="Xem tin thời sự liên quan" title="Tin thời sự liên quan">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M4 5h13a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" />

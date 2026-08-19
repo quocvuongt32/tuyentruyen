@@ -438,7 +438,10 @@ function setupMediaLibrary() {
   const closeBtn = document.getElementById("media-library-close");
   if (!tile || !overlay || !closeBtn) return;
 
-  tile.addEventListener("click", openMediaLibrary);
+  tile.addEventListener("click", () => {
+    closeCornerPanels();
+    openMediaLibrary();
+  });
   closeBtn.addEventListener("click", closeMediaLibrary);
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeMediaLibrary();
@@ -817,8 +820,10 @@ function setupCornerWidgets() {
     }
   };
 
+  const statsFab = document.getElementById("stats-fab");
   const newsFab = document.getElementById("news-fab");
   const feedbackFab = document.getElementById("feedback-fab");
+  if (statsFab) statsFab.addEventListener("click", () => togglePanel("stats-panel", statsFab));
   if (newsFab) newsFab.addEventListener("click", () => togglePanel("news-panel", newsFab));
   if (feedbackFab) feedbackFab.addEventListener("click", () => togglePanel("feedback-panel", feedbackFab));
 
@@ -869,6 +874,26 @@ function setupFeedbackForm() {
   });
 }
 
+// Be rong logo bang dung chieu dai dong chu "Cam nang An toan so" (theo yeu
+// cau thiet ke), do lai moi khi kich thuoc man hinh thay doi vi font co-scale
+// theo vw.
+function syncHeroIconWidth() {
+  const icon = document.getElementById("hero-icon");
+  const title = document.getElementById("hero-title");
+  if (!icon || !title) return;
+  const width = title.getBoundingClientRect().width;
+  if (width > 0) icon.style.width = `${Math.round(width)}px`;
+}
+
+function setupHeroIconSync() {
+  syncHeroIconWidth();
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(syncHeroIconWidth, 120);
+  });
+}
+
 function setupThemeToggle() {
   const btn = document.getElementById("theme-toggle");
   if (!btn) return;
@@ -897,6 +922,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupMediaLibrary();
   setupCornerWidgets();
   setupFeedbackForm();
+  setupHeroIconSync();
   document.getElementById("lightbox").addEventListener("click", closeLightbox);
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
