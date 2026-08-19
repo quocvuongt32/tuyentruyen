@@ -125,6 +125,17 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   nút/panel nhỏ (Thời sự, Số liệu nổi bật, Hòm thư góp ý...) vẫn cố định trong code
   (chưa CMS hoá, coi là "UI chrome" chứ không phải nội dung).
 
+- **Xem link tham khảo ngay trong trang**: bấm "Xem bài viết tham khảo" mở modal
+  `<iframe>` nhúng trang đó, không rời trang. Nhiều trang (Facebook, báo điện tử...)
+  tự chặn nhúng bằng `X-Frame-Options`/`frame-ancestors` — đây là bảo mật của chính
+  trang đó, modal sẽ trống/lỗi, không có cách "vượt qua" (và không nên). Nút "Mở tab
+  mới ↗" ở góc modal là lối thoát cho trường hợp này.
+- **Offline / chưa deploy**: `/admin` cần Netlify Identity thật nên không chạy được ở
+  local. Thêm nội dung khi không có mạng: `scripts/add-event.js` (bấm đúp
+  `Them-su-kien.bat`) — CLI hỏi từng bước, ghi thẳng vào `content/events/*.json` và
+  tự chạy lại `build-events.js`. Xem [README.md](../README.md) mục "Thêm nội dung khi
+  offline".
+
 ## Việc CHƯA CMS hoá (nếu được yêu cầu làm tiếp)
 
 Nhãn UI chrome (tên các nút/panel/modal), meta SEO (title/description trong `<head>`).

@@ -1,31 +1,19 @@
-# Chuyển đổi số & Đổi mới sáng tạo — Khoa Toán - Tin học và Ứng dụng KHCN
+# Cẩm nang An toàn số
 
-Website tĩnh (HTML/CSS/JS thuần, không framework) hiển thị dòng thời gian các hoạt
-động ứng dụng khoa học công nghệ, chuyển đổi số, đổi mới sáng tạo và tuyên truyền
-An ninh mạng của Khoa. Mỗi hoạt động được gắn **nhãn phân loại** (An ninh mạng /
-Chuyển đổi số / Đổi mới sáng tạo / Nghiên cứu khoa học / Khác), có bộ lọc trên
-trang chủ. Nội dung được quản lý qua [Decap CMS](https://decapcms.org/) tại
-`/admin`, lưu trực tiếp vào GitHub dưới dạng file JSON.
+Website tuyên truyền an ninh mạng / chuyển đổi số của Khoa Toán - Tin học và Ứng dụng
+KHCN, Học viện CSND. Live tại **https://tuyentruyen.khoaktt.vn/**, quản trị nội dung
+tại `/admin` ([Decap CMS](https://decapcms.org/), lưu thẳng vào GitHub dạng JSON).
 
-## Kiến trúc
+**Muốn hiểu kiến trúc/tính năng hoặc đang vận hành, sửa lỗi?** Đọc `docs/` trước, file
+này chỉ còn phần thiết lập ban đầu (đã làm 1 lần) + cách thêm nội dung khi offline:
 
-```
-index.html, css/, js/      → trang public, 100% tĩnh, không gọi CDN, không server
-content/events/*.json      → mỗi file = 1 sự kiện, do Decap CMS hoặc scripts/add-event.js tạo/sửa/xóa
-scripts/build-events.js    → gộp content/events/*.json → data/events.json (chạy khi Netlify build)
-scripts/add-event.js       → CLI thêm sự kiện khi thử ở máy local (xem mục 6)
-Chay-thu.bat                → bấm đúp để chạy thử web ở máy local
-Them-su-kien.bat            → bấm đúp để thêm sự kiện khi thử ở máy local
-admin/                     → giao diện Decap CMS (chỉ trang này gọi CDN + Netlify Identity)
-uploads/                   → ảnh minh chứng do Decap CMS / scripts/add-event.js tải lên
-netlify.toml                → cấu hình build + security headers (CSP, X-Frame-Options,…)
-```
+- [docs/PROJECT.md](docs/PROJECT.md) — kiến trúc, luồng dữ liệu, bản đồ tính năng.
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Netlify, CSP, sự cố đã gặp và cách sửa.
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) — nhật ký thay đổi theo ngày.
 
-Trang public không có bất kỳ logic ghi/xóa nào — CRUD chỉ xảy ra qua `/admin`,
-được xác thực bởi Netlify Identity + Git Gateway. Vì vậy bề mặt tấn công phía
-người dùng gần như bằng 0 (không database, không API tự viết, không cổng backend).
+## Thiết lập ban đầu (đã hoàn tất trên site hiện tại — giữ lại để tham khảo)
 
-## 1. Đẩy code lên GitHub
+### 1. Đẩy code lên GitHub
 
 ```bash
 git init -b main
@@ -40,134 +28,75 @@ git remote add origin https://github.com/<ban>/<ten-repo>.git
 git push -u origin main
 ```
 
-## 2. Kết nối Netlify
+### 2. Kết nối Netlify
 
 1. Đăng nhập [Netlify](https://app.netlify.com) bằng tài khoản GitHub của bạn.
 2. **Add new site → Import an existing project → GitHub** → chọn repo vừa tạo.
-3. Build command: `node scripts/build-events.js` — Publish directory: `.`
-   (đã có sẵn trong `netlify.toml`, Netlify sẽ tự nhận).
+3. Build command và publish directory đã có sẵn trong `netlify.toml`, Netlify tự nhận.
 4. Deploy site.
 
-## 3. Bật Netlify Identity + Git Gateway (bắt buộc để `/admin` hoạt động)
+### 3. Bật Netlify Identity + Git Gateway (bắt buộc để `/admin` hoạt động)
 
 1. Vào **Site configuration → Identity → Enable Identity**.
 2. **Identity → Registration**: chọn **Invite only** (không cho ai tự đăng ký).
 3. **Identity → Services → Git Gateway → Enable Git Gateway** (cho phép Identity
    commit thay bạn vào repo GitHub mà không cần cấp token cá nhân cho CMS).
-4. **Identity → Invite users** → nhập **đúng email quản trị của bạn**
-   (vd. địa chỉ Gmail bạn dùng để đăng nhập). Chỉ email được mời mới đăng nhập được —
-   đây là cơ chế giới hạn "chỉ duy nhất tài khoản của tôi" theo yêu cầu bảo mật.
+4. **Identity → Invite users** → nhập đúng email quản trị của bạn. Chỉ email được mời
+   mới đăng nhập được.
 
-### Tùy chọn: đăng nhập bằng đúng tài khoản GitHub của bạn thay vì email/mật khẩu
+#### Tuỳ chọn: đăng nhập bằng đúng tài khoản GitHub thay vì email/mật khẩu
 
-1. Tạo GitHub OAuth App tại **GitHub → Settings → Developer settings → OAuth Apps → New OAuth App**:
-   - Homepage URL: `https://<ten-site>.netlify.app`
-   - Authorization callback URL: `https://api.netlify.com/auth/done`
-2. Copy **Client ID** và **Client Secret** vào Netlify:
-   **Identity → Services → External providers → GitHub**.
-3. Khi đó nút đăng nhập ở `/admin` sẽ dùng OAuth GitHub — chỉ tài khoản GitHub được
-   bạn mời (bước 4 ở trên, dùng email gắn với tài khoản GitHub đó) mới vào được.
+1. Tạo GitHub OAuth App tại **GitHub → Settings → Developer settings → OAuth Apps →
+   New OAuth App**: Homepage URL `https://<ten-site>.netlify.app`, Authorization
+   callback URL `https://api.netlify.com/auth/done`.
+2. Copy **Client ID** và **Client Secret** vào Netlify: **Identity → Services →
+   External providers → GitHub**.
 
-## 4. Sử dụng trang quản trị
+## Thêm/sửa nội dung
 
-Truy cập `https://<ten-site>.netlify.app/admin/`, đăng nhập bằng tài khoản đã mời,
-thêm/sửa/xóa sự kiện trong collection **"Sự kiện tuyên truyền"**. Mỗi lần lưu,
-Decap CMS commit thẳng vào `content/events/` trên GitHub → Netlify tự động build lại
-(`scripts/build-events.js` gộp dữ liệu) → trang timeline cập nhật sau ~1 phút.
+### Bình thường (đã deploy, có mạng)
 
-Có thể xóa sự kiện mẫu `content/events/2026-08-17-buoi-tuyen-truyen-mau.json` ngay
-trong `/admin` sau khi thử.
+Dùng `/admin`. Mỗi lần lưu, Decap CMS commit thẳng vào GitHub → Netlify tự build lại
+→ trang cập nhật sau ~1 phút (trừ khi hết credit build, xem
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)). Đổi mật khẩu tại
+[/admin/doi-mat-khau.html](/admin/doi-mat-khau.html).
 
-`/admin` chỉ hoạt động **sau khi đã deploy lên Netlify và bật Identity + Git Gateway**
-(mục 3) — chạy ở máy local (`localhost`) sẽ không đăng nhập được vì không có backend
-Identity thật đứng sau. Kéo-thả ảnh vào ô ảnh (image widget) đã được Decap CMS hỗ trợ
-sẵn, không cần thêm gì. Việc sắp xếp lại thứ tự sự kiện bằng kéo-thả thì Decap CMS
-không hỗ trợ cho loại collection dạng thư mục (mỗi sự kiện 1 file) như ở đây — thứ tự
-hiển thị trên trang là tự động theo `date` mới nhất lên đầu; trong `/admin` có thể bấm
-tiêu đề cột **Date/Title** ở danh sách để sắp xếp lại cách xem, không phải kéo-thả.
+### Khi offline / chưa deploy
 
-### Đổi mật khẩu
+`/admin` cần Netlify Identity thật nên **không hoạt động offline**. Thay vào đó:
 
-Vào **[Đổi mật khẩu](/admin/doi-mat-khau.html)** (cũng có link ở menu chính) — đăng
-nhập bằng tài khoản Identity, tự nhập mật khẩu mới. Trang này gọi thẳng API của
-Netlify Identity từ trình duyệt của bạn; mật khẩu không đi qua hay lưu ở bất kỳ đâu
-khác ngoài chính tài khoản Identity của bạn.
+- **Thêm hoạt động mới**: bấm đúp **Them-su-kien.bat** (chạy `scripts/add-event.js`)
+  — CLI hỏi lần lượt tiêu đề, phân loại, ngày, địa điểm, nội dung, ảnh (đường dẫn file
+  trên máy, tự copy vào `uploads/`), link tham khảo, link video. Ghi thẳng vào
+  `content/events/*.json`, tự cập nhật `data/events.json` — F5 lại trang xem thử.
+- **Sửa Header/Hero/Footer/Giới thiệu**: sửa trực tiếp `content/site.json` /
+  `content/gioi-thieu.json` bằng tay (đúng field name trong `admin/config.yml`), rồi
+  chạy lại `node scripts/build-site.js` / `node scripts/build-about.js`.
+- Khi có mạng trở lại: `git add -A && git commit -m "..." && git push` (hoặc nhờ
+  Claude làm hộ trong phiên chat) để đồng bộ lên GitHub/Netlify.
 
-## 5. Xem thử ở máy local
+## Xem thử ở máy local
 
-Cách nhanh nhất: bấm đúp file **[Chay-thu.bat](Chay-thu.bat)**. Script sẽ tự cập nhật
-dữ liệu, mở server tại `http://localhost:8990` và mở trình duyệt sẵn cho bạn.
-Đóng cửa sổ cmd hiện ra (tên "TUYEN_TRUYEN - server") để tắt server.
-
-Chạy tay tương đương:
+Bấm đúp **[Chay-thu.bat](Chay-thu.bat)**, hoặc chạy tay:
 
 ```bash
-node scripts/build-events.js
+node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js
 python -m http.server 8990
 ```
 
-Mở `http://localhost:8990`. (Trang `/admin` cần chạy trên Netlify vì phụ thuộc
-Identity + Git Gateway — không hoạt động đầy đủ ở local.)
+Mở `http://localhost:8990`. (`/admin` không hoạt động ở local — xem ở trên.)
 
-## 6. Thêm sự kiện
+## Thống kê lượt truy cập
 
-- **Đã deploy lên Netlify**: dùng `/admin` (Decap CMS) như mục 4 — thao tác từ xa,
-  nhiều thiết bị, có xác thực Identity.
-- **Đang thử ở máy local, chưa deploy**: bấm đúp **[Them-su-kien.bat](Them-su-kien.bat)**
-  (chạy `scripts/add-event.js`). Cửa sổ cmd sẽ hỏi lần lượt: tiêu đề, **phân loại**
-  (chọn số thứ tự), ngày, địa điểm, nội dung (kết thúc bằng dòng chỉ có dấu `.`),
-  đường dẫn ảnh trên máy (cách nhau bằng dấu phẩy, ảnh sẽ được copy vào `uploads/`),
-  link tham khảo, và **link video** (YouTube/Google Drive, nhúng trực tiếp trong
-  trang nếu nhận diện được — không nhận diện được thì hiện dạng link thường). Script
-  tự ghi file vào `content/events/` và cập nhật lại `data/events.json` — chỉ cần F5
-  lại trang đang xem thử.
-
-## 7. Xem link tham khảo ngay trong trang
-
-Bấm "Xem bài viết tham khảo" mở một cửa sổ (modal) nhúng trang đó bằng `<iframe>` ngay
-trong web, không mở tab mới. **Lưu ý:** nhiều trang (Facebook, báo điện tử,…) tự chặn bị
-nhúng bằng header `X-Frame-Options`/`frame-ancestors` — đây là cơ chế bảo mật của chính
-trang đó, không thể và không nên can thiệp để vượt qua. Khi gặp trường hợp này, modal sẽ
-trống hoặc báo lỗi; dùng nút "Mở tab mới ↗" ở góc modal để xem bình thường.
-
-## 8. Banner ảnh nổi bật ở trang chủ
-
-Trong `/admin` (hoặc `Them-su-kien.bat`), mỗi ảnh minh chứng của một sự kiện có thể
-đánh dấu **"Ảnh nổi bật"**. Trang chủ sẽ gom tất cả ảnh được đánh dấu (từ mọi sự kiện)
-thành banner tự động chuyển ảnh mỗi 3 giây, có dấu chấm điều hướng, bấm vào ảnh sẽ
-cuộn xuống và mở đúng sự kiện chứa ảnh đó trong dòng thời gian. Không tạo hệ thống
-upload riêng — dùng lại `uploads/` sẵn có. Nếu chưa có ảnh nào được đánh dấu, khu vực
-banner tự ẩn hoàn toàn, không chừa khoảng trắng.
-
-Khu vực thống kê ngay dưới banner (số buổi tuyên truyền, số ảnh minh chứng, thời gian
-cập nhật gần nhất) được tính tự động từ `content/events/*.json` mỗi lần build, không
-cần nhập tay.
-
-## 9. Thống kê lượt truy cập
-
-Mặc định **tắt hoàn toàn** — không có script theo dõi nào chạy cho tới khi bạn tự bật.
-Dùng [GoatCounter](https://www.goatcounter.com/) vì miễn phí, không cookie, không thu
-thập dữ liệu cá nhân (phù hợp GDPR), và không cần backend riêng. Vì cần tạo tài khoản
-trên dịch vụ bên thứ ba, bước này **bạn phải tự làm** (không thể tự động hoá thay bạn):
-
-1. Đăng ký miễn phí tại [goatcounter.com](https://www.goatcounter.com/), đặt một "site code"
-   (ví dụ `tuyentruyen-anm` → sẽ có dashboard tại `tuyentruyen-anm.goatcounter.com`).
-2. Mở [index.html](index.html), tìm khối comment **"THONG KE TRUY CAP"** ở cuối file
-   (ngay trước `</body>`), thay `REPLACE-ME` bằng site code vừa tạo.
-3. Xoá dòng `<!-- THONG KE...` đầu khối và dòng `-->` cuối khối để bỏ comment, kích hoạt
-   script.
-4. Commit + push — Netlify tự build lại. `netlify.toml` đã sẵn CSP cho phép
-   `gc.zgo.at` (script) và `*.goatcounter.com` (gửi dữ liệu).
-
-Ngoài lượt xem trang, `js/main.js` đã gắn sẵn các sự kiện tuỳ chỉnh để biết **mục nào
-được xem/bấm nhiều nhất**: mở một mốc trong dòng thời gian, bấm ảnh banner, bấm link
-tham khảo, bấm mục nào trong menu điều hướng — tất cả tự động lên dashboard GoatCounter
-dưới dạng "Events" một khi bước 1–4 hoàn tất, không cần chỉnh sửa gì thêm.
+Đã bật (GoatCounter, site code `vuongnq`), không cần làm gì thêm. Cách hoạt động và
+cách bật ô "Lượt truy cập" công khai trên trang: xem
+[docs/PROJECT.md](docs/PROJECT.md) mục "Lượt truy cập".
 
 ## Ghi chú bảo mật
 
-- `netlify.toml` đặt Content-Security-Policy chặt cho toàn site; chỉ `/admin/*`
-  được nới để tải Decap CMS + Netlify Identity từ CDN chính chủ.
+- `netlify.toml` đặt Content-Security-Policy chặt cho toàn site; chỉ `/admin/*` được
+  nới để tải Decap CMS + Netlify Identity từ CDN chính chủ (chi tiết + lý do từng dòng:
+  [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)).
 - `scripts/build-events.js` escape HTML và chỉ whitelist một tập thẻ markdown cơ bản
   khi dựng `bodyHtml`, chặn chèn script từ nội dung nhập trong CMS.
 - Ảnh chỉ được chấp nhận nếu nằm trong `/uploads/` (do chính Git Gateway ghi vào),

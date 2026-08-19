@@ -9,6 +9,9 @@
 
 ## 2026-08-19
 
+- Gộp `README.md` (đã cũ, trùng nhiều với `docs/`) — README giờ chỉ còn phần thiết
+  lập ban đầu (1 lần) + hướng dẫn thêm nội dung khi offline (`add-event.js`/
+  `Them-su-kien.bat`), phần kiến trúc/tính năng trỏ sang `docs/PROJECT.md`.
 - Tạo thư mục `docs/` (file này + PROJECT.md + DEPLOYMENT.md) để CLAUDE mới vào phiên
   chat có thể nắm nhanh trạng thái dự án, tiết kiệm token so với đọc lại toàn bộ code.
 - Phát hiện + xác nhận Netlify hết credit build tháng này (chu kỳ 18/8–17/9), mọi
