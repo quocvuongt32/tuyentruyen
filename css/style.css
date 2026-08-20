@@ -16,7 +16,8 @@
   --hero-glow: #0f1a30;
   --radius: 10px;
   --max-width: 960px;
-  --header-h: 64px;
+  --header-brand-h: 78px;
+  --header-h: 56px;
 }
 
 /* Nen sang: trang anh vang, tinh than "co do sao vang" */
@@ -480,27 +481,25 @@ a { color: inherit; }
   position: sticky;
   top: 0;
   z-index: 50;
-  height: var(--header-h);
+}
+
+/* Hang 1: logo + ten thuong hieu, can giua, rieng 1 hang - kieu masthead
+   bao dien tu (vd Cong an nhan dan). */
+.header-brand-row {
+  height: var(--header-brand-h);
   background: var(--header-bg);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
-}
-
-.header-inner {
-  max-width: var(--max-width);
-  height: 100%;
-  margin: 0 auto;
   padding: 0 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: center;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
   color: var(--text);
 }
@@ -511,16 +510,19 @@ a { color: inherit; }
 }
 
 .brand .logo img {
-  width: 36px;
-  height: 36px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
+  /* Lam sang, ro net hon tren nen ca 2 theme - huy hieu goc hoi tram. */
+  filter: brightness(1.18) saturate(1.12) contrast(1.04);
 }
 
 .brand-text {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 7px;
   white-space: nowrap;
+  font-size: 1.05em;
 }
 
 .brand-line1,
@@ -534,6 +536,23 @@ a { color: inherit; }
   color: var(--gold);
 }
 
+/* Hang 2: thanh dieu huong mau accent, rieng 1 khung - kieu bao dien tu. */
+.header-nav-row {
+  background: var(--accent);
+  border-bottom: 1px solid var(--accent-dim);
+}
+
+.header-nav-inner {
+  max-width: var(--max-width);
+  height: var(--header-h);
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .site-nav {
   display: flex;
   align-items: center;
@@ -542,14 +561,14 @@ a { color: inherit; }
 
 .site-nav a {
   text-decoration: none;
-  color: var(--text-dim);
+  color: var(--on-accent);
   font-size: 0.92rem;
   transition: color 0.15s ease;
 }
 
 .site-nav a:hover,
 .site-nav a:focus-visible {
-  color: var(--accent);
+  color: var(--gold);
 }
 
 .theme-toggle {
@@ -559,9 +578,9 @@ a { color: inherit; }
   width: 34px;
   height: 34px;
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
-  color: var(--text-dim);
+  color: var(--on-accent);
   cursor: pointer;
 }
 
@@ -588,16 +607,16 @@ a { color: inherit; }
   width: 34px;
   height: 34px;
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
-  color: var(--text-dim);
+  color: var(--on-accent);
   cursor: pointer;
 }
 
 .admin-toggle:hover,
 .admin-toggle[aria-expanded="true"] {
-  color: var(--accent);
-  border-color: var(--accent-dim);
+  color: var(--gold);
+  border-color: var(--gold);
 }
 
 .admin-links {
@@ -624,6 +643,7 @@ a { color: inherit; }
   padding: 9px 10px;
   border-radius: 6px;
   font-size: 0.85rem;
+  color: var(--text);
 }
 
 .admin-links a:hover {
@@ -639,7 +659,7 @@ a { color: inherit; }
   width: 36px;
   height: 36px;
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
   cursor: pointer;
 }
@@ -649,7 +669,7 @@ a { color: inherit; }
   width: 18px;
   height: 2px;
   margin: 0 auto;
-  background: var(--text);
+  background: var(--on-accent);
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
@@ -1563,7 +1583,7 @@ a { color: inherit; }
 
   .site-nav {
     position: fixed;
-    top: var(--header-h);
+    top: calc(var(--header-brand-h) + var(--header-h));
     left: 0;
     right: 0;
     flex-direction: column;
@@ -1581,6 +1601,7 @@ a { color: inherit; }
   .site-nav a {
     padding: 14px 20px;
     border-top: 1px solid var(--border);
+    color: var(--text-dim);
   }
 
   .theme-toggle {
@@ -1592,6 +1613,7 @@ a { color: inherit; }
     border: 0;
     border-top: 1px solid var(--border);
     border-radius: 0;
+    color: var(--text-dim);
   }
 
   .theme-toggle::after {

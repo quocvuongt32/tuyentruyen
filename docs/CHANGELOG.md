@@ -7,6 +7,32 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-20 (tiếp 5)
+
+- **Làm lại header thành 2 hàng theo kiểu báo điện tử** (tham khảo Công an nhân dân):
+  hàng 1 là logo + tên thương hiệu "Cẩm nang - An toàn số" căn giữa, riêng 1 khung
+  (`.header-brand-row`); hàng 2 là thanh điều hướng nền đỏ accent, riêng 1 khung
+  (`.header-nav-row`, `.header-nav-inner`). Đổi `--header-h` (64px) thành 2 biến
+  `--header-brand-h` (78px) + `--header-h` (56px, giờ chỉ còn là chiều cao hàng nav) để
+  tính đúng vị trí menu sổ xuống trên mobile (`top: calc(brand-h + nav-h)`).
+  Đổi màu chữ menu/nút theme/nút quản trị sang `--on-accent` (trắng ngà) vì giờ nằm
+  trên nền đỏ đặc thay vì nền mờ như trước; ô "Quản trị"/"Đổi mật khẩu" sổ xuống vẫn giữ
+  màu chữ thường (`--text`) vì bản thân khung đó có nền card riêng, không phải nền đỏ.
+- **Logo sáng hơn**: thêm `filter: brightness(1.18) saturate(1.12) contrast(1.04)` cho
+  ảnh huy hiệu ở header (chỉ ở header, không đụng logo ở Hero) để dễ nhận diện hơn trên
+  nền màu.
+
+## 2026-08-20 (tiếp 4)
+
+- **Sửa lỗi banner trang chủ bị 25 tin tự động chiếm hết**: ảnh của các tin trong feed
+  hoạt động tự động (mục "tiếp 3" bên dưới) bị đánh dấu `featured: true`, vô tình bị
+  gộp luôn vào banner trang chủ (vốn chỉ dành cho ảnh admin chủ động chọn qua "Ảnh đại
+  diện nổi bật"). Đổi thành `featured: false` — ảnh feed vẫn hiện trên thẻ hoạt động
+  của chính nó (không cần `featured`), chỉ không còn vào banner.
+- **Thêm dự phòng khi ảnh lỗi** (banner + thẻ hoạt động): vì ảnh feed lấy trực tiếp từ
+  CDN ngoài (`cdn.hvcsnd.edu.vn`), nếu 1 ảnh nào đó tải lỗi thì tự ẩn/thay khung giữ chỗ
+  thay vì hiện chữ thay thế (alt text) trông như link vỡ giữa banner.
+
 ## 2026-08-20 (tiếp 3)
 
 - **Sửa lỗi nghiêm trọng, tồn tại từ lâu**: script chọn giao diện sáng/tối lúc tải trang

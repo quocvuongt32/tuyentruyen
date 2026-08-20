@@ -381,7 +381,11 @@ async function loadActivityFeedEvents(existingSlugs, existingUrls) {
         date: it.date || today,
         location: "",
         bodyHtml: "",
-        images: it.image ? [{ src: it.image, featured: true }] : [],
+        // featured: false co y - anh nay chi dung lam thumbnail cho the hoat
+        // dong cua chinh no (buildActivityCard doc anh dau tien, khong quan
+        // tam featured), KHONG dua vao banner trang chu (banner chi gom anh
+        // co featured:true - danh rieng cho noi dung admin chu dong chon).
+        images: it.image ? [{ src: it.image, featured: false }] : [],
         featuredImage: "",
         link: it.url,
         videoUrl: "",

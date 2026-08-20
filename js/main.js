@@ -297,6 +297,15 @@ function buildActivityCard(ev) {
   if (ev.slug) card.id = `activity-${ev.slug}`;
   if (ev.category) card.dataset.category = ev.category;
 
+  function appendThumbPlaceholder() {
+    const placeholder = document.createElement("div");
+    placeholder.className = "activity-thumb-placeholder";
+    placeholder.setAttribute("aria-hidden", "true");
+    placeholder.innerHTML =
+      '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m3.5 15 4.5-4.5 3 3 5-5 4.5 4.5"/><circle cx="8" cy="9" r="1.3"/></svg>';
+    card.appendChild(placeholder);
+  }
+
   const firstImage = Array.isArray(ev.images) ? ev.images.find((im) => im && im.src) : null;
   if (firstImage) {
     const img = document.createElement("img");
@@ -304,14 +313,10 @@ function buildActivityCard(ev) {
     img.src = firstImage.src;
     img.alt = ev.title || "";
     img.loading = "lazy";
+    img.addEventListener("error", () => { img.remove(); appendThumbPlaceholder(); }, { once: true });
     card.appendChild(img);
   } else {
-    const placeholder = document.createElement("div");
-    placeholder.className = "activity-thumb-placeholder";
-    placeholder.setAttribute("aria-hidden", "true");
-    placeholder.innerHTML =
-      '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m3.5 15 4.5-4.5 3 3 5-5 4.5 4.5"/><circle cx="8" cy="9" r="1.3"/></svg>';
-    card.appendChild(placeholder);
+    appendThumbPlaceholder();
   }
 
   const body = document.createElement("div");
@@ -644,6 +649,7 @@ function setupBanner(featured) {
     img.src = item.src;
     img.alt = item.eventTitle || "";
     img.loading = i === 0 ? "eager" : "lazy";
+    img.addEventListener("error", () => img.remove(), { once: true });
     slide.appendChild(img);
 
     if (item.eventTitle) {
