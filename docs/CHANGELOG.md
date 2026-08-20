@@ -7,6 +7,45 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-20 (tiếp 7)
+
+- **Nạp 7 infographic "Bộ kỹ năng An toàn số"** người dùng cung cấp (Nhận diện lừa đảo
+  số, Bảo vệ danh tính/dữ liệu cá nhân, Bảo vệ tài khoản/thiết bị, Giao dịch thanh toán
+  an toàn, Mạng xã hội an toàn, Dùng AI an toàn, Ứng phó sự cố) vào `uploads/` +
+  `content/ky-nang/*.json`.
+- **Mở rộng schema `ky_nang` cho phép mục chỉ có link, không cần ảnh riêng** (`image`
+  chuyển `required: false`, `build-skills.js` chỉ loại bỏ mục thiếu CẢ ảnh lẫn link) —
+  áp dụng ngay để thêm 5 bài viết thật từ nguồn chính thống (Bộ Công an, Bộ Khoa học và
+  Công nghệ, Công an tỉnh Ninh Bình) về deepfake, lừa đảo trực tuyến, bảo vệ dữ liệu cá
+  nhân — hiển thị bằng khung giữ chỗ + link thay vì ảnh.
+- Sửa `loadSkills()` trong `main.js`: xử lý đúng trường hợp không có ảnh (khung giữ chỗ
+  thay vì `<img src="">` rỗng — lỗi phổ biến khiến trình duyệt gửi request rỗng về
+  chính trang).
+
+## 2026-08-20 (tiếp 6)
+
+- **Sửa lỗi CSP có thể chặn ảnh feed hoạt động**: `img-src` trong CSP trang public chưa
+  có `https://cdn.hvcsnd.edu.vn` (nguồn ảnh của feed hoạt động tự động thêm ở mục
+  "tiếp 3") — đã bổ sung để đảm bảo ảnh luôn tải được trên bản live.
+- **Thêm 4 thẻ phân loại (Chuyển đổi số/Đổi mới sáng tạo/Nghiên cứu khoa học/Khác) trực
+  tiếp lên thanh điều hướng** — bấm vào sẽ cuộn tới mục "Hoạt động khác" VÀ tự áp dụng
+  đúng bộ lọc đó luôn (`applyActivityFilter()` dùng chung giữa pill lọc và link menu).
+- **Thêm tính năng "Bộ kỹ năng An toàn số"** (`#ky-nang-section`): lưới ảnh/infographic
+  về thủ đoạn lừa đảo + cách phòng ngừa, bấm ảnh xem cỡ lớn (dùng lại lightbox có sẵn).
+  Collection CMS mới `ky_nang` → `content/ky-nang/*.json` → `scripts/build-skills.js` →
+  `data/skills.json`, thêm vào chuỗi build trong `netlify.toml`. **Cố ý để trống, không
+  tự động lấy ảnh từ nguồn ngoài** — infographic là tác phẩm đồ hoạ hoàn chỉnh, rủi ro
+  bản quyền cao hơn nhiều so với headline+link tin tức, nên chờ admin tự tải ảnh do đơn
+  vị làm/có bản quyền qua `/admin`.
+- **Sửa tràn thanh điều hướng** khi tăng từ 5 lên 9 mục: nhãn dài (vd "Nghiên cứu khoa
+  học", "Bộ kỹ năng An toàn số") khiến từng mục tự xuống dòng ngay cả ở đúng 960px
+  (`--max-width` của toàn trang) vì thiếu `white-space: nowrap`. Đã thêm `nowrap`, giảm
+  `gap` (22px→6px) và cỡ chữ (0.92rem→0.78rem) cho khớp menu, thu nhỏ nút theme/quản trị
+  (34px→30px), và tách riêng ngưỡng chuyển sang menu rút gọn (hamburger) cho phần nav
+  lên 940px (các quy tắc responsive khác không liên quan menu vẫn giữ ngưỡng 640/720px
+  cũ) — đã đo thực tế bằng `getBoundingClientRect()` ở nhiều mốc rộng màn hình để xác
+  nhận không còn tràn/xuống dòng lệch nhau.
+
 ## 2026-08-20 (tiếp 5)
 
 - **Làm lại header thành 2 hàng theo kiểu báo điện tử** (tham khảo Công an nhân dân):

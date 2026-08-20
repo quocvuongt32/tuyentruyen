@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js"
+  command = "node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js && node scripts/build-skills.js"
   publish = "."
 
 [build.environment]
@@ -13,7 +13,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), camera=(), microphone=()"
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data: https://*.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.goatcounter.com https://api.open-meteo.com; frame-src https:; frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data: https://*.goatcounter.com https://cdn.hvcsnd.edu.vn; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.goatcounter.com https://api.open-meteo.com; frame-src https:; frame-ancestors 'none'"
 
 # Trang /admin cần tải Decap CMS + Netlify Identity từ CDN và gọi API Identity/Git Gateway.
 [[headers]]

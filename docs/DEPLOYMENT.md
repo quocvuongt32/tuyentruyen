@@ -14,7 +14,7 @@
   mỗi khi push (`Auto publishing is on`) — **trừ khi hết credit, xem mục dưới**.
 - **Build command** (trong `netlify.toml`):
   ```
-  node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js
+  node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js && node scripts/build-skills.js
   ```
   Publish directory: `.` (toàn bộ repo, không có thư mục `dist/build` riêng).
 
@@ -130,7 +130,7 @@ qua console thật, vì lỗi CSP loại này không luôn hiện rõ ràng.
 ## Quy trình test local
 
 ```bash
-node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js
+node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js && node scripts/build-skills.js
 python -m http.server 8990
 ```
 

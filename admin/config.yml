@@ -156,6 +156,41 @@ collections:
               trang khi lô mới thay thế. Mỗi lần Lưu (dù Excel hay ảnh) tốn 15 credit
               Netlify, xem docs/DEPLOYMENT.md.
 
+  - name: "ky_nang"
+    label: "Bộ kỹ năng An toàn số"
+    label_singular: "Kỹ năng / Infographic"
+    folder: "content/ky-nang"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    format: "json"
+    identifier_field: "title"
+    summary: "{{title}}"
+    fields:
+      - label: "Tiêu đề (tên thủ đoạn / kỹ năng)"
+        name: "title"
+        widget: "string"
+        required: true
+        hint: "Vd: Giả mạo cơ quan Công an gọi điện đe dọa, lừa đảo"
+
+      - label: "Ảnh / Infographic (để trống nếu chỉ đính kèm bài viết ở link bên dưới)"
+        name: "image"
+        widget: "image"
+        required: false
+        hint: "Nên dùng ảnh/infographic do đơn vị tự thiết kế hoặc có đầy đủ bản quyền sử dụng — infographic lấy từ nguồn ngoài rủi ro bản quyền cao hơn nhiều so với 1 đường link bài viết."
+
+      - label: "Mô tả ngắn (thủ đoạn & cách phòng ngừa)"
+        name: "summary"
+        widget: "text"
+        required: false
+
+      - label: "Link bài viết tham khảo (nguồn chính thống — Bộ Công an, Cục An toàn thông tin...)"
+        name: "link"
+        widget: "string"
+        required: false
+        pattern: ['^(https?:\/\/).+$', "Link phải bắt đầu bằng http:// hoặc https://"]
+        pattern: ['^(https?:\/\/).+$', "Link phải bắt đầu bằng http:// hoặc https://"]
+
   - name: "events"
     label: "Hoạt động"
     label_singular: "Hoạt động"

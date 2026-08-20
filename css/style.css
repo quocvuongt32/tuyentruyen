@@ -556,13 +556,14 @@ a { color: inherit; }
 .site-nav {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 6px;
 }
 
 .site-nav a {
   text-decoration: none;
   color: var(--on-accent);
-  font-size: 0.92rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
   transition: color 0.15s ease;
 }
 
@@ -575,8 +576,8 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
@@ -604,8 +605,8 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
@@ -1364,6 +1365,77 @@ a { color: inherit; }
   color: var(--text-dim);
 }
 
+/* ---------- Bo ky nang An toan so (luoi anh/infographic) ---------- */
+
+.skills-section {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+.skill-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-align: left;
+  color: var(--text);
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.skill-card:hover {
+  border-color: var(--accent-dim);
+  transform: translateY(-2px);
+}
+
+.skill-thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: block;
+  object-fit: cover;
+  background: var(--bg-alt);
+  cursor: zoom-in;
+}
+
+.skill-thumb-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-dim);
+  background: linear-gradient(135deg, var(--accent-soft), transparent 70%);
+}
+
+.skill-body {
+  padding: 12px 14px 14px;
+}
+
+.skill-title {
+  margin: 0 0 4px;
+  font-size: 0.94rem;
+  line-height: 1.35;
+}
+
+.skill-summary {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
 .activity-modal {
   display: none;
   position: fixed;
@@ -1578,7 +1650,12 @@ a { color: inherit; }
   .about-points { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 640px) {
+/* Menu chinh gio co 9 muc (them 4 the phan loai + Bo ky nang) - o vung
+   640-900px moi muc tu co lai/xuong dong rieng le trong flex nowrap, chu
+   khong tran deu, nhin lech nhau. Gap som sang menu rut gon (hamburger) o
+   nguong rong hon rieng cho phan nav, cac quy tac layout khac (padding,
+   grid...) van giu nguong 640/720px cu. */
+@media (max-width: 940px) {
   .nav-toggle { display: flex; }
 
   .site-nav {
@@ -1596,7 +1673,7 @@ a { color: inherit; }
     transition: max-height 0.25s ease;
   }
 
-  .site-nav.open { max-height: 420px; }
+  .site-nav.open { max-height: 480px; overflow-y: auto; }
 
   .site-nav a {
     padding: 14px 20px;
@@ -1633,7 +1710,9 @@ a { color: inherit; }
     box-shadow: none;
     padding: 0;
   }
+}
 
+@media (max-width: 640px) {
   .section-inner { padding: 44px 18px; }
   .hero { padding: 64px 18px 72px; }
   .timeline { padding-left: 20px; }

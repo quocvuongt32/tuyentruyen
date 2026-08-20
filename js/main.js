@@ -505,12 +505,27 @@ function setupMediaLibrary() {
   });
 }
 
+// Loc luoi "Hoat dong khac" theo danh muc - dung chung cho ca pill trong
+// muc do lan link rut gon tren thanh dieu huong (setupHeaderCategoryLinks).
+function applyActivityFilter(value, label) {
+  const wrap = document.getElementById("category-filter");
+  if (wrap) {
+    wrap.querySelectorAll(".category-pill").forEach((b) => {
+      b.classList.toggle("active", (b.dataset.value || "") === (value || ""));
+    });
+  }
+  document.querySelectorAll("#activity-grid .activity-card").forEach((card) => {
+    const match = !value || card.dataset.category === value;
+    card.classList.toggle("filtered-out", !match);
+  });
+  trackEvent(`/loc/${value || "tat-ca"}`, label || value || "Tất cả");
+}
+
 function setupCategoryFilter(categories) {
   const wrap = document.getElementById("category-filter");
   if (!wrap) return;
 
   wrap.innerHTML = "";
-  const cards = () => document.querySelectorAll("#activity-grid .activity-card");
 
   const allBtn = document.createElement("button");
   allBtn.type = "button";
@@ -529,15 +544,20 @@ function setupCategoryFilter(categories) {
   });
 
   wrap.querySelectorAll(".category-pill").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      wrap.querySelectorAll(".category-pill").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      const value = btn.dataset.value;
-      cards().forEach((card) => {
-        const match = !value || card.dataset.category === value;
-        card.classList.toggle("filtered-out", !match);
-      });
-      trackEvent(`/loc/${value || "tat-ca"}`, btn.textContent);
+    btn.addEventListener("click", () => applyActivityFilter(btn.dataset.value, btn.textContent));
+  });
+}
+
+// Cac link rut gon tren thanh dieu huong (Chuyen doi so/Doi moi sang tao/...)
+// vua cuon xuong muc "Hoat dong khac" vua tu ap dung bo loc tuong ung, thay
+// vi chi cuon toi roi nguoi dung phai tu bam lai pill ben duoi.
+function setupHeaderCategoryLinks() {
+  document.querySelectorAll("#site-nav a[data-activity-filter]").forEach((link) => {
+    link.addEventListener("click", () => {
+      const value = link.dataset.activityFilter;
+      // Doi 1 nhip de #hoat-dong-khac-section kip cuon toi truoc khi doi pill,
+      // tranh giat lien tuc neu trinh duyet dang xu ly hanh vi cuon cua <a href>.
+      setTimeout(() => applyActivityFilter(value, link.textContent), 50);
     });
   });
 }
@@ -926,6 +946,78 @@ async function loadAbout() {
   }
 }
 
+async function loadSkills() {
+  const grid = document.getElementById("skills-grid");
+  if (!grid) return;
+  try {
+    const res = await fetch("data/skills.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Không tải được Bộ kỹ năng An toàn số");
+    const data = await res.json();
+    const skills = Array.isArray(data.skills) ? data.skills : [];
+
+    grid.innerHTML = "";
+    if (!skills.length) {
+      grid.innerHTML = '<p class="empty">Đang cập nhật — chưa có ảnh/infographic nào.</p>';
+      return;
+    }
+
+    skills.forEach((s) => {
+      const card = document.createElement(s.link ? "a" : "button");
+      card.className = "skill-card";
+      if (s.link) {
+        card.href = s.link;
+        card.addEventListener("click", (e) => {
+          e.preventDefault();
+          openLinkModal(s.link);
+        });
+      } else {
+        card.type = "button";
+      }
+
+      if (s.image) {
+        const img = document.createElement("img");
+        img.className = "skill-thumb";
+        img.src = s.image;
+        img.alt = s.title || "";
+        img.loading = "lazy";
+        img.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openLightbox(s.image);
+        });
+        img.addEventListener("error", () => { img.remove(); }, { once: true });
+        card.appendChild(img);
+      } else {
+        const placeholder = document.createElement("div");
+        placeholder.className = "skill-thumb-placeholder";
+        placeholder.setAttribute("aria-hidden", "true");
+        placeholder.innerHTML =
+          '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 13h6M9 17h6"/></svg>';
+        card.appendChild(placeholder);
+      }
+
+      const body = document.createElement("div");
+      body.className = "skill-body";
+      const title = document.createElement("h3");
+      title.className = "skill-title";
+      title.textContent = s.title || "";
+      body.appendChild(title);
+      if (s.summary) {
+        const summary = document.createElement("p");
+        summary.className = "skill-summary";
+        summary.textContent = s.summary;
+        body.appendChild(summary);
+      }
+      card.appendChild(body);
+
+      grid.appendChild(card);
+    });
+  } catch (err) {
+    grid.innerHTML = '<p class="error">Chưa có dữ liệu hoặc lỗi tải dữ liệu.</p>';
+    console.error(err);
+  }
+}
+
 // Ma thoi tiet (Open-Meteo WMO code) -> icon don gian, gom nhom theo tinh chat.
 const WEATHER_ICONS = [
   { codes: [0], icon: "☀️" },
@@ -1214,12 +1306,14 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSite();
   loadEvents();
   loadAbout();
+  loadSkills();
   loadVisitCounter();
   loadTicker();
   setupTickerClock();
   loadTickerWeather();
   setInterval(loadTickerWeather, 15 * 60 * 1000);
   setupNav();
+  setupHeaderCategoryLinks();
   setupAdminMenu();
   setupThemeToggle();
   setupLinkModal();

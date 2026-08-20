@@ -43,10 +43,12 @@ DOM (index.html render động qua JS)
 | `content/site.json` (1 file) | `scripts/build-site.js` | `data/site.json` | Header, Hero, tiêu đề 2 mục, Footer |
 | `content/gioi-thieu.json` (1 file) | `scripts/build-about.js` | `data/about.json` | Mục "Giới thiệu" |
 | — (RSS ngoài + `content/ticker/*.json` tuỳ chọn) | `scripts/build-ticker.js` | `data/ticker.json` | Dải tin chạy đầu trang |
+| `content/ky-nang/*.json` (1 file/kỹ năng) | `scripts/build-skills.js` | `data/skills.json` | Mục "Bộ kỹ năng An toàn số" |
 
 **Nếu sửa code mà không thấy hiệu lực khi test local**: luôn chạy lại
 `node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js
-&& node scripts/build-site.js` trước khi mở server — `data/*.json` không tự sinh.
+&& node scripts/build-site.js && node scripts/build-skills.js` trước khi mở server —
+`data/*.json` không tự sinh.
 
 ## Cấu trúc thư mục
 
@@ -111,6 +113,18 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
 - **Thư viện ảnh & video** (modal `#media-library-modal`): gộp toàn bộ ảnh + video từ
   mọi sự kiện, mở bằng cách bấm ô "Thư viện ảnh & video" (class `.js-stat-media-tile`,
   có ở cả 2 vị trí nói trên). Ảnh → lightbox; video → mở modal chi tiết sự kiện đó.
+- **Bộ kỹ năng An toàn số** (`#ky-nang-section`, collection CMS `ky_nang` →
+  `content/ky-nang/*.json` → `scripts/build-skills.js` → `data/skills.json`): lưới ảnh/
+  infographic về thủ đoạn lừa đảo + cách phòng ngừa, bấm ảnh mở lightbox cỡ lớn. Khác
+  với "Hoạt động" — không có ngày/địa điểm, chỉ có tiêu đề + ảnh (tuỳ chọn) + mô tả ngắn
+  + link (tuỳ chọn) — cần ít nhất 1 trong 2 (ảnh hoặc link), thiếu cả 2 thì bị bỏ qua.
+  Mục không có ảnh hiển thị khung giữ chỗ + link bài viết thay vì `<img>` rỗng.
+  **Cố ý KHÔNG tự động lấy ảnh/infographic từ nguồn ngoài** (khác với feed hoạt động ở
+  trên) — infographic là tác phẩm đồ hoạ hoàn chỉnh, rủi ro bản quyền cao hơn hẳn
+  headline+link tin tức, nên để trống chờ admin tự tải ảnh do đơn vị làm/có bản quyền.
+  Bài viết dạng link (không ảnh riêng) thì được — đã thêm 5 bài từ nguồn chính thống
+  (Bộ Công an, Bộ KH&CN, Công an tỉnh) theo cách chọn lọc thủ công tương tự, không phải
+  auto-scrape.
 - **Chi tiết sự kiện khi bấm vào 1 mốc/thẻ**: `buildDetailFragment()` trong `main.js`.
   Thứ tự hiển thị: video nhúng (nếu có) HOẶC ảnh đầu tiên làm ảnh bìa lớn HOẶC khung giữ
   chỗ (nếu chưa có gì) → link video/tham khảo dạng chữ → nội dung tóm tắt → dải ảnh còn

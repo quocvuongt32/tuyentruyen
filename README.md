@@ -93,7 +93,7 @@ Dùng `/admin`. Mỗi lần lưu, Decap CMS commit thẳng vào GitHub → Netli
 Bấm đúp **[Chay-thu.bat](Chay-thu.bat)**, hoặc chạy tay:
 
 ```bash
-node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js
+node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js && node scripts/build-skills.js
 python -m http.server 8990
 ```
 
