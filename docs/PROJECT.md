@@ -39,7 +39,7 @@ DOM (index.html render động qua JS)
 
 | Nguồn CMS | Script build | Output | Dùng cho |
 |---|---|---|---|
-| `content/events/*.json` (1 file/sự kiện) | `scripts/build-events.js` | `data/events.json` | Timeline "Tuyên truyền An ninh mạng" + lưới "Hoạt động khác" |
+| `content/events/*.json` (1 file/sự kiện) + tuỳ chọn `content/nhap-hang-loat.json` (lô Excel đang chờ, xem "Nhập hàng loạt") | `scripts/build-events.js` | `data/events.json` | Timeline "Tuyên truyền An ninh mạng" + lưới "Hoạt động khác" |
 | `content/site.json` (1 file) | `scripts/build-site.js` | `data/site.json` | Header, Hero, tiêu đề 2 mục, Footer |
 | `content/gioi-thieu.json` (1 file) | `scripts/build-about.js` | `data/about.json` | Mục "Giới thiệu" |
 | — (RSS ngoài + `content/ticker/*.json` tuỳ chọn) | `scripts/build-ticker.js` | `data/ticker.json` | Dải tin chạy đầu trang |
@@ -65,10 +65,12 @@ data/                 Output build (gitignore, không commit — build lại m�
 scripts/build-*.js    4 script build, chỉ dùng Node core (fs, path, fetch) — không
                        cần npm install, không có package.json trong repo.
 scripts/add-event.js  CLI thêm 1 sự kiện thủ công khi test local (không qua CMS).
-scripts/import-events-xlsx.js  Nhập hàng loạt sự kiện từ
-                       uploads/mau-nhap-hoat-dong.xlsx + ảnh từ Anh-nhap-hoat-dong/ —
-                       tự viết ZIP/XML reader, không dùng thư viện xlsx ngoài (giữ đúng
-                       nguyên tắc "chỉ Node core"). Xem mục "Nhập hàng loạt" bên dưới.
+scripts/import-events-xlsx.js  Nhập hàng loạt tại máy — ghi ra content/events/*.json
+                       riêng, tiêu thụ ảnh trong Anh-nhap-hoat-dong/. Xem mục
+                       "Nhập hàng loạt" bên dưới.
+scripts/lib/xlsx-events.js  Thư viện đọc .xlsx dùng chung giữa import-events-xlsx.js
+                       và build-events.js — tự viết ZIP/XML reader, không dùng thư viện
+                       xlsx ngoài (giữ đúng nguyên tắc "chỉ Node core").
 img/                  Ảnh tĩnh (logo, favicon, og-image) — commit vào Git.
 uploads/              Ảnh do CMS/Decap tải lên qua Git Gateway — commit vào Git. Cũng
                        chứa mau-nhap-hoat-dong.xlsx (mẫu Excel nhập hàng loạt).
@@ -143,18 +145,36 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   `Them-su-kien.bat`) — CLI hỏi từng bước, ghi thẳng vào `content/events/*.json` và
   tự chạy lại `build-events.js`. Xem [README.md](../README.md) mục "Thêm nội dung khi
   offline".
-- **Nhập hàng loạt sự kiện (tiết kiệm credit Netlify)**: `scripts/import-events-xlsx.js`
-  (bấm đúp `Nhap-hang-loat.bat`) đọc `uploads/mau-nhap-hoat-dong.xlsx` (mỗi dòng 1 sự
-  kiện, cột đầu "STT" là mã sự kiện) + ảnh trong `Anh-nhap-hoat-dong/` (quy ước tên file
-  `<STT>-<số ảnh>.jpg`, ảnh số 1 = ảnh đại diện) → tạo hàng loạt `content/events/*.json`
-  cùng lúc, copy/đổi tên ảnh vào `uploads/`, ảnh gốc trong thư mục thả ảnh tự mất sau khi
-  nhập (đã "tiêu thụ"). Lý do tồn tại: 1 lần push cho N sự kiện = 15 credit, thay vì N
-  lần lưu qua `/admin` = 15×N credit (xem bảng giá credit trong
-  [DEPLOYMENT.md](DEPLOYMENT.md)). Đọc trực tiếp cấu trúc ZIP/XML của `.xlsx` bằng tay
-  (không dùng thư viện `xlsx` ngoài) để giữ đúng nguyên tắc "chỉ Node core, không cần
-  npm install" của toàn bộ `scripts/`. Hướng dẫn đặt tên ảnh đầy đủ nằm sẵn trong
-  `Anh-nhap-hoat-dong/HUONG-DAN-DAT-TEN-ANH.txt` (script tự tạo lại file này nếu bị xoá
-  mất hoặc clone repo lần đầu).
+- **Nhập hàng loạt sự kiện (tiết kiệm credit Netlify)** — 2 cách, dùng chung
+  `scripts/lib/xlsx-events.js` (tự đọc ZIP/XML của `.xlsx` bằng Node core, không dùng
+  thư viện `xlsx` ngoài — giữ nguyên tắc "chỉ Node core, không cần npm install"):
+  - **Tại máy (`scripts/import-events-xlsx.js`, bấm đúp `Nhap-hang-loat.bat`)**: đọc
+    `uploads/mau-nhap-hoat-dong.xlsx` + ảnh trong `Anh-nhap-hoat-dong/` → **ghi ra file
+    riêng vĩnh viễn** cho từng dòng vào `content/events/*.json` (giống hệt 1 sự kiện tạo
+    tay), ảnh được copy vào `uploads/` rồi **xoá khỏi thư mục thả ảnh** (đã "tiêu thụ").
+    Dùng khi muốn xong hẳn 1 lần, không cần quay lại.
+  - **Qua web (`/admin` → "Nhập hàng loạt (Excel)")**: admin tải file `.xlsx` lên qua
+    field `file` (Decap ghi đường dẫn vào `content/nhap-hang-loat.json`). Ảnh tải lên qua
+    tab Media (đặt tên đúng quy ước, không đổi tên trong web). **`scripts/build-events.js`
+    tự đọc lại `content/nhap-hang-loat.json` ở MỌI lần build**, ghép các dòng hợp lệ trực
+    tiếp vào `data/events.json` — **không ghi/xoá gì trong repo** (Netlify build không
+    commit ngược lại git được), nên đây là dữ liệu "sống" theo đúng file đang được trỏ
+    tới, KHÔNG phải file riêng vĩnh viễn. ⚠️ **Chỉ nên có 1 lô đang xử lý tại 1 thời
+    điểm** — nếu tải file `.xlsx` MỚI lên (thay `content/nhap-hang-loat.json`), lô cũ sẽ
+    biến mất khỏi trang (vì nó chưa từng được ghi thành file riêng). Trước khi tải lô
+    mới, nhờ Claude "chốt" lô hiện tại (chạy `import-events-xlsx.js` để ghi thành file
+    riêng) rồi mới tải lô tiếp theo.
+  - **Mã sự kiện dùng để ghép ảnh**: `<Ngày dạng YYYYMMDD>-<STT>` (hàm
+    `computeEventCode()` trong `xlsx-events.js`) — ghép cả Ngày vì cột STT reset về 1 mỗi
+    lần điền file mới, dễ trùng mã giữa các lần nhập khác nhau nếu chỉ dùng STT.
+  - Lý do tồn tại: 1 lần push/lưu cho N sự kiện = 15 credit, thay vì N lần lưu qua
+    `/admin` = 15×N credit (xem bảng giá credit trong [DEPLOYMENT.md](DEPLOYMENT.md)).
+  - Cột mẫu hiện có: STT, Tiêu đề, Phân loại, **Số kế hoạch** (metadata văn bản chính
+    thức, field `planNumber`, hiển thị trong chi tiết sự kiện), Ngày, Địa điểm, Nội dung,
+    Link tham khảo, Link video, Ghi chú ảnh — không đổi thứ tự/xoá cột đã có.
+  - Hướng dẫn đặt tên ảnh đầy đủ nằm sẵn trong
+    `Anh-nhap-hoat-dong/HUONG-DAN-DAT-TEN-ANH.txt` (script tự tạo lại file này nếu bị xoá
+    mất hoặc clone repo lần đầu).
 
 ## Việc CHƯA CMS hoá (nếu được yêu cầu làm tiếp)
 

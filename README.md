@@ -72,10 +72,16 @@ Dùng `/admin`. Mỗi lần lưu, Decap CMS commit thẳng vào GitHub → Netli
 - **Thêm nhiều hoạt động cùng lúc (tiết kiệm credit Netlify — mỗi lần push/lưu qua
   `/admin` tốn 15 credit, xem [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md))**: điền nhiều
   dòng vào `uploads/mau-nhap-hoat-dong.xlsx`, thả ảnh minh chứng vào thư mục
-  `Anh-nhap-hoat-dong/` (đặt tên `<STT>-<số ảnh>.jpg`, hướng dẫn chi tiết trong file
-  `HUONG-DAN-DAT-TEN-ANH.txt` ở chính thư mục đó), rồi bấm đúp **Nhap-hang-loat.bat**
-  (chạy `scripts/import-events-xlsx.js`) — tạo hết các hoạt động cùng lúc, chỉ cần
-  push 1 lần cho tất cả.
+  `Anh-nhap-hoat-dong/` (đặt tên `<Ngày dạng YYYYMMDD>-<STT>-<số ảnh>.jpg`, hướng dẫn
+  chi tiết trong file `HUONG-DAN-DAT-TEN-ANH.txt` ở chính thư mục đó), rồi bấm đúp
+  **Nhap-hang-loat.bat** (chạy `scripts/import-events-xlsx.js`) — tạo hết các hoạt động
+  cùng lúc thành file riêng trong `content/events/`, chỉ cần push 1 lần cho tất cả.
+  **Cách khác, làm qua web** (không cần ngồi máy này): `/admin` → "Nhập hàng loạt
+  (Excel)" → tải file `.xlsx` lên, tải ảnh lên qua tab Media (đặt tên đúng quy ước) —
+  trang tự đọc lại ở mỗi lần build, ảnh tải lên sau sẽ tự được ghép vào lần build kế
+  tiếp. **Chỉ nên xử lý 1 lô tại 1 thời điểm** — nhờ Claude "chốt" lô hiện tại thành
+  file riêng trước khi tải lô Excel mới lên (nếu không, lô cũ sẽ biến mất khi lô mới
+  thay thế, vì lô qua web chưa từng được ghi thành file riêng).
 - **Sửa Header/Hero/Footer/Giới thiệu**: sửa trực tiếp `content/site.json` /
   `content/gioi-thieu.json` bằng tay (đúng field name trong `admin/config.yml`), rồi
   chạy lại `node scripts/build-site.js` / `node scripts/build-about.js`.

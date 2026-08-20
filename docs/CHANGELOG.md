@@ -7,6 +7,35 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-20 (tiếp)
+
+- **Nhập 10 hoạt động thật** (2022-2024, tuyên truyền pháp luật/an ninh mạng tại các
+  trường THPT/THCS, có số kế hoạch chính thức) từ file Excel người dùng gửi trực tiếp
+  qua chat — dùng `import-events-xlsx.js` để chốt thành file riêng trong
+  `content/events/`. Đã loại bỏ 1 dòng ví dụ hư cấu (do Claude tạo trước đó, có link
+  YouTube rickroll) còn sót lại trong file trước khi nhập — không xuất bản nội dung
+  không có thật.
+- Thêm trường **"Số kế hoạch"** (`planNumber`) xuyên suốt: cột mới trong file mẫu Excel,
+  field trong `admin/config.yml` (cả sự kiện đơn lẻ lẫn nhập hàng loạt), hiển thị trong
+  chi tiết sự kiện trên trang (`.event-plan-number`).
+- **Thêm nút tải file Excel lên qua `/admin`** ("Nhập hàng loạt (Excel)") — giải quyết
+  yêu cầu "không có nút nào để đính kèm file" khi nhìn màn hình `/admin` trước đó.
+  `scripts/build-events.js` tự đọc lại file đã tải lên (qua con trỏ
+  `content/nhap-hang-loat.json`) ở MỌI lần build, ghép trực tiếp vào `data/events.json`,
+  tự tìm ảnh khớp mã trong `uploads/` mỗi lần build — đúng yêu cầu "ảnh thả vào sau, web
+  tự tìm". Đánh đổi: đây là dữ liệu "sống" theo file đang trỏ tới (build không ghi
+  ngược lại được vào Git), nên chỉ nên xử lý 1 lô tại 1 thời điểm, cần "chốt" (ghi
+  thành file riêng vĩnh viễn) trước khi tải lô mới — xem docs/PROJECT.md mục
+  "Nhập hàng loạt".
+- **Sửa lỗi trùng mã ảnh giữa các lần nhập khác nhau**: đổi công thức "mã sự kiện" từ
+  chỉ dùng STT (reset về 1 mỗi lần điền file mới, dễ trùng) sang
+  `<Ngày dạng YYYYMMDD>-<STT>` — STT lặp lại giữa các đợt nhập không còn gây trùng mã vì
+  Ngày hầu như luôn khác nhau. Tách logic đọc `.xlsx` dùng chung vào
+  `scripts/lib/xlsx-events.js` (dùng ở cả 2 đường nhập, tại máy lẫn qua web).
+- Sửa `import-events-xlsx.js`: không đổi tên ảnh khi copy nữa (giữ nguyên tên gốc theo
+  đúng quy ước `<mã>-<số ảnh>.jpg` người dùng đã đặt sẵn), thống nhất với cách web-upload
+  xác định ảnh (cùng dùng đúng tên file, không phát sinh 2 quy tắc đặt tên khác nhau).
+
 ## 2026-08-20
 
 - Thêm công cụ **nhập hàng loạt sự kiện** (`scripts/import-events-xlsx.js`, bấm đúp

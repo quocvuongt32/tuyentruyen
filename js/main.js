@@ -221,6 +221,13 @@ function buildDetailFragment(ev) {
     frag.appendChild(buildEventCoverPlaceholder());
   }
 
+  if (ev.planNumber) {
+    const plan = document.createElement("p");
+    plan.className = "event-plan-number";
+    plan.textContent = `Kế hoạch: ${ev.planNumber}`;
+    frag.appendChild(plan);
+  }
+
   if (ev.videoUrl && !ev.videoEmbedUrl) {
     const a = document.createElement("a");
     a.href = ev.videoUrl;

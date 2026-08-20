@@ -133,6 +133,29 @@ collections:
                 name: "description"
                 widget: "text"
 
+  - name: "nhap_hang_loat"
+    label: "Nhập hàng loạt (Excel)"
+    files:
+      - name: "file_excel"
+        label: "Nhập hàng loạt hoạt động"
+        file: "content/nhap-hang-loat.json"
+        fields:
+          - label: "File Excel (.xlsx) đã điền"
+            name: "file"
+            widget: "file"
+            required: false
+            hint: >
+              Tải lên file mau-nhap-hoat-dong.xlsx đã điền (điền theo đúng mẫu trong
+              uploads/mau-nhap-hoat-dong.xlsx). Sau khi Lưu, trang sẽ tự đọc file này ở
+              MỌI lần build sau — tải ảnh minh chứng lên qua tab Media (đặt tên
+              <Ngày viết liền>-<STT>-<số ảnh>.jpg theo đúng hướng dẫn trong
+              Anh-nhap-hoat-dong/HUONG-DAN-DAT-TEN-ANH.txt) sẽ tự được ghép vào ở lần
+              build kế tiếp, không cần làm gì thêm. QUAN TRỌNG: chỉ xử lý ĐÚNG 1 file
+              tại 1 thời điểm — trước khi tải file mới lên, nhờ Claude "chốt" lô hiện
+              tại thành các hoạt động riêng vĩnh viễn, nếu không lô cũ sẽ biến mất khỏi
+              trang khi lô mới thay thế. Mỗi lần Lưu (dù Excel hay ảnh) tốn 15 credit
+              Netlify, xem docs/DEPLOYMENT.md.
+
   - name: "events"
     label: "Hoạt động"
     label_singular: "Hoạt động"
@@ -173,6 +196,12 @@ collections:
         name: "location"
         widget: "string"
         required: true
+
+      - label: "Số kế hoạch (nếu có)"
+        name: "planNumber"
+        widget: "string"
+        required: false
+        hint: "Vd: Số 2423/KH-T02-KTT — số hiệu văn bản/kế hoạch chính thức của hoạt động, nếu có."
 
       - label: "Nội dung tóm tắt"
         name: "body"

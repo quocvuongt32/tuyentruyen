@@ -1263,6 +1263,13 @@ a { color: inherit; }
 
 .event-link:hover { text-decoration: underline; }
 
+.event-plan-number {
+  margin: 0 0 10px;
+  color: var(--text-dim);
+  font-size: 0.86rem;
+  font-style: italic;
+}
+
 /* ---------- Hoat dong khac (luoi the dang tap chi) ---------- */
 
 .activity-section {

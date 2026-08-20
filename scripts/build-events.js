@@ -168,6 +168,7 @@ const events = files
       title: typeof data.title === "string" ? data.title : "",
       category,
       categoryLabel: CATEGORY_LABELS[category],
+      planNumber: typeof data.planNumber === "string" ? data.planNumber : "",
       date: typeof data.date === "string" ? data.date : "",
       location: typeof data.location === "string" ? data.location : "",
       bodyHtml: markdownToHtml(data.body || ""),
@@ -178,8 +179,90 @@ const events = files
       videoEmbedUrl: videoUrl ? toEmbedUrl(videoUrl) : null,
     };
   })
-  .filter(Boolean)
-  .sort((a, b) => (a.date < b.date ? 1 : -1));
+  .filter(Boolean);
+
+// ---------------------------------------------------------------------
+// Lo hang loat dang cho (tuy chon): admin tai 1 file .xlsx qua /admin ->
+// "Nhap hang loat (Excel)", CMS ghi lai duong dan trong content/nhap-hang-loat.json.
+// Moi lan build deu doc lai file .xlsx do + tim anh khop ma trong uploads/
+// (KHONG xoa/di chuyen gi - build khong the ghi nguoc lai repo). Vi vay day
+// la du lieu "song" theo dung file .xlsx dang duoc tro toi tai thoi diem
+// build, KHONG phai file rieng vinh vien - xem docs/PROJECT.md muc
+// "Nhap hang loat" ve quy tac "1 lo tai 1 thoi diem, chot xong roi moi tai lo moi".
+const pendingPath = path.join(__dirname, "..", "content", "nhap-hang-loat.json");
+let pendingEvents = [];
+try {
+  const pendingRaw = fs.readFileSync(pendingPath, "utf8");
+  const pendingData = JSON.parse(pendingRaw);
+  const xlsxRelPath = typeof pendingData.file === "string" ? pendingData.file.replace(/^\//, "") : "";
+  if (xlsxRelPath) {
+    const xlsxAbsPath = path.join(__dirname, "..", xlsxRelPath);
+    const buf = fs.readFileSync(xlsxAbsPath);
+    const { parseEventsWorkbook } = require("./lib/xlsx-events");
+    const { items, warnings } = parseEventsWorkbook(buf);
+    warnings.forEach((w) => console.warn(`[nhap-hang-loat] ${w}`));
+
+    const existingSlugs = new Set(events.map((e) => e.slug));
+    const uploadsDirForScan = path.join(__dirname, "..", "uploads");
+    let uploadFiles = [];
+    try {
+      uploadFiles = fs.readdirSync(uploadsDirForScan);
+    } catch (e) {
+      uploadFiles = [];
+    }
+
+    pendingEvents = items.map((item) => {
+      const baseSlug = `${item.date}-${item.title
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")}`;
+      let slug = baseSlug || `${item.date}-su-kien`;
+      let n = 2;
+      while (existingSlugs.has(slug)) slug = `${baseSlug}-${n++}`;
+      existingSlugs.add(slug);
+
+      const re = new RegExp(`^${item.code}[-_](\\d+)\\.(jpg|jpeg|png|gif|webp)$`, "i");
+      const images = uploadFiles
+        .map((name) => {
+          const m = re.exec(name);
+          return m ? { name, order: parseInt(m[1], 10) } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.order - b.order)
+        .map((f, i) => ({ src: `/uploads/${f.name}`, featured: i === 0 }));
+
+      const videoUrl = item.video || "";
+      return {
+        slug,
+        title: item.title,
+        category: item.category,
+        categoryLabel: CATEGORY_LABELS[item.category],
+        planNumber: item.planNumber,
+        date: item.date,
+        location: item.location,
+        bodyHtml: markdownToHtml(item.body || ""),
+        images,
+        featuredImage: "",
+        link: item.link,
+        videoUrl,
+        videoEmbedUrl: videoUrl ? toEmbedUrl(videoUrl) : null,
+      };
+    });
+    if (pendingEvents.length) {
+      console.log(`[nhap-hang-loat] Ghép thêm ${pendingEvents.length} hoạt động từ ${xlsxRelPath} (chưa chốt file riêng).`);
+    }
+  }
+} catch (e) {
+  // Chua co file nao duoc tai len qua nut "Nhap hang loat (Excel)" - bo qua, khong loi.
+}
+
+events.push(...pendingEvents);
+events.sort((a, b) => (a.date < b.date ? 1 : -1));
 
 const featured = [];
 let imageCount = 0;
