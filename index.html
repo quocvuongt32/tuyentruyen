@@ -4,15 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>
-  // Neu nguoi dung da tung bam nut chuyen giao dien thi uu tien lua chon do.
-  // Neu chua, tu chon theo gio trong ngay: sang (6h-12h) = sang, con lai
-  // (chieu/toi/dem) = toi, roi luu lai de ca trang dung 1 gia tri thong nhat.
+  // Mac dinh giao dien sang. Neu nguoi dung da tung tu bam nut chuyen doi thi
+  // uu tien luu lua chon do o lan sau.
   try {
-    var savedTheme = localStorage.getItem("theme");
-    if (!savedTheme) {
-      var hour = new Date().getHours();
-      savedTheme = hour >= 6 && hour < 12 ? "light" : "dark";
-    }
+    var savedTheme = localStorage.getItem("theme") || "light";
     if (savedTheme === "light") {
       document.documentElement.setAttribute("data-theme", "light");
     }

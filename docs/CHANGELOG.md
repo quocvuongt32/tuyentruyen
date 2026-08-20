@@ -7,6 +7,20 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-20 (tiếp 2)
+
+- Đổi giao diện mặc định thành **sáng** cho mọi người xem lần đầu (trước đây tự chọn
+  theo giờ trong ngày) — ai muốn tối vẫn tự bấm nút chuyển đổi như cũ, lựa chọn đó được
+  nhớ lại cho các lần sau.
+- Xác nhận nguyên nhân ô "Lượt truy cập" không tăng dù bấm link nhiều lần: endpoint
+  `/counter/TOTAL.json` của GoatCounter **cache tới 4 giờ** theo đúng thiết kế của họ,
+  không phải lỗi — số liệu thật vẫn được ghi nhận, chỉ hiển thị trễ.
+- **Lấp đầy 4 tab phân loại từng trống** ("Chuyển đổi số", "Đổi mới sáng tạo", "Nghiên
+  cứu khoa học", bổ sung thêm "Khác") bằng 8 hoạt động thật, lấy từ đúng trang chính
+  thống hvcsnd.edu.vn (Học viện CSND) — 3 trong số đó hoàn thiện từ chính các dòng link
+  người dùng đã dán sẵn trong file Excel nhưng chưa kịp điền tiêu đề/ngày. Tóm tắt viết
+  lại bằng lời văn riêng (không sao chép nguyên văn bài gốc).
+
 ## 2026-08-20 (tiếp)
 
 - **Nhập 10 hoạt động thật** (2022-2024, tuyên truyền pháp luật/an ninh mạng tại các
