@@ -64,9 +64,17 @@ content/              Nguồn dữ liệu CMS (commit vào Git, KHÔNG gitignore
 data/                 Output build (gitignore, không commit — build lại mỗi lần).
 scripts/build-*.js    4 script build, chỉ dùng Node core (fs, path, fetch) — không
                        cần npm install, không có package.json trong repo.
-scripts/add-event.js  CLI thêm sự kiện thủ công khi test local (không qua CMS).
+scripts/add-event.js  CLI thêm 1 sự kiện thủ công khi test local (không qua CMS).
+scripts/import-events-xlsx.js  Nhập hàng loạt sự kiện từ
+                       uploads/mau-nhap-hoat-dong.xlsx + ảnh từ Anh-nhap-hoat-dong/ —
+                       tự viết ZIP/XML reader, không dùng thư viện xlsx ngoài (giữ đúng
+                       nguyên tắc "chỉ Node core"). Xem mục "Nhập hàng loạt" bên dưới.
 img/                  Ảnh tĩnh (logo, favicon, og-image) — commit vào Git.
-uploads/              Ảnh do CMS/Decap tải lên qua Git Gateway — commit vào Git.
+uploads/              Ảnh do CMS/Decap tải lên qua Git Gateway — commit vào Git. Cũng
+                       chứa mau-nhap-hoat-dong.xlsx (mẫu Excel nhập hàng loạt).
+Anh-nhap-hoat-dong/    Thư mục thả ảnh trước khi nhập hàng loạt — gitignore (ảnh gốc
+                       chưa xử lý không lên Git, chỉ bản đã copy/đổi tên trong uploads/
+                       mới commit). Tự động rỗng lại sau mỗi lần chạy import.
 logo/, Thư viện/       Nguồn ảnh gốc (PSD/PNG lớn) để xử lý ra img/ — gitignore, KHÔNG
                        lên GitHub (chỉ tồn tại trên máy local của người dùng).
 netlify.toml           Build command + Content-Security-Policy headers. Xem
@@ -135,6 +143,18 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   `Them-su-kien.bat`) — CLI hỏi từng bước, ghi thẳng vào `content/events/*.json` và
   tự chạy lại `build-events.js`. Xem [README.md](../README.md) mục "Thêm nội dung khi
   offline".
+- **Nhập hàng loạt sự kiện (tiết kiệm credit Netlify)**: `scripts/import-events-xlsx.js`
+  (bấm đúp `Nhap-hang-loat.bat`) đọc `uploads/mau-nhap-hoat-dong.xlsx` (mỗi dòng 1 sự
+  kiện, cột đầu "STT" là mã sự kiện) + ảnh trong `Anh-nhap-hoat-dong/` (quy ước tên file
+  `<STT>-<số ảnh>.jpg`, ảnh số 1 = ảnh đại diện) → tạo hàng loạt `content/events/*.json`
+  cùng lúc, copy/đổi tên ảnh vào `uploads/`, ảnh gốc trong thư mục thả ảnh tự mất sau khi
+  nhập (đã "tiêu thụ"). Lý do tồn tại: 1 lần push cho N sự kiện = 15 credit, thay vì N
+  lần lưu qua `/admin` = 15×N credit (xem bảng giá credit trong
+  [DEPLOYMENT.md](DEPLOYMENT.md)). Đọc trực tiếp cấu trúc ZIP/XML của `.xlsx` bằng tay
+  (không dùng thư viện `xlsx` ngoài) để giữ đúng nguyên tắc "chỉ Node core, không cần
+  npm install" của toàn bộ `scripts/`. Hướng dẫn đặt tên ảnh đầy đủ nằm sẵn trong
+  `Anh-nhap-hoat-dong/HUONG-DAN-DAT-TEN-ANH.txt` (script tự tạo lại file này nếu bị xoá
+  mất hoặc clone repo lần đầu).
 
 ## Việc CHƯA CMS hoá (nếu được yêu cầu làm tiếp)
 

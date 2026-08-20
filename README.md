@@ -65,10 +65,17 @@ Dùng `/admin`. Mỗi lần lưu, Decap CMS commit thẳng vào GitHub → Netli
 
 `/admin` cần Netlify Identity thật nên **không hoạt động offline**. Thay vào đó:
 
-- **Thêm hoạt động mới**: bấm đúp **Them-su-kien.bat** (chạy `scripts/add-event.js`)
+- **Thêm 1 hoạt động**: bấm đúp **Them-su-kien.bat** (chạy `scripts/add-event.js`)
   — CLI hỏi lần lượt tiêu đề, phân loại, ngày, địa điểm, nội dung, ảnh (đường dẫn file
   trên máy, tự copy vào `uploads/`), link tham khảo, link video. Ghi thẳng vào
   `content/events/*.json`, tự cập nhật `data/events.json` — F5 lại trang xem thử.
+- **Thêm nhiều hoạt động cùng lúc (tiết kiệm credit Netlify — mỗi lần push/lưu qua
+  `/admin` tốn 15 credit, xem [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md))**: điền nhiều
+  dòng vào `uploads/mau-nhap-hoat-dong.xlsx`, thả ảnh minh chứng vào thư mục
+  `Anh-nhap-hoat-dong/` (đặt tên `<STT>-<số ảnh>.jpg`, hướng dẫn chi tiết trong file
+  `HUONG-DAN-DAT-TEN-ANH.txt` ở chính thư mục đó), rồi bấm đúp **Nhap-hang-loat.bat**
+  (chạy `scripts/import-events-xlsx.js`) — tạo hết các hoạt động cùng lúc, chỉ cần
+  push 1 lần cho tất cả.
 - **Sửa Header/Hero/Footer/Giới thiệu**: sửa trực tiếp `content/site.json` /
   `content/gioi-thieu.json` bằng tay (đúng field name trong `admin/config.yml`), rồi
   chạy lại `node scripts/build-site.js` / `node scripts/build-about.js`.

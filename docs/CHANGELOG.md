@@ -7,6 +7,30 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-20
+
+- Thêm công cụ **nhập hàng loạt sự kiện** (`scripts/import-events-xlsx.js`, bấm đúp
+  `Nhap-hang-loat.bat`): đọc `uploads/mau-nhap-hoat-dong.xlsx` (đã dọn sạch dòng ví dụ
+  bị trùng STT với dòng mẫu trống — lỗi có sẵn từ trước) + ảnh trong thư mục mới
+  `Anh-nhap-hoat-dong/` (quy ước tên `<STT>-<số ảnh>.jpg`, có hướng dẫn chi tiết trong
+  `HUONG-DAN-DAT-TEN-ANH.txt` ngay trong thư mục đó, script tự tạo lại nếu mất). Tự viết
+  bộ đọc ZIP/XML cho `.xlsx` bằng Node core, không cài thêm thư viện nào — giữ đúng
+  nguyên tắc "không cần npm install" của dự án. Mục đích: N sự kiện nhập 1 lần + 1 lần
+  push = 15 credit Netlify, thay vì N lần lưu qua `/admin` = 15×N credit. Đã test đủ các
+  ca: ảnh nhiều tấm, thiếu ảnh, sai định dạng ngày, phân loại không khớp, dòng trống.
+- Nâng cấp Netlify lên gói **Personal ($9/tháng, 1.000 credit/tháng)** — giải quyết việc
+  hết credit gói Free. Push đầu tiên sau nâng cấp build/deploy thành công trong 9 giây.
+- Xác nhận công thức credit chính xác từ docs Netlify: **1 lần production deploy (push
+  code hoặc admin Lưu trong `/admin`) = 15 credit cố định**, không phụ thuộc thời lượng
+  build; traffic thật tính riêng (2 credit/10k request, 20 credit/GB băng thông).
+- Bật công khai số liệu **GoatCounter** (site `vuongnq`, tick "Allow adding visitor
+  counts on your website" trong Settings) — ô "Lượt truy cập" trên trang giờ hiện số
+  thật thay vì "—". Không tốn credit Netlify (chỉ là cấu hình phía GoatCounter).
+- Thêm mục "Quy tắc duy trì credit" vào `docs/DEPLOYMENT.md`: gộp thay đổi trước khi
+  Lưu/push, ưu tiên nhập hàng loạt qua Excel thay vì từng bài qua `/admin`, kiểm tra số
+  dư định kỳ, theo dõi traffic qua GoatCounter — mục tiêu duy trì gói Personal trong
+  ngân sách 1.000 credit/tháng mà không cần bật Auto recharge.
+
 ## 2026-08-19
 
 - Đổi nhãn "THỜI SỰ" trong dải tin từ khối nền vàng đặc (chữ tối trên nền vàng — độ
