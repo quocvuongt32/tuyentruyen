@@ -7,6 +7,32 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-20 (tiếp 3)
+
+- **Sửa lỗi nghiêm trọng, tồn tại từ lâu**: script chọn giao diện sáng/tối lúc tải trang
+  nằm dưới dạng `<script>` inline trong `<head>` — nhưng CSP công khai
+  (`script-src 'self' https://gc.zgo.at`) **không có `'unsafe-inline'`**, nên trình
+  duyệt âm thầm chặn không cho chạy (không log lỗi rõ ràng ra console). Hệ quả: tính
+  năng "tự chọn sáng 6h-12h, tối ngoài giờ đó" **chưa từng thực sự hoạt động trên bản
+  live** suốt thời gian qua — trang luôn hiển thị theo CSS mặc định (tối), bất kể giờ
+  hay lựa chọn mặc định mới đặt sáng. Đã sửa bằng cách chuyển đoạn script này ra file
+  riêng `js/theme-init.js` (script từ file ngoài luôn được `'self'` cho phép). Xác nhận
+  qua `curl` trực tiếp cả server local lẫn bản live (không dùng Browser pane vì công cụ
+  này gặp trục trặc hiển thị khi kiểm tra).
+- **Sửa lỗi nút lọc phân loại trong "Hoạt động khác" không có tác dụng**: CSS ẩn thẻ bị
+  lọc nhắm nhầm class `.event-card.filtered-out`, trong khi thẻ thật có class
+  `.activity-card` — nút bấm đổi đúng trạng thái nhưng không thẻ nào bị ẩn/hiện. Sửa
+  lại đúng class `.activity-card.filtered-out`.
+- **Thêm feed hoạt động tự động** cho 3 danh mục "Chuyển đổi số", "Đổi mới sáng tạo",
+  "Nghiên cứu khoa học" (tối đa 9 tin/danh mục) — quét trực tiếp trang "tag" tương ứng
+  trên hvcsnd.edu.vn (Học viện CSND không có RSS công khai, xem `build-ticker.js`) ngay
+  trong `build-events.js`, chạy lại ở MỌI lần build nên tự cập nhật theo đúng trang chủ
+  Học viện, không cần thao tác gì thêm. Lấy cả ảnh đại diện thật từ CDN chính thức của
+  Học viện (`cdn.hvcsnd.edu.vn`) thay vì khung giữ chỗ. Danh mục "Khác" không có tag
+  tương ứng trên hvcsnd.edu.vn nên vẫn dựa vào nội dung nhập tay/qua Excel.
+- Sửa lỗi so sánh ngày không ổn định khi 2 hoạt động cùng ngày (comparator sort trả về
+  `-1` thay vì `0` khi bằng nhau, phá vỡ tính ổn định của sort).
+
 ## 2026-08-20 (tiếp 2)
 
 - Đổi giao diện mặc định thành **sáng** cho mọi người xem lần đầu (trước đây tự chọn

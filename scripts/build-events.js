@@ -1,5 +1,5 @@
 // Gộp các file JSON trong content/events/ thành data/events.json để trang tĩnh fetch().
-// Không dùng package ngoài — chỉ Node core (fs, path).
+// Không dùng package ngoài — chỉ Node core (fs, path, fetch có sẵn từ Node 18).
 "use strict";
 
 const fs = require("fs");
@@ -142,44 +142,44 @@ function normalizeImages(rawImages) {
     .filter(Boolean);
 }
 
-fs.mkdirSync(outDir, { recursive: true });
+function loadIndividualEvents() {
+  let files = [];
+  try {
+    files = fs.readdirSync(eventsDir).filter((f) => f.endsWith(".json"));
+  } catch (e) {
+    files = [];
+  }
 
-let files = [];
-try {
-  files = fs.readdirSync(eventsDir).filter((f) => f.endsWith(".json"));
-} catch (e) {
-  files = [];
+  return files
+    .map((file) => {
+      const raw = fs.readFileSync(path.join(eventsDir, file), "utf8");
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch (e) {
+        console.warn(`Bỏ qua file lỗi định dạng: ${file}`);
+        return null;
+      }
+      const category = normalizeCategory(data.category);
+      const videoUrl = isSafeUrl(data.video) ? data.video : "";
+      return {
+        slug: slugFromFilename(file),
+        title: typeof data.title === "string" ? data.title : "",
+        category,
+        categoryLabel: CATEGORY_LABELS[category],
+        planNumber: typeof data.planNumber === "string" ? data.planNumber : "",
+        date: typeof data.date === "string" ? data.date : "",
+        location: typeof data.location === "string" ? data.location : "",
+        bodyHtml: markdownToHtml(data.body || ""),
+        images: normalizeImages(data.images),
+        featuredImage: isSafeImagePath(data.featuredImage) ? data.featuredImage : "",
+        link: isSafeUrl(data.link) ? data.link : "",
+        videoUrl,
+        videoEmbedUrl: videoUrl ? toEmbedUrl(videoUrl) : null,
+      };
+    })
+    .filter(Boolean);
 }
-
-const events = files
-  .map((file) => {
-    const raw = fs.readFileSync(path.join(eventsDir, file), "utf8");
-    let data;
-    try {
-      data = JSON.parse(raw);
-    } catch (e) {
-      console.warn(`Bỏ qua file lỗi định dạng: ${file}`);
-      return null;
-    }
-    const category = normalizeCategory(data.category);
-    const videoUrl = isSafeUrl(data.video) ? data.video : "";
-    return {
-      slug: slugFromFilename(file),
-      title: typeof data.title === "string" ? data.title : "",
-      category,
-      categoryLabel: CATEGORY_LABELS[category],
-      planNumber: typeof data.planNumber === "string" ? data.planNumber : "",
-      date: typeof data.date === "string" ? data.date : "",
-      location: typeof data.location === "string" ? data.location : "",
-      bodyHtml: markdownToHtml(data.body || ""),
-      images: normalizeImages(data.images),
-      featuredImage: isSafeImagePath(data.featuredImage) ? data.featuredImage : "",
-      link: isSafeUrl(data.link) ? data.link : "",
-      videoUrl,
-      videoEmbedUrl: videoUrl ? toEmbedUrl(videoUrl) : null,
-    };
-  })
-  .filter(Boolean);
 
 // ---------------------------------------------------------------------
 // Lo hang loat dang cho (tuy chon): admin tai 1 file .xlsx qua /admin ->
@@ -189,20 +189,20 @@ const events = files
 // la du lieu "song" theo dung file .xlsx dang duoc tro toi tai thoi diem
 // build, KHONG phai file rieng vinh vien - xem docs/PROJECT.md muc
 // "Nhap hang loat" ve quy tac "1 lo tai 1 thoi diem, chot xong roi moi tai lo moi".
-const pendingPath = path.join(__dirname, "..", "content", "nhap-hang-loat.json");
-let pendingEvents = [];
-try {
-  const pendingRaw = fs.readFileSync(pendingPath, "utf8");
-  const pendingData = JSON.parse(pendingRaw);
-  const xlsxRelPath = typeof pendingData.file === "string" ? pendingData.file.replace(/^\//, "") : "";
-  if (xlsxRelPath) {
+function loadPendingBatchEvents(existingSlugs) {
+  const pendingPath = path.join(__dirname, "..", "content", "nhap-hang-loat.json");
+  try {
+    const pendingRaw = fs.readFileSync(pendingPath, "utf8");
+    const pendingData = JSON.parse(pendingRaw);
+    const xlsxRelPath = typeof pendingData.file === "string" ? pendingData.file.replace(/^\//, "") : "";
+    if (!xlsxRelPath) return [];
+
     const xlsxAbsPath = path.join(__dirname, "..", xlsxRelPath);
     const buf = fs.readFileSync(xlsxAbsPath);
     const { parseEventsWorkbook } = require("./lib/xlsx-events");
     const { items, warnings } = parseEventsWorkbook(buf);
     warnings.forEach((w) => console.warn(`[nhap-hang-loat] ${w}`));
 
-    const existingSlugs = new Set(events.map((e) => e.slug));
     const uploadsDirForScan = path.join(__dirname, "..", "uploads");
     let uploadFiles = [];
     try {
@@ -211,7 +211,7 @@ try {
       uploadFiles = [];
     }
 
-    pendingEvents = items.map((item) => {
+    const pendingEvents = items.map((item) => {
       const baseSlug = `${item.date}-${item.title
         .normalize("NFD")
         .replace(/[̀-ͯ]/g, "")
@@ -256,50 +256,209 @@ try {
     if (pendingEvents.length) {
       console.log(`[nhap-hang-loat] Ghép thêm ${pendingEvents.length} hoạt động từ ${xlsxRelPath} (chưa chốt file riêng).`);
     }
+    return pendingEvents;
+  } catch (e) {
+    // Chua co file nao duoc tai len qua nut "Nhap hang loat (Excel)" - bo qua, khong loi.
+    return [];
   }
-} catch (e) {
-  // Chua co file nao duoc tai len qua nut "Nhap hang loat (Excel)" - bo qua, khong loi.
 }
 
-events.push(...pendingEvents);
-events.sort((a, b) => (a.date < b.date ? 1 : -1));
+// ---------------------------------------------------------------------
+// Feed hoạt động tự động từ hvcsnd.edu.vn (trang chính thống của Học viện
+// CSND — Học viện không có RSS công khai, xem scripts/build-ticker.js).
+// Quét trang "tag" của từng danh mục, lấy tối đa N bài mới nhất mỗi danh
+// mục. KHÔNG ghi file gì — chạy lại (và tự cập nhật) ở MỌI lần build.
+// Trang không có ngày đăng hiển thị rõ, nhưng đường dẫn ảnh trên CDN của
+// họ luôn theo dạng /uploads/YYYY/MM/DD/... rất sát ngày đăng thật, nên
+// dùng tạm làm ngày hiển thị.
+// ---------------------------------------------------------------------
+const ACTIVITY_FEED_SOURCES = [
+  { url: "https://hvcsnd.edu.vn/tag/chuyen-doi-so-3340", category: "chuyen-doi-so" },
+  { url: "https://hvcsnd.edu.vn/tag/doi-moi-sang-tao-1884", category: "doi-moi-sang-tao" },
+  { url: "https://hvcsnd.edu.vn/tag/nghien-cuu-khoa-hoc-207", category: "nghien-cuu-khoa-hoc" },
+];
+const ACTIVITY_FEED_MAX_PER_CATEGORY = 9;
+const ACTIVITY_FEED_TIMEOUT_MS = 12000;
+const ACTIVITY_FEED_TRUSTED_IMAGE_HOST = "https://cdn.hvcsnd.edu.vn/";
 
-const featured = [];
-let imageCount = 0;
-for (const ev of events) {
-  for (const img of ev.images) {
-    imageCount++;
-    if (img.featured) {
+function decodeHtmlEntities(s) {
+  return String(s)
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
+}
+
+// Trang tag co nhieu bien the layout (khac class/the bao quanh tuy vi tri),
+// nen khong dua vao 1 div bao ngoai co dinh - tim truc tiep tung the tieu
+// de <h1|h2 class="headline...">, roi lay ngay/anh tu doan HTML NGAY TRUOC
+// no (anh minh hoa luon nam truoc tieu de trong cung 1 muc).
+function parseHvcsndTagPage(html) {
+  const items = [];
+  const seenUrls = new Set();
+  const headlineRegex = /<h[12] class="headline[^"]*">\s*<a href="([^"]+)" title="([^"]*)"/g;
+  let m;
+  while ((m = headlineRegex.exec(html))) {
+    const href = m[1];
+    const title = decodeHtmlEntities(m[2]);
+    if (!href || !title) continue;
+    const url = href.startsWith("http") ? href : `https://hvcsnd.edu.vn${href}`;
+    if (seenUrls.has(url)) continue;
+    seenUrls.add(url);
+
+    const windowStart = Math.max(0, m.index - 700);
+    const before = html.slice(windowStart, m.index);
+
+    const dateMatches = [...before.matchAll(/uploads\/(\d{4})\/(\d{2})\/(\d{2})\//g)];
+    const lastDate = dateMatches[dateMatches.length - 1];
+    const date = lastDate ? `${lastDate[1]}-${lastDate[2]}-${lastDate[3]}` : null;
+
+    const imgMatches = [...before.matchAll(/<img[^>]*\bsrc="(https:\/\/cdn\.hvcsnd\.edu\.vn\/[^"]+)"/g)];
+    const lastImg = imgMatches[imgMatches.length - 1];
+    const image = lastImg ? decodeHtmlEntities(lastImg[1]).replace(/&amp;/g, "&") : null;
+
+    items.push({
+      url,
+      title,
+      date,
+      image: image && image.startsWith(ACTIVITY_FEED_TRUSTED_IMAGE_HOST) ? image : null,
+    });
+  }
+  return items;
+}
+
+async function fetchActivityFeedSource({ url, category }) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ACTIVITY_FEED_TIMEOUT_MS);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) {
+      console.warn(`[activity-feed] Bỏ qua ${category}: HTTP ${res.status}`);
+      return [];
+    }
+    const html = await res.text();
+    const items = parseHvcsndTagPage(html).slice(0, ACTIVITY_FEED_MAX_PER_CATEGORY);
+    console.log(`[activity-feed] ${category}: lấy ${items.length} tin từ hvcsnd.edu.vn`);
+    return items.map((it) => ({ ...it, category }));
+  } catch (e) {
+    console.warn(`[activity-feed] Lỗi lấy tin ${category}: ${e.message}`);
+    return [];
+  }
+}
+
+async function loadActivityFeedEvents(existingSlugs, existingUrls) {
+  const results = await Promise.all(ACTIVITY_FEED_SOURCES.map(fetchActivityFeedSource));
+  const items = results.flat();
+  const today = new Date().toISOString().slice(0, 10);
+
+  return items
+    .filter((it) => !existingUrls.has(it.url))
+    .map((it) => {
+      const baseSlug = `feed-${it.title
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")}`;
+      let slug = baseSlug || `feed-${it.category}-${existingSlugs.size}`;
+      let n = 2;
+      while (existingSlugs.has(slug)) slug = `${baseSlug}-${n++}`;
+      existingSlugs.add(slug);
+      existingUrls.add(it.url);
+
+      return {
+        slug,
+        title: it.title,
+        category: it.category,
+        categoryLabel: CATEGORY_LABELS[it.category],
+        planNumber: "",
+        date: it.date || today,
+        location: "",
+        bodyHtml: "",
+        images: it.image ? [{ src: it.image, featured: true }] : [],
+        featuredImage: "",
+        link: it.url,
+        videoUrl: "",
+        videoEmbedUrl: null,
+      };
+    });
+}
+
+async function main() {
+  fs.mkdirSync(outDir, { recursive: true });
+
+  const events = loadIndividualEvents();
+  const existingSlugs = new Set(events.map((e) => e.slug));
+  const existingUrls = new Set(events.map((e) => e.link).filter(Boolean));
+
+  const pendingEvents = loadPendingBatchEvents(existingSlugs);
+  events.push(...pendingEvents);
+  pendingEvents.forEach((e) => { if (e.link) existingUrls.add(e.link); });
+
+  let feedEvents = [];
+  try {
+    feedEvents = await loadActivityFeedEvents(existingSlugs, existingUrls);
+  } catch (e) {
+    console.warn(`[activity-feed] Bỏ qua toàn bộ feed do lỗi không mong đợi: ${e.message}`);
+  }
+  events.push(...feedEvents);
+
+  // So sanh ISO date dang chuoi (YYYY-MM-DD) - luon dat gan nhat len dau, bat
+  // ke thu tu nhap lieu truoc/sau. Tra ve 0 khi bang nhau de giu thu tu on
+  // dinh (Array.sort da bao dam stable tu ES2019).
+  events.sort((a, b) => {
+    if (a.date === b.date) return 0;
+    return a.date < b.date ? 1 : -1;
+  });
+
+  const featured = [];
+  let imageCount = 0;
+  for (const ev of events) {
+    for (const img of ev.images) {
+      imageCount++;
+      if (img.featured) {
+        featured.push({
+          src: img.src,
+          eventSlug: ev.slug,
+          eventTitle: ev.title,
+          eventDate: ev.date,
+        });
+      }
+    }
+    if (ev.featuredImage) {
       featured.push({
-        src: img.src,
+        src: ev.featuredImage,
         eventSlug: ev.slug,
         eventTitle: ev.title,
         eventDate: ev.date,
       });
     }
   }
-  if (ev.featuredImage) {
-    featured.push({
-      src: ev.featuredImage,
-      eventSlug: ev.slug,
-      eventTitle: ev.title,
-      eventDate: ev.date,
-    });
-  }
+
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    stats: {
+      eventCount: events.length,
+      imageCount,
+    },
+    categories: CATEGORIES,
+    featured,
+    events,
+  };
+
+  fs.writeFileSync(outFile, JSON.stringify(payload, null, 2), "utf8");
+  console.log(
+    `Đã tạo ${events.length} sự kiện (${imageCount} ảnh, ${featured.length} ảnh nổi bật) vào ${path.relative(process.cwd(), outFile)}`
+  );
 }
 
-const payload = {
-  generatedAt: new Date().toISOString(),
-  stats: {
-    eventCount: events.length,
-    imageCount,
-  },
-  categories: CATEGORIES,
-  featured,
-  events,
-};
-
-fs.writeFileSync(outFile, JSON.stringify(payload, null, 2), "utf8");
-console.log(
-  `Đã tạo ${events.length} sự kiện (${imageCount} ảnh, ${featured.length} ảnh nổi bật) vào ${path.relative(process.cwd(), outFile)}`
-);
+main().catch((e) => {
+  console.error("Lỗi không mong đợi khi build events:", e);
+  process.exitCode = 1;
+});

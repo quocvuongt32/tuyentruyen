@@ -102,6 +102,19 @@ script-src 'self' 'unsafe-inline' 'unsafe-eval' https://identity.netlify.com htt
   chặn âm thầm (không crash gì rõ ràng, chỉ mất đúng 1 luồng điều hướng sau login).
 - **`unsafe-eval`** — Decap CMS bundle cần để chạy.
 
+## CSP trang public chặn cả `<script>` inline — dùng file riêng
+
+CSP `/*` là `script-src 'self' https://gc.zgo.at` — **không có `'unsafe-inline'`**.
+Bài học thực tế: từng có 1 đoạn `<script>` inline nhỏ ngay đầu `<head>` (chọn giao diện
+sáng/tối lúc tải trang) — bị trình duyệt **âm thầm chặn không chạy, không báo lỗi rõ
+console** — khiến cả tính năng phụ thuộc vào nó không hoạt động trên bản live suốt một
+thời gian dài mà không ai phát hiện ra (mọi thứ vẫn "trông bình thường" vì trang có màu
+nền mặc định hợp lý). **Không thêm `<script>` inline nào vào trang public** — luôn tách
+ra file riêng trong `js/` và nạp bằng `<script src="...">` (được `'self'` cho phép).
+Muốn kiểm tra 1 đoạn JS có thực sự chạy trên bản live hay không: đừng chỉ nhìn qua có
+vẻ đúng — kiểm tra trực tiếp bằng `curl` hoặc đọc `document.documentElement.getAttribute(...)`
+qua console thật, vì lỗi CSP loại này không luôn hiện rõ ràng.
+
 ## Media/upload — giới hạn cần nhớ
 
 - GitHub Contents API (mà Git Gateway dùng để commit file) **giới hạn ~1MB/file**.

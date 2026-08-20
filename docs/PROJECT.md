@@ -176,6 +176,16 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
     `Anh-nhap-hoat-dong/HUONG-DAN-DAT-TEN-ANH.txt` (script tự tạo lại file này nếu bị xoá
     mất hoặc clone repo lần đầu).
 
+- **Feed hoạt động tự động từ hvcsnd.edu.vn**: `build-events.js` quét trực tiếp trang
+  `/tag/<slug>` của Học viện CSND cho 3 danh mục (Chuyển đổi số, Đổi mới sáng tạo,
+  Nghiên cứu khoa học — xem `ACTIVITY_FEED_SOURCES`), lấy tối đa 9 bài mới nhất/danh
+  mục kèm ảnh đại diện thật (CDN `cdn.hvcsnd.edu.vn`). Chạy lại ở MỌI lần build nên tự
+  cập nhật theo đúng trang chủ Học viện — không ghi file, không cần thao tác tay. Trang
+  không hiển thị ngày đăng rõ ràng nên dùng ngày trong đường dẫn ảnh CDN
+  (`/uploads/YYYY/MM/DD/...`) làm proxy — khá sát ngày đăng thật. Nếu hvcsnd.edu.vn đổi
+  cấu trúc HTML, feed sẽ tự động trả về rỗng cho danh mục đó (không lỗi build, xem log
+  `[activity-feed]`) — cần cập nhật lại regex trong `parseHvcsndTagPage()`.
+
 ## Việc CHƯA CMS hoá (nếu được yêu cầu làm tiếp)
 
 Nhãn UI chrome (tên các nút/panel/modal), meta SEO (title/description trong `<head>`).

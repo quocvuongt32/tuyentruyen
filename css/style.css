@@ -1055,7 +1055,7 @@ a { color: inherit; }
   font-weight: 600;
 }
 
-.event-card.filtered-out {
+.activity-card.filtered-out {
   display: none;
 }
 
