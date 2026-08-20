@@ -9,6 +9,25 @@
 
 ## 2026-08-19
 
+- Đổi nhãn "THỜI SỰ" trong dải tin từ khối nền vàng đặc (chữ tối trên nền vàng — độ
+  tương phản kém ở theme sáng) sang dạng viền nhạt/nền trong suốt, chữ trắng — theo
+  yêu cầu người dùng khi so với ảnh chụp giao diện thực tế.
+- Chuyển dải tin chạy xuống **ngay dưới header** (trước đây nằm trên header) và thêm
+  **thanh thời tiết + đồng hồ trực tiếp** vào đầu dải tin (Hà Nội, nhiệt độ thực qua
+  Open-Meteo API — không cần key, cập nhật lại mỗi 15 phút; ngày/giờ theo múi giờ
+  Asia/Ho_Chi_Minh, cập nhật mỗi giây), theo bố cục tham khảo từ cổng thông tin Bộ Công
+  an. Thêm `https://api.open-meteo.com` vào CSP `connect-src` của trang public
+  (`netlify.toml`). Trên mobile ẩn bớt phần ngày/giờ để tránh tràn dòng.
+- Cập nhật `Kịch bản.docx` (kịch bản dự thi) theo yêu cầu: thêm **Cảnh 1 mới** (0:00–0:15,
+  15 giây) cho Trưởng nhóm (Thượng tá Phạm Thị Ngân) quay đoạn tự giới thiệu on-camera; các
+  cảnh cũ dời thành Cảnh 2→6, cắt cảnh mở đầu cũ (nay là Cảnh 2) từ 25s→20s để giữ tổng thời
+  lượng 02 phút 55 giây (dưới mức trần 03 phút). Bổ sung vào Visual của Cảnh 3/4/5 các tính
+  năng web mới trong phiên này (dải tin chạy, nút sáng/tối, cụm widget góc, Thư viện ảnh &
+  video, giao diện chi tiết sự kiện ảnh bìa lớn). Cập nhật PHẦN I (thời lượng) và PHẦN III
+  Giai đoạn 2 (thêm mục quay đoạn giới thiệu). Sửa trực tiếp bằng chỉnh sửa XML (giữ nguyên
+  100% `tcPr`/`rPr` — không đổi font/cỡ chữ/thể thức Nghị định 30 đã có), có backup
+  `Kịch bản.backup-<timestamp>.docx` trước khi ghi đè, đã qua kiểm tra `validate.py` (XSD +
+  so sánh với bản gốc) PASSED.
 - Gộp `README.md` (đã cũ, trùng nhiều với `docs/`) — README giờ chỉ còn phần thiết
   lập ban đầu (1 lần) + hướng dẫn thêm nội dung khi offline (`add-event.js`/
   `Them-su-kien.bat`), phần kiến trúc/tính năng trỏ sang `docs/PROJECT.md`.

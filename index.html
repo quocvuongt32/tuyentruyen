@@ -35,13 +35,6 @@
 </head>
 <body>
 
-<div class="news-ticker" id="news-ticker" hidden>
-  <span class="news-ticker-label">Thời sự</span>
-  <div class="news-ticker-viewport">
-    <div class="news-ticker-track" id="news-ticker-track"></div>
-  </div>
-</div>
-
 <header class="site-header" id="site-header">
   <div class="header-inner">
     <a href="#trang-chu" class="brand">
@@ -91,6 +84,22 @@
     </nav>
   </div>
 </header>
+
+<div class="news-ticker" id="news-ticker" hidden>
+  <div class="news-ticker-inner">
+    <div class="ticker-meta">
+      <span class="ticker-weather" id="ticker-weather" hidden>
+        <span class="ticker-weather-icon" id="ticker-weather-icon" aria-hidden="true">🌤️</span>
+        <span id="ticker-weather-text"></span>
+      </span>
+      <span class="ticker-datetime" id="ticker-datetime"></span>
+    </div>
+    <span class="news-ticker-label">Thời sự</span>
+    <div class="news-ticker-viewport">
+      <div class="news-ticker-track" id="news-ticker-track"></div>
+    </div>
+  </div>
+</div>
 
 <main>
 

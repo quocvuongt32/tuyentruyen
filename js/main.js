@@ -913,6 +913,75 @@ async function loadAbout() {
   }
 }
 
+// Ma thoi tiet (Open-Meteo WMO code) -> icon don gian, gom nhom theo tinh chat.
+const WEATHER_ICONS = [
+  { codes: [0], icon: "☀️" },
+  { codes: [1, 2], icon: "🌤️" },
+  { codes: [3], icon: "☁️" },
+  { codes: [45, 48], icon: "🌫️" },
+  { codes: [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82], icon: "🌧️" },
+  { codes: [71, 73, 75, 77, 85, 86], icon: "🌨️" },
+  { codes: [95, 96, 99], icon: "⛈️" },
+];
+
+function weatherIconFor(code) {
+  const match = WEATHER_ICONS.find((g) => g.codes.includes(code));
+  return match ? match.icon : "🌤️";
+}
+
+function setupTickerClock() {
+  const el = document.getElementById("ticker-datetime");
+  if (!el) return;
+
+  const fmt = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  function tick() {
+    const parts = fmt.formatToParts(new Date());
+    const get = (type) => parts.find((p) => p.type === type)?.value || "";
+    const weekday = get("weekday");
+    const label = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+    el.textContent = `${label}, ${get("day")}/${get("month")}/${get("year")}, ${get("hour")}:${get("minute")}:${get("second")} GMT+7`;
+  }
+
+  tick();
+  setInterval(tick, 1000);
+}
+
+async function loadTickerWeather() {
+  const wrap = document.getElementById("ticker-weather");
+  const iconEl = document.getElementById("ticker-weather-icon");
+  const textEl = document.getElementById("ticker-weather-text");
+  if (!wrap || !iconEl || !textEl) return;
+
+  try {
+    const res = await fetch(
+      "https://api.open-meteo.com/v1/forecast?latitude=21.0285&longitude=105.8542&current=temperature_2m,weather_code&timezone=Asia%2FBangkok",
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error("Không tải được thời tiết");
+    const payload = await res.json();
+    const temp = payload?.current?.temperature_2m;
+    const code = payload?.current?.weather_code;
+    if (typeof temp !== "number") throw new Error("Thiếu dữ liệu nhiệt độ");
+
+    iconEl.textContent = weatherIconFor(code);
+    textEl.textContent = `Hà Nội ${temp.toFixed(1)}°C`;
+    wrap.hidden = false;
+  } catch (e) {
+    wrap.hidden = true;
+  }
+}
+
 let tickerItems = [];
 
 async function loadTicker() {
@@ -1134,6 +1203,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadAbout();
   loadVisitCounter();
   loadTicker();
+  setupTickerClock();
+  loadTickerWeather();
+  setInterval(loadTickerWeather, 15 * 60 * 1000);
   setupNav();
   setupAdminMenu();
   setupThemeToggle();
