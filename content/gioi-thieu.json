@@ -11,20 +11,7 @@
       "text": "Hoạt động tuyên truyền phối hợp cùng lực lượng Công an nhân dân"
     }
   ],
-  "points": [
-    {
-      "icon": "shield",
-      "text": "Tuyên truyền An ninh mạng, an toàn thông tin"
-    },
-    {
-      "icon": "bulb",
-      "text": "Đổi mới sáng tạo, ứng dụng công nghệ mới (AI, dữ liệu số...)"
-    },
-    {
-      "icon": "refresh",
-      "text": "Chuyển đổi số trong quản lý, giảng dạy, nghiên cứu khoa học"
-    }
-  ],
+  "points": [],
   "directiveTitle": "Căn cứ thực hiện",
   "directives": [
     {
