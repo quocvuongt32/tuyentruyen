@@ -556,13 +556,14 @@ a { color: inherit; }
 .site-nav {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 26px;
 }
 
 .site-nav a {
   text-decoration: none;
   color: var(--on-accent);
-  font-size: 0.78rem;
+  font-size: 0.92rem;
+  font-weight: 600;
   white-space: nowrap;
   transition: color 0.15s ease;
 }
@@ -570,6 +571,91 @@ a { color: inherit; }
 .site-nav a:hover,
 .site-nav a:focus-visible {
   color: var(--gold);
+}
+
+/* Ngan cach nhe giua cac muc menu chinh (a truc tiep + nut "Them"), khong
+   ap dung cho theme-toggle/admin-menu (da co khung rieng). */
+.site-nav > a,
+.site-nav > .nav-more {
+  position: relative;
+}
+
+.site-nav > a:not(:first-child)::before,
+.site-nav > .nav-more::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.nav-more {
+  display: flex;
+  align-items: center;
+}
+
+.nav-more-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--on-accent);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.nav-more-toggle:hover,
+.nav-more-toggle[aria-expanded="true"] {
+  color: var(--gold);
+}
+
+.nav-more-toggle svg {
+  transition: transform 0.15s ease;
+}
+
+.nav-more-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.nav-more-links {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  min-width: 210px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+  z-index: 60;
+}
+
+.nav-more-links.open {
+  display: flex;
+}
+
+.nav-more-links a {
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.nav-more-links a:hover {
+  background: var(--bg-alt);
+  color: var(--accent);
 }
 
 .theme-toggle {
@@ -1235,26 +1321,6 @@ a { color: inherit; }
 
 .event-cover img:hover { transform: scale(1.02); }
 
-.event-cover-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: linear-gradient(160deg, var(--accent-soft), var(--gold-soft));
-  color: var(--text-dim);
-  font-size: 0.82rem;
-  text-align: center;
-  padding: 20px;
-}
-
-.event-cover-placeholder svg {
-  width: 40px;
-  height: 40px;
-  color: var(--gold);
-  opacity: 0.85;
-}
-
 .event-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -1325,21 +1391,12 @@ a { color: inherit; }
   transform: translateY(-2px);
 }
 
-.activity-thumb,
-.activity-thumb-placeholder {
+.activity-thumb {
   width: 100%;
   aspect-ratio: 16 / 9;
   display: block;
   object-fit: cover;
   background: var(--bg-alt);
-}
-
-.activity-thumb-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent-dim);
-  background: linear-gradient(135deg, var(--accent-soft), transparent 70%);
 }
 
 .activity-body {
@@ -1418,16 +1475,6 @@ a { color: inherit; }
   object-fit: cover;
   background: var(--bg-alt);
   cursor: zoom-in;
-}
-
-.skill-thumb-placeholder {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent-dim);
-  background: linear-gradient(135deg, var(--accent-soft), transparent 70%);
 }
 
 .skill-body {
@@ -1697,6 +1744,36 @@ a { color: inherit; }
   .site-nav a {
     padding: 14px 20px;
     border-top: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .site-nav > a:not(:first-child)::before,
+  .site-nav > .nav-more::before {
+    display: none;
+  }
+
+  .nav-more {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-more-toggle { display: none; }
+
+  .nav-more-links {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .nav-more-links a {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    font-size: inherit;
     color: var(--text-dim);
   }
 

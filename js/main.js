@@ -160,31 +160,6 @@ function buildCard(ev, openByDefault) {
   return article;
 }
 
-// Video/link/noi dung/anh minh chung - dung chung cho the o Dong thoi gian
-// (Tuyen truyen) va modal chi tiet o Hoat dong khac, tranh trung lap code.
-function buildEventCoverPlaceholder() {
-  const placeholder = document.createElement("div");
-  placeholder.className = "event-cover event-cover-placeholder";
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor");
-  svg.setAttribute("stroke-width", "1.4");
-  svg.setAttribute("stroke-linecap", "round");
-  svg.setAttribute("stroke-linejoin", "round");
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", "M4 5.2c2.2-1 4.8-1 8 0v14c-3.2-1-5.8-1-8 0V5.2Z");
-  const path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path2.setAttribute("d", "M20 5.2c-2.2-1-4.8-1-8 0v14c3.2-1 5.8-1 8 0V5.2Z");
-  svg.appendChild(path);
-  svg.appendChild(path2);
-  const label = document.createElement("span");
-  label.textContent = "Ảnh minh chứng đang được cập nhật";
-  placeholder.appendChild(svg);
-  placeholder.appendChild(label);
-  return placeholder;
-}
-
 function buildDetailFragment(ev) {
   const frag = document.createDocumentFragment();
   const images = Array.isArray(ev.images) ? ev.images.filter((it) => it && it.src) : [];
@@ -217,8 +192,6 @@ function buildDetailFragment(ev) {
     cover.appendChild(img);
     frag.appendChild(cover);
     galleryImages = images.slice(1);
-  } else if (!ev.videoUrl) {
-    frag.appendChild(buildEventCoverPlaceholder());
   }
 
   if (ev.planNumber) {
@@ -297,15 +270,6 @@ function buildActivityCard(ev) {
   if (ev.slug) card.id = `activity-${ev.slug}`;
   if (ev.category) card.dataset.category = ev.category;
 
-  function appendThumbPlaceholder() {
-    const placeholder = document.createElement("div");
-    placeholder.className = "activity-thumb-placeholder";
-    placeholder.setAttribute("aria-hidden", "true");
-    placeholder.innerHTML =
-      '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m3.5 15 4.5-4.5 3 3 5-5 4.5 4.5"/><circle cx="8" cy="9" r="1.3"/></svg>';
-    card.appendChild(placeholder);
-  }
-
   const firstImage = Array.isArray(ev.images) ? ev.images.find((im) => im && im.src) : null;
   if (firstImage) {
     const img = document.createElement("img");
@@ -313,10 +277,8 @@ function buildActivityCard(ev) {
     img.src = firstImage.src;
     img.alt = ev.title || "";
     img.loading = "lazy";
-    img.addEventListener("error", () => { img.remove(); appendThumbPlaceholder(); }, { once: true });
+    img.addEventListener("error", () => { img.remove(); }, { once: true });
     card.appendChild(img);
-  } else {
-    appendThumbPlaceholder();
   }
 
   const body = document.createElement("div");
@@ -749,10 +711,38 @@ function setupNav() {
     });
   });
 
-  nav.querySelectorAll(":scope > a").forEach((link) => {
+  nav.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
       trackEvent(`/menu${link.getAttribute("href")}`, link.textContent.trim());
     });
+  });
+}
+
+function setupNavMore() {
+  const wrap = document.getElementById("nav-more");
+  const toggle = document.getElementById("nav-more-toggle");
+  const links = document.getElementById("nav-more-links");
+  if (!wrap || !toggle || !links) return;
+
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const willOpen = !links.classList.contains("open");
+    links.classList.toggle("open", willOpen);
+    toggle.setAttribute("aria-expanded", String(willOpen));
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!wrap.contains(e.target)) {
+      links.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      links.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
   });
 }
 
@@ -794,6 +784,13 @@ function setupAdminMenu() {
       links.classList.remove("open");
       toggle.setAttribute("aria-expanded", "false");
     }
+  });
+
+  links.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      links.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    });
   });
 }
 
@@ -981,13 +978,6 @@ function buildSkillCard(s) {
     });
     img.addEventListener("error", () => { img.remove(); }, { once: true });
     card.appendChild(img);
-  } else {
-    const placeholder = document.createElement("div");
-    placeholder.className = "skill-thumb-placeholder";
-    placeholder.setAttribute("aria-hidden", "true");
-    placeholder.innerHTML =
-      '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 13h6M9 17h6"/></svg>';
-    card.appendChild(placeholder);
   }
 
   const body = document.createElement("div");
@@ -1340,6 +1330,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadTickerWeather();
   setInterval(loadTickerWeather, 15 * 60 * 1000);
   setupNav();
+  setupNavMore();
   setupHeaderCategoryLinks();
   setupAdminMenu();
   setupThemeToggle();

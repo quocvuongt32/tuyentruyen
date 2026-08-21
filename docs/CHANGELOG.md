@@ -7,6 +7,56 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-21 (tiếp 3)
+
+- **Bỏ hẳn các ô placeholder icon** khi thẻ chưa có ảnh — thay vì hiện icon xám/khung
+  giữ chỗ (nhìn như ảnh hỏng), giờ thẻ không có ảnh chỉ hiện chữ, không chiếm khoảng
+  trống vô nghĩa. Áp dụng cho: thẻ "Bộ kỹ năng An toàn số" dạng link
+  (`.skill-thumb-placeholder`), thẻ "Hoạt động" (`.activity-thumb-placeholder`), và
+  khung "Ảnh minh chứng đang được cập nhật" trong panel chi tiết sự kiện
+  (`.event-cover-placeholder`, dùng chung giữa Đồng thời gian và modal Hoạt động khác).
+  Ảnh sẽ tự hiện lại bình thường khi nội dung có ảnh thật.
+- **Rút gọn menu chính từ 9 xuống 7 mục**: giữ Trang chủ, Giới thiệu, Tuyên truyền,
+  Chuyển đổi số, Nghiên cứu khoa học, Liên hệ hiện trực tiếp; gộp Đổi mới sáng tạo,
+  Khác, Bộ kỹ năng An toàn số vào menu sổ xuống "Thêm" mới (`#nav-more`, giữ nguyên
+  hành vi lọc hoạt động/điều hướng của từng mục). Tăng cỡ chữ menu (0.78rem → 0.92rem,
+  đậm hơn) và thêm gạch phân cách mảnh giữa các mục cho đỡ rối mắt. Trên mobile (<940px)
+  menu "Thêm" tự giãn phẳng vào danh sách dọc như các mục khác, không lồng dropdown.
+
+## 2026-08-21 (tiếp 2)
+
+- **Phát hiện lại**: 3 file lời bình (`Audio/1. Nam.mp3`, `2. Nữ.mp3`, `3. Nam.mp3`) thực ra
+  khớp CHÍNH XÁC với lời bình 5 cảnh trong `Audio/Kịch bản.backup-20260819-222106.docx`
+  (PHẦN II — Bảng phân cảnh dựng video, cuộc thi sản phẩm truyền thông số của Đảng bộ Học
+  viện CSND) — không phải kịch bản quảng bá website riêng như nhận định trước đó (đã đính
+  chính với người dùng). Audio 1 = lời bình Cảnh 1, Audio 2 = gộp liền Cảnh 2+3+4, Audio 3
+  = lời bình Cảnh 5.
+- **Cài `ffmpeg` (winget, Gyan.FFmpeg full build)** và **`eSpeak NG`** (cài xong nhưng không
+  dùng tới) để có thể tự dựng/render video trong môi trường làm việc.
+- **Dựng bản nháp hoàn chỉnh `Tu-lieu-clip/Cam-nang-An-toan-so_ban-nhap.mp4`** (1920x1080,
+  H.264/AAC, 94,3 giây) theo đúng kịch bản 5 cảnh: 5 ảnh nền motion-graphic tự tạo bằng
+  Pillow (`scripts/video/build_slides.py`, bám màu sắc/thương hiệu thật của site — đỏ
+  #d62828, vàng #e8b923, nền kem #fdf8ec, dùng logo/huy hiệu thật trong `img/`) + lời bình
+  thật ghép đúng thời lượng qua ffmpeg (`scripts/video/build_video.sh`). Do không lấy được
+  ảnh chụp màn hình thật của site (giới hạn công cụ trình duyệt) nên hình ảnh là đồ họa mô
+  phỏng giao diện, không phải screen-recording thật — cần thay bằng cảnh quay màn hình thật
+  trước khi nộp dự thi chính thức. Chưa có nhạc nền/SFX (không có tư liệu âm thanh bản quyền).
+  Phát hiện phụ: font "SVN-Arial"/"SVN-Segoe UI" trong `C:\Windows\Fonts` chèn watermark ẩn
+  vào một số glyph khi render bằng Pillow — đã chuyển sang dùng font Windows chuẩn
+  (`arial.ttf`, `arialbd.ttf`, `segoeuib.ttf`).
+
+## 2026-08-21 (tiếp)
+
+- **Dựng kịch bản edit video giới thiệu website** từ 3 file lời bình người dùng ghi âm
+  (`Audio/1. Nam.mp3` 21,6s, `Audio/2. Nữ.mp3` 57,1s, `Audio/3. Nam.mp3` 15,7s — tổng
+  1 phút 34 giây). Nội dung lời bình này quảng bá trực tiếp website (3 trụ cột, kho lưu
+  trữ chiến dịch tuyên truyền) — khác kịch bản 5 cảnh "Cẩm nang An toàn số" trong file
+  backup. Đã tạo `Tu-lieu-clip/Kich-ban-dung-video-gioi-thieu-website.docx`: timeline
+  từng đoạn khớp lời bình, hình ảnh/cảnh quay màn hình đề xuất (bám theo đúng các mục đã
+  có trên site: banner, Bộ kỹ năng An toàn số 2 nhóm, danh sách Hoạt động...), danh sách
+  tư liệu cần quay riêng, gợi ý nhạc nền, và các bước lắp ráp thủ công. Không tự xuất
+  được file video (.mp4) trong môi trường hiện tại — thiếu công cụ dựng/render video.
+
 ## 2026-08-21
 
 - **Nhập dữ liệu từ `uploads/mau-nhap-hoat-dong-2.xlsx`** (28 dòng): đối chiếu thủ công
