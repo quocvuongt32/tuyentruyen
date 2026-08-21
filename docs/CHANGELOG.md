@@ -7,6 +7,25 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-21
+
+- **Nhập dữ liệu từ `uploads/mau-nhap-hoat-dong-2.xlsx`** (28 dòng): đối chiếu thủ công
+  từng dòng với 19 sự kiện đã đăng trước khi ghi — loại 1 dòng ví dụ hư cấu còn sót,
+  bỏ qua 4 dòng trùng hoàn toàn (3 "Thiện nguyện" tên chung + 1 dòng Lào Cai trùng link
+  với sự kiện đã có), **cập nhật thêm link/video tham khảo cho 6 sự kiện đã đăng nhưng
+  trước đó thiếu link**, và **tạo mới 14 sự kiện thật chưa từng có** (các trường THCS/
+  Tiểu học Marie Curie, Giảng Võ, Trung Tự, Đoàn Thị Điểm, Ngôi Sao Hà Nội... giai đoạn
+  2021-2026). 1 dòng có link bị dán nhầm (không khớp chủ đề) đã bỏ link, giữ lại nội
+  dung. Tổng số hoạt động: 19 → 58.
+- **Tách "Bộ kỹ năng An toàn số" thành 2 nhóm riêng**: "Infographic kỹ năng" (7 ảnh) và
+  "Bài viết tham khảo từ nguồn chính thống" (5 bài) — mỗi nhóm có tiêu đề phụ và lưới
+  riêng (`#skills-grid-image` / `#skills-grid-link`), thay vì trộn chung 1 lưới.
+  `loadSkills()` lọc theo `s.image` để phân nhóm.
+- **Bài viết dạng link (không ảnh riêng) giờ mở thẳng tab mới** thay vì qua modal iframe
+  — nhiều trang `.gov.vn` tự chặn nhúng bằng X-Frame-Options khiến modal trống/treo,
+  tạo cảm giác web bị lỗi. Thẻ dạng này giờ là link `target="_blank"` thật, có gợi ý chữ
+  "Xem bài viết (mở tab mới) ↗" trên thẻ.
+
 ## 2026-08-20 (tiếp 7)
 
 - **Nạp 7 infographic "Bộ kỹ năng An toàn số"** người dùng cung cấp (Nhận diện lừa đảo

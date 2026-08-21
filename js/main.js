@@ -946,74 +946,101 @@ async function loadAbout() {
   }
 }
 
+function buildSkillCard(s) {
+  const card = document.createElement(s.link ? "a" : "button");
+  card.className = "skill-card";
+  if (s.link) {
+    card.href = s.link;
+    if (!s.image) {
+      // Muc chi co link (bai viet tham khao): mo thang tab moi, khong qua
+      // modal iframe - nhieu trang chinh thong (.gov.vn...) tu chan nhung
+      // bang X-Frame-Options, khien modal trong/treo, kem thuyet phuc.
+      card.target = "_blank";
+      card.rel = "noopener noreferrer";
+      card.addEventListener("click", () => trackEvent(`/ky-nang/${s.slug}`, s.title));
+    } else {
+      card.addEventListener("click", (e) => {
+        e.preventDefault();
+        openLinkModal(s.link);
+      });
+    }
+  } else {
+    card.type = "button";
+  }
+
+  if (s.image) {
+    const img = document.createElement("img");
+    img.className = "skill-thumb";
+    img.src = s.image;
+    img.alt = s.title || "";
+    img.loading = "lazy";
+    img.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openLightbox(s.image);
+    });
+    img.addEventListener("error", () => { img.remove(); }, { once: true });
+    card.appendChild(img);
+  } else {
+    const placeholder = document.createElement("div");
+    placeholder.className = "skill-thumb-placeholder";
+    placeholder.setAttribute("aria-hidden", "true");
+    placeholder.innerHTML =
+      '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 13h6M9 17h6"/></svg>';
+    card.appendChild(placeholder);
+  }
+
+  const body = document.createElement("div");
+  body.className = "skill-body";
+  const title = document.createElement("h3");
+  title.className = "skill-title";
+  title.textContent = s.title || "";
+  body.appendChild(title);
+  if (s.summary) {
+    const summary = document.createElement("p");
+    summary.className = "skill-summary";
+    summary.textContent = s.summary;
+    body.appendChild(summary);
+  }
+  if (s.link && !s.image) {
+    const openHint = document.createElement("span");
+    openHint.className = "skill-open-hint";
+    openHint.textContent = "Xem bài viết (mở tab mới) ↗";
+    body.appendChild(openHint);
+  }
+  card.appendChild(body);
+  return card;
+}
+
 async function loadSkills() {
-  const grid = document.getElementById("skills-grid");
-  if (!grid) return;
+  const gridImage = document.getElementById("skills-grid-image");
+  const gridLink = document.getElementById("skills-grid-link");
+  if (!gridImage || !gridLink) return;
   try {
     const res = await fetch("data/skills.json", { cache: "no-store" });
     if (!res.ok) throw new Error("Không tải được Bộ kỹ năng An toàn số");
     const data = await res.json();
     const skills = Array.isArray(data.skills) ? data.skills : [];
 
-    grid.innerHTML = "";
-    if (!skills.length) {
-      grid.innerHTML = '<p class="empty">Đang cập nhật — chưa có ảnh/infographic nào.</p>';
-      return;
+    const imageSkills = skills.filter((s) => s.image);
+    const linkSkills = skills.filter((s) => !s.image && s.link);
+
+    gridImage.innerHTML = "";
+    if (!imageSkills.length) {
+      gridImage.innerHTML = '<p class="empty">Đang cập nhật — chưa có infographic nào.</p>';
+    } else {
+      imageSkills.forEach((s) => gridImage.appendChild(buildSkillCard(s)));
     }
 
-    skills.forEach((s) => {
-      const card = document.createElement(s.link ? "a" : "button");
-      card.className = "skill-card";
-      if (s.link) {
-        card.href = s.link;
-        card.addEventListener("click", (e) => {
-          e.preventDefault();
-          openLinkModal(s.link);
-        });
-      } else {
-        card.type = "button";
-      }
-
-      if (s.image) {
-        const img = document.createElement("img");
-        img.className = "skill-thumb";
-        img.src = s.image;
-        img.alt = s.title || "";
-        img.loading = "lazy";
-        img.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          openLightbox(s.image);
-        });
-        img.addEventListener("error", () => { img.remove(); }, { once: true });
-        card.appendChild(img);
-      } else {
-        const placeholder = document.createElement("div");
-        placeholder.className = "skill-thumb-placeholder";
-        placeholder.setAttribute("aria-hidden", "true");
-        placeholder.innerHTML =
-          '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 13h6M9 17h6"/></svg>';
-        card.appendChild(placeholder);
-      }
-
-      const body = document.createElement("div");
-      body.className = "skill-body";
-      const title = document.createElement("h3");
-      title.className = "skill-title";
-      title.textContent = s.title || "";
-      body.appendChild(title);
-      if (s.summary) {
-        const summary = document.createElement("p");
-        summary.className = "skill-summary";
-        summary.textContent = s.summary;
-        body.appendChild(summary);
-      }
-      card.appendChild(body);
-
-      grid.appendChild(card);
-    });
+    gridLink.innerHTML = "";
+    if (!linkSkills.length) {
+      gridLink.innerHTML = '<p class="empty">Đang cập nhật — chưa có bài viết nào.</p>';
+    } else {
+      linkSkills.forEach((s) => gridLink.appendChild(buildSkillCard(s)));
+    }
   } catch (err) {
-    grid.innerHTML = '<p class="error">Chưa có dữ liệu hoặc lỗi tải dữ liệu.</p>';
+    gridImage.innerHTML = '<p class="error">Chưa có dữ liệu hoặc lỗi tải dữ liệu.</p>';
+    gridLink.innerHTML = "";
     console.error(err);
   }
 }

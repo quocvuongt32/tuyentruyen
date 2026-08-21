@@ -1372,6 +1372,17 @@ a { color: inherit; }
   border-top: 1px solid var(--border);
 }
 
+.skills-subheading {
+  margin: 0 0 14px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.skills-grid + .skills-subheading {
+  margin-top: 32px;
+}
+
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -1434,6 +1445,14 @@ a { color: inherit; }
   font-size: 0.82rem;
   color: var(--text-dim);
   line-height: 1.5;
+}
+
+.skill-open-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
 }
 
 .activity-modal {
