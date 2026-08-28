@@ -1609,7 +1609,11 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   padding: 30px;
-  z-index: 100;
+  /* Phai cao hon moi modal khac (activity-modal/media-library-modal = 110) vi
+     lightbox thuong duoc mo TU BEN TRONG cac modal do (bam anh trong Thu vien
+     anh) - neu thap hon, anh mo ra se bi modal dang mo de len tren, nhin nhu
+     "chim xuong duoi". */
+  z-index: 200;
   cursor: zoom-out;
 }
 

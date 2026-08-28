@@ -7,6 +7,20 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-28 (tiếp 5)
+
+- **Sửa ảnh "chìm xuống dưới" khi bấm trong Thư viện ảnh & video**: `#lightbox` có
+  `z-index: 100`, thấp hơn `.activity-modal`/`#media-library-modal` (`z-index: 110`) mà
+  nó thường được mở ra TỪ BÊN TRONG — ảnh vẫn mở nhưng bị modal thư viện đang mở đè lên
+  trên, nhìn như biến mất/chìm xuống. Tăng `z-index` lightbox lên **200** (cao nhất
+  trang) để luôn nổi trên mọi modal khác, không riêng gì thư viện ảnh.
+- **Thư viện ảnh & video giờ chỉ hiện ảnh/video thật** do đơn vị tự nhập (bỏ hẳn ảnh tin
+  tức tự động từ hvcsnd.edu.vn, nhận diện qua slug bắt đầu `feed-`) — trước đó ảnh feed
+  luôn có ngày mới nhất (fetch lại mỗi lần build) nên chiếm hết đầu danh sách, đẩy ảnh
+  hoạt động thật (Marie Curie, Nguyễn Thị Minh Khai...) xuống rất xa dù người dùng vừa
+  thêm. Sắp xếp mới nhất lên đầu theo đúng ngày hoạt động, không cần sort thêm ở JS vì
+  `allEvents` đã được `build-events.js` sắp giảm dần theo ngày sẵn.
+
 ## 2026-08-28 (tiếp 4)
 
 - **Sửa lỗi `/admin` không mở được** ("Error loading the CMS configuration": `YAMLSemanticError:

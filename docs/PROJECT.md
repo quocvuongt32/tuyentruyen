@@ -111,12 +111,18 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   — API này **yêu cầu bật "Allow using the visitor counter"** trong Settings của
   GoatCounter, nếu chưa bật sẽ trả 403 và ô hiển thị giữ nguyên dấu "—" (không lỗi gì,
   chỉ là chưa có số).
-- **Thư viện ảnh & video** (modal `#media-library-modal`): gộp toàn bộ ảnh + video từ
-  mọi sự kiện, mở bằng cách bấm ô "Thư viện ảnh & video" (class `.js-stat-media-tile`,
-  có ở cả 2 vị trí nói trên). Ảnh → lightbox; video → mở modal chi tiết sự kiện đó. Lưới
-  chỉ hiện ảnh thuần (không có chữ tiêu đề phủ lên như trước — người dùng phản hồi "rối
-  mắt"), tên hoạt động chỉ còn ở thuộc tính `title` (tooltip khi hover), không hiển thị
-  mặc định.
+- **Thư viện ảnh & video** (modal `#media-library-modal`, `collectMediaItems()` trong
+  `main.js`): gộp ảnh + video từ **các sự kiện thật do đơn vị tự nhập** (bỏ qua sự kiện
+  auto-feed hvcsnd.edu.vn — nhận diện qua `slug` bắt đầu `feed-` — vì ảnh feed luôn có
+  ngày mới nhất mỗi lần build, chiếm hết đầu danh sách nếu không lọc), mở bằng cách bấm ô
+  "Thư viện ảnh & video" (class `.js-stat-media-tile`, có ở cả 2 vị trí nói trên). Sắp
+  xếp mới nhất lên đầu — không cần sort riêng vì `allEvents` (từ `data/events.json`) đã
+  được `build-events.js` sắp giảm dần theo ngày sẵn, chỉ cần lọc rồi giữ nguyên thứ tự.
+  Ảnh → lightbox (`z-index: 200`, cao nhất trang — phải cao hơn mọi modal khác vì
+  thường mở TỪ BÊN TRONG 1 modal đang mở, ví dụ chính thư viện ảnh này); video → mở modal
+  chi tiết sự kiện đó. Lưới chỉ hiện ảnh thuần (không có chữ tiêu đề phủ lên như trước —
+  người dùng phản hồi "rối mắt"), tên hoạt động chỉ còn ở thuộc tính `title` (tooltip khi
+  hover), không hiển thị mặc định.
 - **Bộ kỹ năng An toàn số** (`#ky-nang-section`, collection CMS `ky_nang` →
   `content/ky-nang/*.json` → `scripts/build-skills.js` → `data/skills.json`): lưới ảnh/
   infographic về thủ đoạn lừa đảo + cách phòng ngừa, bấm ảnh mở lightbox cỡ lớn. Khác

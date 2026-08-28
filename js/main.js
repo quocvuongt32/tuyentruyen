@@ -364,7 +364,12 @@ function setupActivityModal() {
 
 function collectMediaItems() {
   const items = [];
+  // Bo qua su kien tu dong lay tu feed hvcsnd.edu.vn (slug bat dau "feed-") -
+  // Thu vien anh & video chi hien anh/video that do don vi tu nhap, khong lan
+  // anh minh hoa tin tuc chung chung. allEvents da sap theo ngay giam dan tu
+  // build-events.js nen khong can sort lai o day.
   for (const ev of allEvents) {
+    if (ev.slug && ev.slug.startsWith("feed-")) continue;
     if (Array.isArray(ev.images)) {
       for (const img of ev.images) {
         if (img && img.src) items.push({ type: "image", src: img.src, ev });
