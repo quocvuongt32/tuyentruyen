@@ -140,11 +140,15 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   riêng `featuredImage` (1 ảnh), không còn checkbox "featured" trên từng ảnh trong danh
   sách (vì không đánh dấu riêng lẻ được khi chọn nhiều file cùng lúc).
 - **Banner trang chủ**: gom tất cả `featuredImage` của mọi sự kiện, tự trượt.
-- **Carousel ở vị trí logo đầu trang** (`#brand-carousel` trong `header-brand-row`,
-  `setupBrandCarousel()` trong `main.js`): 16 slide cố định (huy hiệu `img/badge.png` +
-  15 ảnh `uploads/banner-01.jpg`…`banner-15.jpg`), tự chạy vòng vô hạn, 2 giây/ảnh, hiệu
-  ứng trượt ngang (class `.is-active`/`.is-prev`, transition `transform: translateX()`
-  trong CSS — không dùng thư viện carousel ngoài). Danh sách ảnh **cố định trong HTML**
+- **Carousel ở khung logo lớn trong Hero** (`#hero-icon`, dưới thanh điều hướng — KHÔNG
+  phải logo nhỏ ở header, đã thử nhầm chỗ này 1 lần), `setupHeroCarousel()` trong
+  `main.js`: 16 slide cố định (huy hiệu `img/badge.png` + 15 ảnh
+  `uploads/banner-01.jpg`…`banner-15.jpg`), tự chạy vòng vô hạn, 2 giây/ảnh, hiệu ứng
+  trượt ngang (class `.is-active`/`.is-prev`, transition `transform: translateX()` trong
+  CSS — không dùng thư viện carousel ngoài). `.hero-icon` có `aspect-ratio: 4/3` cố định
+  để khung không nhảy kích thước giữa các ảnh; bề rộng vẫn tự đồng bộ theo chữ tiêu đề
+  qua `syncHeroIconWidth()` (xem bullet "Logo" bên dưới) — 2 cơ chế độc lập, không xung
+  đột. Danh sách ảnh **cố định trong HTML**
   (không qua CMS) vì đây là dàn ảnh cố định do admin chọn tay 1 lần, không phải nội dung
   cập nhật thường xuyên như sự kiện. Ảnh nguồn gốc để ở `uploads/Banner/` (gitignore,
   nặng 60KB–8.7MB/ảnh) — đã nén xuống `uploads/banner-NN.jpg` (60–165KB, commit vào Git)

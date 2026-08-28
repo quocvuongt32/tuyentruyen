@@ -759,10 +759,10 @@ function setupHomeLinks() {
   });
 }
 
-// Carousel o vi tri logo dau trang: bat dau bang huy hieu, roi chay qua
+// Carousel o vi tri logo lon trong Hero: bat dau bang huy hieu, roi chay qua
 // het anh Banner, lap lai vo han - moi anh hien 2 giay, truot ngang.
-function setupBrandCarousel() {
-  const track = document.getElementById("brand-carousel");
+function setupHeroCarousel() {
+  const track = document.getElementById("hero-icon");
   if (!track) return;
   const slides = Array.from(track.querySelectorAll("img"));
   if (slides.length < 2) return;
@@ -1352,7 +1352,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(loadTickerWeather, 15 * 60 * 1000);
   setupNav();
   setupNavMore();
-  setupBrandCarousel();
+  setupHeroCarousel();
   setupHeaderCategoryLinks();
   setupAdminMenu();
   setupThemeToggle();

@@ -7,6 +7,15 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-28 (tiếp)
+
+- **Sửa vị trí carousel logo**: người dùng phản hồi vị trí đúng là khung logo LỚN trong
+  Hero (`#hero-icon`, dưới thanh điều hướng, phía trên tiêu đề "Cẩm nang An toàn số"),
+  không phải logo nhỏ ở header — đã chuyển carousel sang `#hero-icon`
+  (`setupHeroCarousel()` trong `main.js`), trả lại logo header về trạng thái tĩnh ban đầu.
+  `.hero-icon` giờ có `aspect-ratio: 4/3` cố định để khung không nhảy kích thước khi đổi
+  ảnh; bề rộng vẫn tự đồng bộ theo chữ tiêu đề qua `syncHeroIconWidth()` như cũ.
+
 ## 2026-08-28
 
 - **Nhập ảnh minh chứng thật cho 17 sự kiện** từ `uploads/mau-nhap-hoat-dong.xlsx`

@@ -504,39 +504,18 @@ a { color: inherit; }
   color: var(--text);
 }
 
-/* Carousel o vi tri logo: chay ngang qua lai giua huy hieu va cac anh
-   Banner, 2 giay/anh, lap vo han. Slide moi truot vao tu phai, slide cu
-   truot ra trai (xem setupBrandCarousel trong main.js). */
-.brand-carousel {
-  position: relative;
+.brand .logo {
+  display: flex;
   flex-shrink: 0;
-  width: 120px;
-  height: 56px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
 }
 
-.brand-carousel img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: translateX(100%);
-  transition: transform 0.6s ease;
-}
-
-.brand-carousel img[data-logo="true"] {
+.brand .logo img {
+  width: 52px;
+  height: 52px;
   object-fit: contain;
-  padding: 5px;
   /* Lam sang, ro net hon tren nen ca 2 theme - huy hieu goc hoi tram. */
   filter: brightness(1.18) saturate(1.12) contrast(1.04);
 }
-
-.brand-carousel img.is-active { transform: translateX(0); }
-.brand-carousel img.is-prev { transform: translateX(-100%); }
 
 .brand-text {
   display: flex;
@@ -896,20 +875,40 @@ a { color: inherit; }
   margin: 0 auto;
 }
 
+/* Carousel chay ngang qua lai giua huy hieu va cac anh Banner, 2 giay/anh,
+   lap vo han. Be rong do dong bo bang JS (syncHeroIconWidth) theo dung chieu
+   dai chu tieu de; chieu cao suy ra tu aspect-ratio de khung khong nhay khi
+   doi anh. Slide moi truot vao tu phai, slide cu truot ra trai (xem
+   setupBrandCarousel trong main.js). */
 .hero-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  display: block;
   width: min(260px, 70vw);
+  aspect-ratio: 4 / 3;
   margin: 0 auto 18px;
+  border-radius: 14px;
+  overflow: hidden;
   filter: drop-shadow(0 0 28px var(--accent-soft));
 }
 
 .hero-icon img {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
+  transform: translateX(100%);
+  transition: transform 0.6s ease;
 }
+
+.hero-icon img[data-logo="true"] {
+  object-fit: contain;
+  padding: 10px;
+  background: var(--bg-card);
+}
+
+.hero-icon img.is-active { transform: translateX(0); }
+.hero-icon img.is-prev { transform: translateX(-100%); }
 
 .hero h1 {
   margin: 0 0 14px;
