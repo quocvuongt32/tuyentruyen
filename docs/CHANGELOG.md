@@ -7,6 +7,14 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-28 (tiếp 4)
+
+- **Sửa lỗi `/admin` không mở được** ("Error loading the CMS configuration": `YAMLSemanticError:
+  Map keys must be unique; "pattern" is repeated at line 187"). Nguyên nhân: field `link` của
+  collection `ky_nang` bị dán trùng dòng `pattern:` 2 lần khi thêm validate link ở phiên trước
+  — YAML strict parser của Decap CMS chặn hẳn key trùng trong cùng 1 mapping (khác PyYAML mặc
+  định chỉ âm thầm lấy giá trị sau). Xoá dòng trùng trong `admin/config.yml`.
+
 ## 2026-08-28 (tiếp 3)
 
 - **Chữ thương hiệu header ("Cẩm nang - An toàn số") in hoa, đậm, phóng to** để tạo điểm

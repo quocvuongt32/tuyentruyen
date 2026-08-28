@@ -189,7 +189,6 @@ collections:
         widget: "string"
         required: false
         pattern: ['^(https?:\/\/).+$', "Link phải bắt đầu bằng http:// hoặc https://"]
-        pattern: ['^(https?:\/\/).+$', "Link phải bắt đầu bằng http:// hoặc https://"]
 
   - name: "events"
     label: "Hoạt động"
