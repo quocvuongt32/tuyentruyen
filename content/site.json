@@ -1,7 +1,7 @@
 {
   "brand": {
-    "line1": "Cẩm nang -",
-    "line2": "An toàn số"
+    "line1": "CẨM NANG -",
+    "line2": "AN TOÀN SỐ"
   },
   "nav": {
     "trangChu": "Trang chủ",
@@ -11,8 +11,8 @@
     "lienHe": "Liên hệ"
   },
   "hero": {
-    "title": "Cẩm nang An toàn số",
-    "subtitle": "Không gian tuyên truyền kỹ năng an ninh mạng và an toàn thông tin, \nđồng thời cập nhật hoạt động chuyển đổi số, đổi mới sáng tạo của \nKhoa Toán - Tin học và Ứng dụng khoa học công nghệ \ntrong phòng, chống tội phạm.",
+    "title": "CẨM NANG AN TOÀN SỐ",
+    "subtitle": "Không gian tuyên truyền kỹ năng an ninh mạng và an toàn thông tin, đồng thời cập nhật hoạt động chuyển đổi số, đổi mới sáng tạo của Khoa Toán - Tin học và Ứng dụng khoa học công nghệ trong phòng, chống tội phạm.",
     "ctaText": "Xem Cẩm nang"
   },
   "timelineSection": {
