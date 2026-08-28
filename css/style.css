@@ -16,7 +16,7 @@
   --hero-glow: #0f1a30;
   --radius: 10px;
   --max-width: 960px;
-  --header-brand-h: 78px;
+  --header-brand-h: 92px;
   --header-h: 56px;
 }
 
@@ -446,19 +446,6 @@ a { color: inherit; }
   display: block;
 }
 
-.media-library-item-caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 16px 8px 6px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.82), transparent);
-  color: #fff;
-  font-size: 0.7rem;
-  text-align: left;
-  line-height: 1.3;
-}
-
 .media-library-item-play {
   position: absolute;
   inset: 0;
@@ -527,9 +514,11 @@ a { color: inherit; }
 
 .brand-line1,
 .brand-line2 {
-  font-size: 1.12rem;
-  font-weight: 700;
-  letter-spacing: 0.2px;
+  font-size: clamp(1.5rem, 5.5vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 .brand-line2 {
@@ -769,7 +758,7 @@ a { color: inherit; }
 .hero {
   position: relative;
   overflow: hidden;
-  padding: 88px 20px 96px;
+  padding: 28px 20px 96px;
   text-align: center;
   background: radial-gradient(ellipse at top, var(--hero-glow) 0%, var(--bg) 65%);
 }
@@ -875,17 +864,17 @@ a { color: inherit; }
   margin: 0 auto;
 }
 
-/* Carousel chay ngang qua lai giua huy hieu va cac anh Banner, 2 giay/anh,
-   lap vo han. Be rong do dong bo bang JS (syncHeroIconWidth) theo dung chieu
-   dai chu tieu de; chieu cao suy ra tu aspect-ratio de khung khong nhay khi
-   doi anh. Slide moi truot vao tu phai, slide cu truot ra trai (xem
-   setupBrandCarousel trong main.js). */
+/* Carousel chay ngang qua lai giua huy hieu va cac anh Banner, dang khoi
+   banner chu nhat 16:9, cao va sat ngay duoi dai tin "Thoi su". Be rong co
+   dinh (khong con dong bo theo chu tieu de - qua nho so voi 1 khoi banner).
+   Slide moi truot vao tu phai, slide cu truot ra trai (xem setupHeroCarousel
+   trong main.js). */
 .hero-icon {
   position: relative;
   display: block;
-  width: min(260px, 70vw);
-  aspect-ratio: 4 / 3;
-  margin: 0 auto 18px;
+  width: min(720px, 94vw);
+  aspect-ratio: 16 / 9;
+  margin: 0 auto 24px;
   border-radius: 14px;
   overflow: hidden;
   filter: drop-shadow(0 0 28px var(--accent-soft));
@@ -898,13 +887,12 @@ a { color: inherit; }
   height: 100%;
   object-fit: cover;
   transform: translateX(100%);
-  transition: transform 0.6s ease;
+  transition: transform 0.9s ease;
 }
 
 .hero-icon img[data-logo="true"] {
   object-fit: contain;
-  padding: 10px;
-  background: var(--bg-card);
+  padding: 8%;
 }
 
 .hero-icon img.is-active { transform: translateX(0); }
@@ -1830,7 +1818,7 @@ a { color: inherit; }
 
 @media (max-width: 640px) {
   .section-inner { padding: 44px 18px; }
-  .hero { padding: 64px 18px 72px; }
+  .hero { padding: 20px 18px 72px; }
   .timeline { padding-left: 20px; }
   .event-dot { left: -26px; }
   .event-summary { align-items: flex-start; }

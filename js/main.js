@@ -427,11 +427,7 @@ function buildMediaLibrary() {
       });
     }
 
-    const caption = document.createElement("span");
-    caption.className = "media-library-item-caption";
-    caption.textContent = item.ev.title || "";
-    btn.appendChild(caption);
-
+    btn.title = item.ev.title || "";
     grid.appendChild(btn);
   });
 }
@@ -760,7 +756,8 @@ function setupHomeLinks() {
 }
 
 // Carousel o vi tri logo lon trong Hero: bat dau bang huy hieu, roi chay qua
-// het anh Banner, lap lai vo han - moi anh hien 2 giay, truot ngang.
+// het anh Banner, lap lai vo han - moi anh hien 4 giay, truot ngang cham vua
+// du de khong hoa mat.
 function setupHeroCarousel() {
   const track = document.getElementById("hero-icon");
   if (!track) return;
@@ -776,8 +773,8 @@ function setupHeroCarousel() {
     slides[prev].classList.remove("is-active");
     slides[prev].classList.add("is-prev");
     slides[idx].classList.add("is-active");
-    setTimeout(() => slides[prev].classList.remove("is-prev"), 650);
-  }, 2000);
+    setTimeout(() => slides[prev].classList.remove("is-prev"), 950);
+  }, 4000);
 }
 
 function setupAdminMenu() {
@@ -887,9 +884,6 @@ async function loadSite() {
     const footer = data.footer || {};
     setText("footer-line1", footer.line1);
     setText("footer-line2", footer.line2);
-
-    // Tieu de hero co the doi -> can do lai be rong logo cho khop.
-    syncHeroIconWidth();
   } catch (err) {
     console.error(err);
   }
@@ -1293,37 +1287,6 @@ function setupFeedbackForm() {
   });
 }
 
-// Be rong logo bang dung chieu dai dong chu "Cam nang An toan so" (theo yeu
-// cau thiet ke), do lai moi khi kich thuoc man hinh thay doi vi font co-scale
-// theo vw.
-function syncHeroIconWidth() {
-  const icon = document.getElementById("hero-icon");
-  const title = document.getElementById("hero-title");
-  if (!icon || !title) return;
-
-  // h1 la block nen getBoundingClientRect tra ve be rong ca khoi (bang container),
-  // khong phai be rong chu that. Dung Range de do dung phan chu da render.
-  let width = 0;
-  const textNode = title.firstChild;
-  if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-    const range = document.createRange();
-    range.selectNodeContents(textNode);
-    width = range.getBoundingClientRect().width;
-  }
-  if (!width) width = title.getBoundingClientRect().width;
-
-  if (width > 0) icon.style.width = `${Math.round(width)}px`;
-}
-
-function setupHeroIconSync() {
-  syncHeroIconWidth();
-  let resizeTimer = null;
-  window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(syncHeroIconWidth, 120);
-  });
-}
-
 function setupThemeToggle() {
   const btn = document.getElementById("theme-toggle");
   if (!btn) return;
@@ -1361,7 +1324,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupMediaLibrary();
   setupCornerWidgets();
   setupFeedbackForm();
-  setupHeroIconSync();
   setupHomeLinks();
   document.getElementById("lightbox").addEventListener("click", closeLightbox);
   const yearEl = document.getElementById("year");

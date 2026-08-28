@@ -7,6 +7,30 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-28 (tiếp 3)
+
+- **Chữ thương hiệu header ("Cẩm nang - An toàn số") in hoa, đậm, phóng to** để tạo điểm
+  nhấn ngang tầm logo: `font-size` từ `1.12rem` cố định lên `clamp(1.5rem, 5.5vw, 2.6rem)`
+  responsive (đo thực tế ~47px, gần khớp chiều cao logo 52px), `font-weight` 700→800,
+  thêm `text-transform: uppercase`. Tăng `--header-brand-h` 78px→92px cho đủ chỗ.
+
+## 2026-08-28 (tiếp 2)
+
+- **Tinh chỉnh khối carousel Hero theo phản hồi người dùng**:
+  - Bỏ nền `var(--bg-card)` phủ sau huy hiệu (đang nhìn như 1 mảng trắng xấu) — giờ trong
+    suốt, hoà với nền chung của Hero.
+  - Đổi tỷ lệ khung từ 4:3 sang **16:9** (`aspect-ratio: 16/9`), phóng to thành khối
+    banner chữ nhật thật sự (`width: min(720px, 94vw)`, trước đó chỉ ~260px vì đo theo
+    chiều rộng chữ tiêu đề) — **bỏ luôn cơ chế `syncHeroIconWidth()`** (đo bề rộng logo
+    khớp chữ H1) vì không còn phù hợp với 1 khối banner lớn độc lập.
+  - Chậm lại nhịp chuyển ảnh: 2 giây → **4 giây**/ảnh, transition trượt 0.6s → 0.9s, đỡ
+    gây hoa mắt.
+  - Giảm khoảng trắng phía trên Hero (`padding-top` 88px → 28px, mobile 64px → 20px) để
+    khối banner nằm sát ngay dưới dải tin "Thời sự" như yêu cầu.
+- **Thư viện ảnh & video**: bỏ dòng chữ tiêu đề phủ trên từng ảnh trong lưới
+  (`.media-library-item-caption`) — chỉ còn giữ lại làm `title` (tooltip khi hover), ảnh
+  hiện thuần không bị chữ che, đỡ rối mắt.
+
 ## 2026-08-28 (tiếp)
 
 - **Sửa vị trí carousel logo**: người dùng phản hồi vị trí đúng là khung logo LỚN trong

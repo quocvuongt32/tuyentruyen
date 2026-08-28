@@ -113,7 +113,10 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   chỉ là chưa có số).
 - **Thư viện ảnh & video** (modal `#media-library-modal`): gộp toàn bộ ảnh + video từ
   mọi sự kiện, mở bằng cách bấm ô "Thư viện ảnh & video" (class `.js-stat-media-tile`,
-  có ở cả 2 vị trí nói trên). Ảnh → lightbox; video → mở modal chi tiết sự kiện đó.
+  có ở cả 2 vị trí nói trên). Ảnh → lightbox; video → mở modal chi tiết sự kiện đó. Lưới
+  chỉ hiện ảnh thuần (không có chữ tiêu đề phủ lên như trước — người dùng phản hồi "rối
+  mắt"), tên hoạt động chỉ còn ở thuộc tính `title` (tooltip khi hover), không hiển thị
+  mặc định.
 - **Bộ kỹ năng An toàn số** (`#ky-nang-section`, collection CMS `ky_nang` →
   `content/ky-nang/*.json` → `scripts/build-skills.js` → `data/skills.json`): lưới ảnh/
   infographic về thủ đoạn lừa đảo + cách phòng ngừa, bấm ảnh mở lightbox cỡ lớn. Khác
@@ -140,25 +143,28 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   riêng `featuredImage` (1 ảnh), không còn checkbox "featured" trên từng ảnh trong danh
   sách (vì không đánh dấu riêng lẻ được khi chọn nhiều file cùng lúc).
 - **Banner trang chủ**: gom tất cả `featuredImage` của mọi sự kiện, tự trượt.
-- **Carousel ở khung logo lớn trong Hero** (`#hero-icon`, dưới thanh điều hướng — KHÔNG
-  phải logo nhỏ ở header, đã thử nhầm chỗ này 1 lần), `setupHeroCarousel()` trong
-  `main.js`: 16 slide cố định (huy hiệu `img/badge.png` + 15 ảnh
-  `uploads/banner-01.jpg`…`banner-15.jpg`), tự chạy vòng vô hạn, 2 giây/ảnh, hiệu ứng
-  trượt ngang (class `.is-active`/`.is-prev`, transition `transform: translateX()` trong
-  CSS — không dùng thư viện carousel ngoài). `.hero-icon` có `aspect-ratio: 4/3` cố định
-  để khung không nhảy kích thước giữa các ảnh; bề rộng vẫn tự đồng bộ theo chữ tiêu đề
-  qua `syncHeroIconWidth()` (xem bullet "Logo" bên dưới) — 2 cơ chế độc lập, không xung
-  đột. Danh sách ảnh **cố định trong HTML**
+- **Carousel ở khung logo lớn trong Hero** (`#hero-icon`, dưới thanh điều hướng, sát
+  ngay dải tin "Thời sự" — KHÔNG phải logo nhỏ ở header, đã thử nhầm chỗ này 1 lần),
+  `setupHeroCarousel()` trong `main.js`: 16 slide cố định (huy hiệu `img/badge.png` + 15
+  ảnh `uploads/banner-01.jpg`…`banner-15.jpg`), tự chạy vòng vô hạn, **4 giây/ảnh**
+  (2 giây ban đầu bị chê nhanh gây hoa mắt), hiệu ứng trượt ngang (class
+  `.is-active`/`.is-prev`, transition `transform: translateX()` 0.9s trong CSS — không
+  dùng thư viện carousel ngoài). `.hero-icon` có **`aspect-ratio: 16/9`** cố định (ban đầu
+  4:3, đổi theo yêu cầu "ảnh chữ nhật"), bề rộng **cố định** `min(720px, 94vw)` — đã BỎ
+  cơ chế `syncHeroIconWidth()` đo khớp chữ tiêu đề (không còn phù hợp khi đây là 1 khối
+  banner lớn độc lập, không phải logo nhỏ nữa). Slide huy hiệu (`data-logo="true"`)
+  dùng `object-fit: contain` + không có màu nền phía sau (trong suốt, tránh lộ khung
+  trắng xấu — đã bị phản hồi 1 lần) trong khi các ảnh Banner dùng `object-fit: cover`.
+  Danh sách ảnh **cố định trong HTML**
   (không qua CMS) vì đây là dàn ảnh cố định do admin chọn tay 1 lần, không phải nội dung
   cập nhật thường xuyên như sự kiện. Ảnh nguồn gốc để ở `uploads/Banner/` (gitignore,
   nặng 60KB–8.7MB/ảnh) — đã nén xuống `uploads/banner-NN.jpg` (60–165KB, commit vào Git)
   qua `scripts/process-banner-photos.py`. Xem mục "Xử lý ảnh thật dung lượng lớn" bên dưới.
 - **Logo**: `img/badge.png` (huy hiệu tròn, dùng ở header + hero + favicon) và
   `img/favicon.png` — sinh ra bằng cách crop/resize từ file gốc trong `logo/` (không
-  commit). Chiều rộng logo ở Hero **tự đo bằng JS** (`syncHeroIconWidth()`) để luôn
-  bằng đúng chiều rộng chữ tiêu đề "Cẩm nang An toàn số" bên dưới — lưu ý: đo bằng
-  `Range` trên text node, KHÔNG dùng `getBoundingClientRect()` trên `<h1>` (vì h1 là
-  block, sẽ trả về bề rộng cả container thay vì bề rộng chữ thật — đã từng bug chỗ này).
+  commit). ~~Chiều rộng logo ở Hero từng tự đo bằng JS để khớp chữ tiêu đề~~ — đã bỏ khi
+  `#hero-icon` chuyển thành khối carousel banner 16:9 cỡ lớn (xem bullet "Carousel ở khung
+  logo lớn trong Hero" phía trên), giờ bề rộng cố định qua CSS, không cần JS đo nữa.
 - **Đoạn mô tả Hero xuống dòng chủ động**: `#hero-subtitle` có CSS
   `white-space: pre-line` — Enter trong ô "Đoạn mô tả" ở `/admin` sẽ xuống dòng đúng
   vị trí đó trên trang, không phụ thuộc trình duyệt tự ngắt.
