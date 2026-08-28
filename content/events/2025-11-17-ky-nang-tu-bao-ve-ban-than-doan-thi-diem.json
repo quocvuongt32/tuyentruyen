@@ -4,7 +4,32 @@
   "date": "2025-11-17",
   "location": "Trường Tiểu học Đoàn Thị Điểm",
   "body": "",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/doan-thi-diem-01.jpg"
+    },
+    {
+      "image": "/uploads/doan-thi-diem-02.jpg"
+    },
+    {
+      "image": "/uploads/doan-thi-diem-03.jpg"
+    },
+    {
+      "image": "/uploads/doan-thi-diem-04.jpg"
+    },
+    {
+      "image": "/uploads/doan-thi-diem-05.jpg"
+    },
+    {
+      "image": "/uploads/doan-thi-diem-06.jpg"
+    },
+    {
+      "image": "/uploads/doan-thi-diem-07.jpg"
+    },
+    {
+      "image": "/uploads/doan-thi-diem-08.jpg"
+    }
+  ],
   "link": "",
   "video": ""
 }

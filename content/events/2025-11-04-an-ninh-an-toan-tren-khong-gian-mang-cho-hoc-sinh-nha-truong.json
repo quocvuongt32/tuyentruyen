@@ -4,7 +4,38 @@
   "date": "2025-11-04",
   "location": "Trường THCS và THPT Marie Curie",
   "body": "",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/marie-curie-01.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-02.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-03.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-04.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-05.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-06.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-07.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-08.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-09.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-10.jpg"
+    }
+  ],
   "link": "",
   "video": ""
 }

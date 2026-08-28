@@ -4,7 +4,17 @@
   "date": "2023-10-09",
   "location": "Trường THCS Mai Dịch, Cầu Giấy, TP Hà Nội",
   "body": "",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/mai-dich-01.jpg"
+    },
+    {
+      "image": "/uploads/mai-dich-02.jpg"
+    },
+    {
+      "image": "/uploads/mai-dich-03.jpg"
+    }
+  ],
   "link": "",
   "video": "",
   "planNumber": "Số 4066/KH-T02-KTT"

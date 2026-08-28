@@ -1,8 +1,9 @@
 # Cẩm nang An toàn số — tổng quan dự án
 
 > Đọc file này trước tiên trong mọi phiên chat mới. Đây là bản đồ hệ thống, không phải
-> hướng dẫn cài đặt (xem [DEPLOYMENT.md](DEPLOYMENT.md) cho phần đó) và không phải
-> nhật ký thay đổi (xem [CHANGELOG.md](CHANGELOG.md)).
+> hướng dẫn cài đặt (xem [DEPLOYMENT.md](DEPLOYMENT.md) cho phần đó), không phải
+> nhật ký thay đổi (xem [CHANGELOG.md](CHANGELOG.md)), và không bao gồm hạng mục video dự
+> thi riêng (xem [VIDEO-PRODUCTION.md](VIDEO-PRODUCTION.md)).
 
 ## Site là gì
 
@@ -118,7 +119,11 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   infographic về thủ đoạn lừa đảo + cách phòng ngừa, bấm ảnh mở lightbox cỡ lớn. Khác
   với "Hoạt động" — không có ngày/địa điểm, chỉ có tiêu đề + ảnh (tuỳ chọn) + mô tả ngắn
   + link (tuỳ chọn) — cần ít nhất 1 trong 2 (ảnh hoặc link), thiếu cả 2 thì bị bỏ qua.
-  Mục không có ảnh hiển thị khung giữ chỗ + link bài viết thay vì `<img>` rỗng.
+  Mục không có ảnh thì không hiện `<img>` hay khung giữ chỗ nào — chỉ có chữ (tiêu đề/mô
+  tả/link nếu có). Cùng quy tắc áp dụng cho thẻ lưới "Hoạt động" (`buildActivityCard()`)
+  và khung "Ảnh minh chứng đang được cập nhật" trong chi tiết sự kiện (đã bỏ hẳn, không
+  còn `buildEventCoverPlaceholder()`) — placeholder icon từng bị đánh giá là "nhìn như
+  ảnh lỗi", nên quy ước chung của site là: chưa có ảnh → ẩn hẳn phần ảnh, có ảnh mới hiện.
   **Cố ý KHÔNG tự động lấy ảnh/infographic từ nguồn ngoài** (khác với feed hoạt động ở
   trên) — infographic là tác phẩm đồ hoạ hoàn chỉnh, rủi ro bản quyền cao hơn hẳn
   headline+link tin tức, nên để trống chờ admin tự tải ảnh do đơn vị làm/có bản quyền.
@@ -135,6 +140,15 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   riêng `featuredImage` (1 ảnh), không còn checkbox "featured" trên từng ảnh trong danh
   sách (vì không đánh dấu riêng lẻ được khi chọn nhiều file cùng lúc).
 - **Banner trang chủ**: gom tất cả `featuredImage` của mọi sự kiện, tự trượt.
+- **Carousel ở vị trí logo đầu trang** (`#brand-carousel` trong `header-brand-row`,
+  `setupBrandCarousel()` trong `main.js`): 16 slide cố định (huy hiệu `img/badge.png` +
+  15 ảnh `uploads/banner-01.jpg`…`banner-15.jpg`), tự chạy vòng vô hạn, 2 giây/ảnh, hiệu
+  ứng trượt ngang (class `.is-active`/`.is-prev`, transition `transform: translateX()`
+  trong CSS — không dùng thư viện carousel ngoài). Danh sách ảnh **cố định trong HTML**
+  (không qua CMS) vì đây là dàn ảnh cố định do admin chọn tay 1 lần, không phải nội dung
+  cập nhật thường xuyên như sự kiện. Ảnh nguồn gốc để ở `uploads/Banner/` (gitignore,
+  nặng 60KB–8.7MB/ảnh) — đã nén xuống `uploads/banner-NN.jpg` (60–165KB, commit vào Git)
+  qua `scripts/process-banner-photos.py`. Xem mục "Xử lý ảnh thật dung lượng lớn" bên dưới.
 - **Logo**: `img/badge.png` (huy hiệu tròn, dùng ở header + hero + favicon) và
   `img/favicon.png` — sinh ra bằng cách crop/resize từ file gốc trong `logo/` (không
   commit). Chiều rộng logo ở Hero **tự đo bằng JS** (`syncHeroIconWidth()`) để luôn
@@ -144,6 +158,13 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
 - **Đoạn mô tả Hero xuống dòng chủ động**: `#hero-subtitle` có CSS
   `white-space: pre-line` — Enter trong ô "Đoạn mô tả" ở `/admin` sẽ xuống dòng đúng
   vị trí đó trên trang, không phụ thuộc trình duyệt tự ngắt.
+- **Menu chính rút gọn + dropdown "Thêm"**: `#site-nav` chỉ hiện trực tiếp 6 mục cố định
+  trong HTML (Trang chủ, Giới thiệu, Tuyên truyền, Chuyển đổi số, Bộ kỹ năng An toàn số,
+  Liên hệ) + nút "Thêm" (`#nav-more-toggle`/`#nav-more-links`, `setupNavMore()` trong
+  `main.js`) gom các mục còn lại (hiện là Đổi mới sáng tạo, Khác, Nghiên cứu khoa học).
+  Mục nào hiện trực tiếp / mục nào vào "Thêm" là **lựa chọn thủ công của người dùng, sửa
+  trực tiếp trong `index.html`** (di chuyển thẻ `<a>` vào/ra khỏi `#nav-more-links`) —
+  không có logic tự động, không phải CMS hoá.
 - **CMS hoá gần như toàn bộ chữ tĩnh**: header, hero, tiêu đề 2 mục Tuyên truyền/Hoạt
   động khác, footer đều sửa được qua `/admin` → "Nội dung chung trang web". Nhãn các
   nút/panel nhỏ (Thời sự, Số liệu nổi bật, Hòm thư góp ý...) vẫn cố định trong code
@@ -189,6 +210,30 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   - Hướng dẫn đặt tên ảnh đầy đủ nằm sẵn trong
     `Anh-nhap-hoat-dong/HUONG-DAN-DAT-TEN-ANH.txt` (script tự tạo lại file này nếu bị xoá
     mất hoặc clone repo lần đầu).
+
+- **Xử lý ảnh thật dung lượng lớn** (`scripts/process-event-photos.py`,
+  `scripts/process-banner-photos.py` — Python, dùng `Pillow` + `pillow-heif`, KHÔNG
+  phải Node như các script build khác vì cần decode HEIC + nén JPEG chất lượng cao):
+  - Ảnh gốc do người dùng thả vào các thư mục `uploads/<Tên địa điểm>/` thường rất nặng
+    (ảnh iPhone `.HEIC` 1–8MB/ảnh, ảnh gốc camera 6–18MB/ảnh) — CMS/Decap yêu cầu <1MB
+    mỗi ảnh (xem hint field `images` trong `admin/config.yml`), và HEIC trình duyệt
+    thường không hiển thị được (trừ Safari).
+  - Quy trình: mở bằng `Pillow` (`pillow_heif.register_heif_opener()` để đọc `.HEIC`) →
+    `ImageOps.exif_transpose()` (sửa ảnh bị xoay sai do EXIF) → resize cạnh dài nhất về
+    ≤1600px (ảnh sự kiện) hoặc ≤900px (ảnh banner nhỏ) → xuất JPEG, giảm dần quality từ
+    82–85 tới khi dưới ngưỡng (950KB ảnh sự kiện / 220KB ảnh banner) hoặc chạm quality
+    sàn 55 → ghi phẳng vào `uploads/<prefix>-NN.jpg` theo đúng quy ước CMS (không thư
+    mục con, không dấu/khoảng trắng trong tên file).
+  - `process-event-photos.py` có sẵn bảng ánh xạ cứng (`GROUPS`) từ tên thư mục nguồn →
+    tên file đích → danh sách file `content/events/*.json` cần cập nhật field `images`
+    — đây là script **một lần cho một đợt ảnh cụ thể** (không tổng quát/tái sử dụng
+    nguyên vẹn cho đợt ảnh khác), cần sửa lại `GROUPS` mỗi khi có ảnh mới cần ghép. Sau
+    khi chạy xong luôn phải `node scripts/build-events.js` lại để `data/events.json`
+    nhận ảnh mới.
+  - Thư mục ảnh gốc (`uploads/<Tên địa điểm>/`, `uploads/Banner/`) đã liệt kê hết vào
+    `.gitignore` — chỉ ảnh đã nén (`uploads/*.jpg` phẳng) mới commit vào Git. Nếu có đợt
+    ảnh mới, nhớ thêm thư mục nguồn mới vào `.gitignore` theo đúng mẫu các dòng
+    `/uploads/<Tên>/` hiện có, tránh commit nhầm ảnh gốc nặng.
 
 - **Feed hoạt động tự động từ hvcsnd.edu.vn**: `build-events.js` quét trực tiếp trang
   `/tag/<slug>` của Học viện CSND cho 3 danh mục (Chuyển đổi số, Đổi mới sáng tạo,

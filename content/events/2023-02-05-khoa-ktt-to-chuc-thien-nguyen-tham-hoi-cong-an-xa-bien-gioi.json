@@ -4,7 +4,17 @@
   "date": "2023-02-05",
   "location": "Các xã biên giới, tỉnh Cao Bằng",
   "body": "Đoàn công tác của Khoa đến thăm hỏi, động viên cán bộ Công an xã biên giới đang công tác tại địa bàn phức tạp về an ninh trật tự, đồng thời trao quà hỗ trợ học sinh có hoàn cảnh khó khăn tại các trường học trên địa bàn.",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/cao-bang-van-dinh-01.jpg"
+    },
+    {
+      "image": "/uploads/cao-bang-van-dinh-02.jpg"
+    },
+    {
+      "image": "/uploads/cao-bang-van-dinh-03.jpg"
+    }
+  ],
   "link": "https://hvcsnd.edu.vn/khoa-toan-tin-hoc-va-ung-dung-khcn-trong-pctp-to-chuc-chuong-trinh-thien-nguyen-va-tham-hoi-cong-an-xa-bien-gioi-11482",
   "video": ""
 }

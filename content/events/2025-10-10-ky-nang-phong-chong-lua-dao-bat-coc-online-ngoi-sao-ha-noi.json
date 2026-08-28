@@ -4,7 +4,20 @@
   "date": "2025-10-10",
   "location": "Trường Liên cấp THCS, Tiểu học tư thục Ngôi Sao Hà Nội",
   "body": "",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/ngoi-sao-ha-noi-01.jpg"
+    },
+    {
+      "image": "/uploads/ngoi-sao-ha-noi-02.jpg"
+    },
+    {
+      "image": "/uploads/ngoi-sao-ha-noi-03.jpg"
+    },
+    {
+      "image": "/uploads/ngoi-sao-ha-noi-04.jpg"
+    }
+  ],
   "link": "https://ngoisaohanoi.edu.vn/ngoi-sao-ha-noi-chu-dong-trang-bi-la-chan-an-toan-cho-hansers-khoi-trung-hoc-co-so/",
   "video": ""
 }

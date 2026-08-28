@@ -4,7 +4,47 @@
   "date": "2022-10-05",
   "location": "Trường THPT Amsterdam, TP Hà Nội",
   "body": "",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/ha-noi-ams-01.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-02.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-03.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-04.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-05.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-06.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-07.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-08.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-09.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-10.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-11.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-12.jpg"
+    },
+    {
+      "image": "/uploads/ha-noi-ams-13.jpg"
+    }
+  ],
   "link": "https://hvcsnd.edu.vn/khoa-toan-tin-hoc-va-ung-dung-khcn-trong-pctp-tuyen-truyen-pho-bien-giao-duc-phap-luat-cho-hoc-sinh-tai-ha-noi-11252",
   "video": "https://hn-ams.edu.vn/en/node/39102",
   "planNumber": "Số 3124/KH-T02-KTT"

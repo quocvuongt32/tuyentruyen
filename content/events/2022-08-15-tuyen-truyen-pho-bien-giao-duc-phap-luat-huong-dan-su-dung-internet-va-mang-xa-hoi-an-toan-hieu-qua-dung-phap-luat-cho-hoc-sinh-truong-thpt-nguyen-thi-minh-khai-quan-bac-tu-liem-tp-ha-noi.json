@@ -4,7 +4,41 @@
   "date": "2022-08-15",
   "location": "Trường THPT Nguyễn Thị Minh Khai, quận Bắc Từ Liêm, TP Hà Nội",
   "body": "",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-01.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-02.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-03.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-04.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-05.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-06.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-07.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-08.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-09.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-10.jpg"
+    },
+    {
+      "image": "/uploads/nguyen-thi-minh-khai-11.jpg"
+    }
+  ],
   "link": "https://hvcsnd.edu.vn/tuyen-truyen-pho-bien-giao-duc-phap-luat-huong-dan-su-dung-internet-va-mang-xa-hoi-an-toan-hieu-qua-11155",
   "video": "",
   "planNumber": "Số 2423/KH-T02-KTT"

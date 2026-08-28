@@ -4,7 +4,26 @@
   "date": "2022-10-07",
   "location": "Trường THCS Cầu Giấy, TP Hà Nội",
   "body": "",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/cau-giay-2022-10-07-01.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2022-10-07-02.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2022-10-07-03.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2022-10-07-04.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2022-10-07-05.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2022-10-07-06.jpg"
+    }
+  ],
   "link": "https://hvcsnd.edu.vn/khoa-toan-tin-hoc-va-ung-dung-khcn-trong-pctp-tuyen-truyen-pho-bien-giao-duc-phap-luat-cho-hoc-sinh-tai-ha-noi-11252",
   "video": "",
   "planNumber": "Số 3123/KH-T02-KTT"

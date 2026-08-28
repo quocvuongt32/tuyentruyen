@@ -7,6 +7,23 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-28
+
+- **Nhập ảnh minh chứng thật cho 17 sự kiện** từ `uploads/mau-nhap-hoat-dong.xlsx`
+  (cột "Ghi chú ảnh minh chứng" trỏ tới các thư mục ảnh gốc mới thả vào uploads/) — 76
+  ảnh gốc (HEIC/JPG/WEBP, có ảnh tới 18MB) được nén qua `scripts/process-event-photos.py`
+  (Pillow + pillow-heif) xuống dưới 1MB/ảnh, ghi phẳng vào `uploads/*.jpg`, cập nhật
+  `images[]` trong từng `content/events/*.json` tương ứng. Bộ ảnh Marie Curie (10 ảnh)
+  và Đoàn Thị Điểm (8 ảnh) dùng chung cho nhiều sự kiện cùng địa điểm theo đúng ghi chú
+  trong file Excel. Thư mục ảnh gốc đã thêm vào `.gitignore` (chỉ ảnh đã nén lên Git).
+- **Carousel ảnh chạy ở vị trí logo đầu trang**: huy hiệu + 15 ảnh trong `uploads/Banner/`
+  (đã nén qua `scripts/process-banner-photos.py`, còn 60–165KB/ảnh) tự chạy vòng vô hạn,
+  2 giây/ảnh, hiệu ứng trượt ngang — `#brand-carousel` + `setupBrandCarousel()`.
+- **Bổ sung tài liệu dự án**: cập nhật [PROJECT.md](PROJECT.md) (carousel logo, menu
+  "Thêm", quy ước ẩn placeholder khi chưa có ảnh, pipeline nén ảnh thật) và tạo mới
+  [VIDEO-PRODUCTION.md](VIDEO-PRODUCTION.md) tách riêng trạng thái hạng mục video dự thi.
+  Từ phiên này, cập nhật `docs/` ngay sau mỗi nhiệm vụ hoàn thành (không chờ gộp).
+
 ## 2026-08-21 (tiếp 3)
 
 - **Bỏ hẳn các ô placeholder icon** khi thẻ chưa có ảnh — thay vì hiện icon xám/khung

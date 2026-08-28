@@ -504,18 +504,39 @@ a { color: inherit; }
   color: var(--text);
 }
 
-.brand .logo {
-  display: flex;
+/* Carousel o vi tri logo: chay ngang qua lai giua huy hieu va cac anh
+   Banner, 2 giay/anh, lap vo han. Slide moi truot vao tu phai, slide cu
+   truot ra trai (xem setupBrandCarousel trong main.js). */
+.brand-carousel {
+  position: relative;
   flex-shrink: 0;
+  width: 120px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
 }
 
-.brand .logo img {
-  width: 52px;
-  height: 52px;
+.brand-carousel img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translateX(100%);
+  transition: transform 0.6s ease;
+}
+
+.brand-carousel img[data-logo="true"] {
   object-fit: contain;
+  padding: 5px;
   /* Lam sang, ro net hon tren nen ca 2 theme - huy hieu goc hoi tram. */
   filter: brightness(1.18) saturate(1.12) contrast(1.04);
 }
+
+.brand-carousel img.is-active { transform: translateX(0); }
+.brand-carousel img.is-prev { transform: translateX(-100%); }
 
 .brand-text {
   display: flex;

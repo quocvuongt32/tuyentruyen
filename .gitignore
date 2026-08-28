@@ -14,5 +14,25 @@ data/skills.json
 /logo/
 /Anh-nhap-hoat-dong/
 
+# Anh minh chung goc (HEIC/JPG dung luong lon, chua qua nen) - chi la nguon
+# tam, ban da nen/dat ten lai nam trong uploads/*.jpg duoc content/events
+# tham chieu. Khong dua ban goc vao git de tranh phinh repo.
+/uploads/Nguyễn Thị Minh Khai/
+/uploads/Hà Nội Arm/
+/uploads/Cầu giấy 2/
+/uploads/Cầu giấy/
+/uploads/Thượng cát/
+/uploads/Xuân Đỉnh/
+/uploads/Mai Dịch/
+/uploads/Ngôi sao Hà Nội/
+/uploads/Marie Curie/
+/uploads/Đoàn Thị Điểm/
+/uploads/Vần dính/
+/uploads/Pacop/
+/uploads/Vừ a dính/
+/uploads/Đông Mỹ/
+/uploads/Đề án 06/
+/uploads/Banner/
+
 # Local Netlify folder
 .netlify

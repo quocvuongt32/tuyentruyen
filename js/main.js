@@ -759,6 +759,27 @@ function setupHomeLinks() {
   });
 }
 
+// Carousel o vi tri logo dau trang: bat dau bang huy hieu, roi chay qua
+// het anh Banner, lap lai vo han - moi anh hien 2 giay, truot ngang.
+function setupBrandCarousel() {
+  const track = document.getElementById("brand-carousel");
+  if (!track) return;
+  const slides = Array.from(track.querySelectorAll("img"));
+  if (slides.length < 2) return;
+
+  let idx = slides.findIndex((img) => img.classList.contains("is-active"));
+  if (idx < 0) idx = 0;
+
+  setInterval(() => {
+    const prev = idx;
+    idx = (idx + 1) % slides.length;
+    slides[prev].classList.remove("is-active");
+    slides[prev].classList.add("is-prev");
+    slides[idx].classList.add("is-active");
+    setTimeout(() => slides[prev].classList.remove("is-prev"), 650);
+  }, 2000);
+}
+
 function setupAdminMenu() {
   const menu = document.getElementById("admin-menu");
   const toggle = document.getElementById("admin-toggle");
@@ -1331,6 +1352,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(loadTickerWeather, 15 * 60 * 1000);
   setupNav();
   setupNavMore();
+  setupBrandCarousel();
   setupHeaderCategoryLinks();
   setupAdminMenu();
   setupThemeToggle();

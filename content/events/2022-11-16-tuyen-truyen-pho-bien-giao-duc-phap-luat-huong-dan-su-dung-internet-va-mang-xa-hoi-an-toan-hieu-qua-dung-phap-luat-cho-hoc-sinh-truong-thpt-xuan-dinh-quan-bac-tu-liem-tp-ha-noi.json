@@ -4,7 +4,20 @@
   "date": "2022-11-16",
   "location": "Trường THPT Xuân Đỉnh, Quận Bắc Từ Liêm, TP Hà Nội",
   "body": "",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/xuan-dinh-thpt-2022-01.jpg"
+    },
+    {
+      "image": "/uploads/xuan-dinh-thpt-2022-02.jpg"
+    },
+    {
+      "image": "/uploads/xuan-dinh-thpt-2022-03.jpg"
+    },
+    {
+      "image": "/uploads/xuan-dinh-thpt-2022-04.jpg"
+    }
+  ],
   "link": "",
   "video": "",
   "planNumber": "Số 4162/KH-T02-KTT"

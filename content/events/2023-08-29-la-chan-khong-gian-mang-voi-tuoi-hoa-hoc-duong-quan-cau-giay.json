@@ -4,7 +4,26 @@
   "date": "2023-08-29",
   "location": "Trường THCS Cầu Giấy, TP Hà Nội",
   "body": "",
-  "images": [],
+  "images": [
+    {
+      "image": "/uploads/cau-giay-2023-08-29-01.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2023-08-29-02.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2023-08-29-03.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2023-08-29-04.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2023-08-29-05.jpg"
+    },
+    {
+      "image": "/uploads/cau-giay-2023-08-29-06.jpg"
+    }
+  ],
   "link": "https://hvcsnd.edu.vn/tuyen-truyen-huong-dan-su-dung-internet-va-giao-tiep-ung-xu-tren-khong-gian-mang-11869",
   "video": "",
   "planNumber": "Số 3343/KH-T02-KTT"
