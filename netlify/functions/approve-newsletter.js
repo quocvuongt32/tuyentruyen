@@ -2,16 +2,16 @@
 // Admin bam nut "Duyet & Gui" trong email ban nhap (tu compose-newsletter.js)
 // se goi toi day. Xac minh chu ky HMAC + han 48h cua noi dung nam trong URL
 // (khong luu server-side, xem giai thich trong compose-newsletter.js), roi
-// gui email cho TOAN BO contact trong Resend Audience.
+// tao + gui 1 Resend Broadcast nham vao segment chua toan bo nguoi dang ky.
 //
 // Day la buoc THUC SU GUI HANG LOAT - request nay phai den tu link trong
 // email admin, khong duoc de public/lo secret.
 
 const crypto = require("crypto");
-const { sendEmail, listAudienceContacts, newsletterLayout, escapeHtml } = require("./_lib");
+const { createAndSendBroadcast, newsletterLayout, escapeHtml, NEWSLETTER_FROM } = require("./_lib");
 
 const SIGNING_SECRET = process.env.NEWSLETTER_SIGNING_SECRET;
-const RESEND_AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID;
+const RESEND_SEGMENT_ID = process.env.RESEND_SEGMENT_ID;
 const MAX_AGE_MS = 48 * 60 * 60 * 1000; // 48 gio
 
 exports.handler = async (event) => {
@@ -24,8 +24,8 @@ exports.handler = async (event) => {
   if (!data || !sig) {
     return { statusCode: 400, body: "Thieu tham so" };
   }
-  if (!RESEND_AUDIENCE_ID) {
-    return { statusCode: 500, body: "Thieu bien moi truong RESEND_AUDIENCE_ID" };
+  if (!RESEND_SEGMENT_ID) {
+    return { statusCode: 500, body: "Thieu bien moi truong RESEND_SEGMENT_ID" };
   }
 
   const expectedSig = crypto.createHmac("sha256", SIGNING_SECRET).update(data).digest("hex");
@@ -60,38 +60,21 @@ exports.handler = async (event) => {
 
   const html = newsletterLayout({
     title: payload.subject || "Bản tin An toàn số",
-    bodyHtml,
-    footerNote: "Trả lời email này nếu bạn muốn huỷ đăng ký",
+    bodyHtml:
+      bodyHtml +
+      `<p style="margin-top:20px;font-size:12px;color:#8a8065;">Huỷ đăng ký: <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#8a8065;">bấm vào đây</a></p>`,
+    footerNote: "",
   });
 
-  let recipients;
   try {
-    recipients = await listAudienceContacts(RESEND_AUDIENCE_ID);
+    const result = await createAndSendBroadcast({
+      segmentId: RESEND_SEGMENT_ID,
+      from: NEWSLETTER_FROM,
+      subject: payload.subject || "Bản tin An toàn số",
+      html,
+    });
+    return { statusCode: 200, body: `Da gui broadcast (id: ${result.broadcastId}) cho toan bo nguoi dang ky.` };
   } catch (e) {
-    return { statusCode: 502, body: "Khong lay duoc danh sach nguoi dang ky: " + e.message };
+    return { statusCode: 502, body: "Gui broadcast that bai: " + e.message };
   }
-
-  if (!recipients.length) {
-    return { statusCode: 200, body: "Danh sach nguoi dang ky dang rong, khong gui gi." };
-  }
-
-  // Gui tuan tu tung nguoi (khong dung endpoint broadcast cua Resend de giu
-  // code don gian/de kiem soat loi tung dia chi) - co dan cach nho giua cac
-  // lan goi de khong vuot rate limit cua goi mien phi.
-  let sent = 0;
-  const failed = [];
-  for (const to of recipients) {
-    try {
-      await sendEmail({ to, subject: payload.subject || "Bản tin An toàn số", html });
-      sent++;
-    } catch (e) {
-      failed.push(to);
-    }
-    await new Promise((r) => setTimeout(r, 150));
-  }
-
-  return {
-    statusCode: 200,
-    body: `Da gui ${sent}/${recipients.length} email.` + (failed.length ? ` That bai: ${failed.join(", ")}` : ""),
-  };
 };

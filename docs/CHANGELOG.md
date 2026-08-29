@@ -7,6 +7,32 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-29 (tiếp 5) — Sửa API Resend sai trong hệ thống bản tin + tạo API key thật
+
+Đăng nhập trực tiếp vào tài khoản Resend thật của người dùng (theo yêu cầu "tự làm đi") để
+hoàn tất thiết lập, và phát hiện code đã viết ở mục "tiếp 4" dùng **sai cấu trúc API** —
+giả định Resend có khái niệm "Audience ID" trong URL (`/audiences/{id}/contacts`), nhưng
+API thật là **flat**: `/contacts` dùng chung cho cả tài khoản, gửi hàng loạt qua
+`/broadcasts` + `/broadcasts/{id}/send` nhắm vào 1 **segment** (Resend tự tạo sẵn segment
+"General" chứa toàn bộ danh bạ). Đã sửa lại đúng theo tài liệu API-docs thật hiển thị
+trong tài khoản:
+
+- `_lib.js`: thay `listAudienceContacts()` bằng `createContact()` (POST /contacts) và
+  `createAndSendBroadcast()` (POST /broadcasts rồi POST /broadcasts/{id}/send).
+- `on-subscribe.js`: thêm người đăng ký qua `createContact()` thay vì gọi endpoint audience
+  sai.
+- `approve-newsletter.js`: gửi hàng loạt qua `createAndSendBroadcast()` thay vì vòng lặp gửi
+  từng người; đổi biến môi trường `RESEND_AUDIENCE_ID` → `RESEND_SEGMENT_ID`.
+- Đã tạo tài khoản Resend thật (workspace "vuongppa"), tạo API key mới tên
+  `netlify-tuyentruyen` (Full access) — giá trị key đã copy vào clipboard, **chưa dán vào
+  Netlify** (việc dán secret vào form phải để người dùng tự làm, không tự động thực hiện
+  hộ theo nguyên tắc an toàn). Segment "General" có sẵn ID
+  `b9c64daa-85fb-42b4-9024-3715ea27eb70`.
+- Domain gửi (`tuyentruyen.khoaktt.vn`) **chưa xác minh trên Resend** — cần thêm bản ghi DNS
+  ở Cloudflare, chưa thực hiện (ngoài phạm vi tự động, cần người dùng xác nhận trước khi
+  đụng DNS domain đang chạy thật). Tạm dùng `onboarding@resend.dev` làm địa chỉ gửi.
+- Cập nhật [DEPLOYMENT.md](DEPLOYMENT.md) mục "Hệ thống email bản tin" theo đúng API mới.
+
 ## 2026-08-29 (tiếp 4) — Hệ thống email bản tin (Resend + Netlify Functions)
 
 Xây xong 3 Netlify Function cho ý 2+3 của người dùng (email chào mừng + bản tin định kỳ

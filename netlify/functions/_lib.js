@@ -4,6 +4,12 @@
 // fetch (co san tu Node 18, xem netlify.toml NODE_VERSION) - khong can
 // npm install goi "resend" chinh thuc, goi thang REST API cho gon, dung
 // quy uoc "khong phu thuoc npm ngoai" da co trong scripts/build-*.js.
+//
+// LUU Y VE API CUA RESEND (da kiem tra truc tiep trong tai khoan that):
+// khong co khai niem "Audience ID" trong URL - /contacts la endpoint
+// "flat" dung chung cho ca tai khoan. Gui hang loat dung /broadcasts
+// (nham vao 1 "segment", Resend tu tao san 1 segment mac dinh ten
+// "General") + /broadcasts/{id}/send.
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const NEWSLETTER_FROM =
@@ -36,26 +42,65 @@ async function sendEmail({ to, subject, html }) {
   return res.json();
 }
 
-// Lay toan bo contact trong 1 Resend Audience (danh sach nguoi dang ky).
-// Endpoint theo tai lieu Resend hien tai (resend.com/docs/api-reference) -
-// KIEM TRA LAI sau khi co API key that, cau truc response co the doi.
-async function listAudienceContacts(audienceId) {
+// Them 1 nguoi dang ky vao danh ba Resend. API cua Resend la "flat" - khong
+// co khai niem Audience ID trong URL, chi POST /contacts voi email.
+async function createContact({ email }) {
   if (!RESEND_API_KEY) {
     throw new Error("Thieu bien moi truong RESEND_API_KEY");
   }
-  const res = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}` },
+  const res = await fetch("https://api.resend.com/contacts", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, unsubscribed: false }),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`Resend list contacts that bai (${res.status}): ${text}`);
+    throw new Error(`Resend them contact that bai (${res.status}): ${text}`);
   }
-  const data = await res.json();
-  const list = Array.isArray(data && data.data) ? data.data : [];
-  return list
-    .filter((c) => !c.unsubscribed)
-    .map((c) => c.email)
-    .filter(Boolean);
+  return res.json();
+}
+
+// Tao 1 broadcast nham vao 1 segment (vd segment "General" mac dinh cua tai
+// khoan) roi gui ngay. Day la co che gui hang loat that su cua Resend -
+// thay the cho viec tu lap gui tung email tung nguoi.
+async function createAndSendBroadcast({ segmentId, from, subject, html }) {
+  if (!RESEND_API_KEY) {
+    throw new Error("Thieu bien moi truong RESEND_API_KEY");
+  }
+  const createRes = await fetch("https://api.resend.com/broadcasts", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ segment_id: segmentId, from, subject, html }),
+  });
+  if (!createRes.ok) {
+    const text = await createRes.text().catch(() => "");
+    throw new Error(`Resend tao broadcast that bai (${createRes.status}): ${text}`);
+  }
+  const created = await createRes.json();
+  const broadcastId = created && created.id;
+  if (!broadcastId) {
+    throw new Error("Resend tao broadcast khong tra ve id");
+  }
+
+  const sendRes = await fetch(`https://api.resend.com/broadcasts/${broadcastId}/send`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({}),
+  });
+  if (!sendRes.ok) {
+    const text = await sendRes.text().catch(() => "");
+    throw new Error(`Resend gui broadcast that bai (${sendRes.status}): ${text}`);
+  }
+  return { broadcastId, ...(await sendRes.json().catch(() => ({}))) };
 }
 
 function newsletterLayout({ title, bodyHtml, footerNote }) {
@@ -82,6 +127,7 @@ module.exports = {
   NEWSLETTER_FROM,
   escapeHtml,
   sendEmail,
-  listAudienceContacts,
+  createContact,
+  createAndSendBroadcast,
   newsletterLayout,
 };

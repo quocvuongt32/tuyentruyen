@@ -129,37 +129,44 @@ qua console thật, vì lỗi CSP loại này không luôn hiện rõ ràng.
 
 ## Hệ thống email bản tin (Resend + Netlify Functions) — CẦN THIẾT LẬP THỦ CÔNG
 
-Code đã viết xong (`netlify/functions/`) nhưng **chưa hoạt động được cho tới khi làm đủ
-các bước thủ công dưới đây** — chưa có tài khoản Resend nên chưa test được thật, cần tự
-kiểm tra kỹ sau khi thiết lập.
+Code đã viết xong (`netlify/functions/`) và đã đối chiếu trực tiếp với API thật của Resend
+(đăng nhập tài khoản `vuongppa@gmail.com` trên resend.com để kiểm tra tài liệu API-docs
+thực tế) — API của Resend là "flat", **không có khái niệm Audience ID trong URL** như
+tài liệu cũ từng giả định. Danh bạ dùng chung `/contacts`, gửi hàng loạt dùng `/broadcasts`
+nhắm vào 1 **segment** (Resend tự tạo sẵn 1 segment mặc định tên **"General"** chứa toàn bộ
+contact của tài khoản).
 
 ### 3 function
 
 | File | Vai trò | Kích hoạt bởi |
 |---|---|---|
-| `netlify/functions/on-subscribe.js` | Gửi email chào mừng khi có người đăng ký form "Nhận cảnh báo..." + thêm email vào Resend Audience | Netlify Forms outgoing webhook (form `dang-ky-ban-tin`) |
+| `netlify/functions/on-subscribe.js` | Gửi email chào mừng khi có người đăng ký form "Nhận cảnh báo..." + thêm email vào danh bạ Resend (`POST /contacts`) | Netlify Forms outgoing webhook (form `dang-ky-ban-tin`) |
 | `netlify/functions/compose-newsletter.js` | Soạn bản nháp bản tin (lấy 5 sự kiện thật gần nhất từ `data/events.json`), gửi cho `ADMIN_EMAIL` kèm link duyệt | Admin tự bấm link (không tự động theo lịch) |
-| `netlify/functions/approve-newsletter.js` | Xác minh link duyệt (chữ ký HMAC, hết hạn 48h), gửi email cho toàn bộ Resend Audience | Admin bấm nút "Duyệt & Gửi" trong email nháp |
+| `netlify/functions/approve-newsletter.js` | Xác minh link duyệt (chữ ký HMAC, hết hạn 48h), tạo + gửi 1 Resend Broadcast nhắm vào segment | Admin bấm nút "Duyệt & Gửi" trong email nháp |
 
 ### Các bước thiết lập (làm 1 lần)
 
-1. **Tạo tài khoản** tại [resend.com](https://resend.com) (miễn phí, không cần thẻ).
+1. **Tạo tài khoản** tại [resend.com](https://resend.com) (miễn phí, không cần thẻ) — **đã tạo xong** (workspace "vuongppa").
 2. **Xác minh domain gửi** (Resend → Domains → Add Domain, thêm bản ghi DNS được yêu cầu
    vào domain `khoaktt.vn`/`tuyentruyen.khoaktt.vn` tại nơi quản lý DNS — hiện là
-   Cloudflare theo mục "Thông tin hạ tầng" ở trên). Nếu chưa muốn đụng DNS ngay, có thể
-   tạm dùng địa chỉ gửi mặc định `onboarding@resend.dev` của Resend để thử nghiệm (giới
-   hạn hơn, chỉ gửi được tới chính email đăng ký tài khoản Resend — không dùng được cho
-   gửi hàng loạt thật).
-3. **Tạo Audience** (Resend → Audiences → Create Audience, đặt tên vd "Ban tin An toan
-   so") → copy **Audience ID**.
-4. **Tạo API Key** (Resend → API Keys → Create API Key, quyền "Sending access" là đủ) →
-   copy key (dạng `re_...`).
+   Cloudflare theo mục "Thông tin hạ tầng" ở trên) — **chưa làm** (cần chủ động vào
+   Cloudflare thêm bản ghi DNS, việc này ngoài phạm vi tự động thực hiện được). Trong lúc
+   chưa xác minh domain, dùng địa chỉ gửi mặc định `onboarding@resend.dev` của Resend
+   (giới hạn hơn, chỉ gửi được tới chính email đăng ký tài khoản Resend — **không dùng
+   được cho gửi hàng loạt thật tới người lạ** cho tới khi xác minh domain riêng).
+3. **Lấy Segment ID** (Resend → Audiences → segment mặc định "General" → xem URL có
+   `?segmentId=...`). Tài khoản hiện tại có sẵn: `b9c64daa-85fb-42b4-9024-3715ea27eb70`
+   (dùng làm giá trị `RESEND_SEGMENT_ID` bên dưới nếu muốn gửi cho toàn bộ danh bạ).
+4. **Tạo API Key** (Resend → API Keys → Create API Key, quyền "Full access" hoặc "Sending
+   access" đều được) → copy key (dạng `re_...`) — **đã tạo 1 key tên `netlify-tuyentruyen`**,
+   giá trị đã được copy vào clipboard trình duyệt lúc thiết lập; nếu đã mất, vào lại
+   Resend → API Keys để tạo key mới (giá trị cũ không xem lại được, phải tạo mới).
 5. **Thêm biến môi trường trong Netlify** (Site configuration → Environment variables):
 
    | Tên biến | Giá trị |
    |---|---|
-   | `RESEND_API_KEY` | API key bước 4 |
-   | `RESEND_AUDIENCE_ID` | Audience ID bước 3 |
+   | `RESEND_API_KEY` | API key bước 4 — **dán trực tiếp trong Netlify UI, không nhờ AI dán hộ** |
+   | `RESEND_SEGMENT_ID` | Segment ID bước 3 (vd `b9c64daa-85fb-42b4-9024-3715ea27eb70` cho segment "General") |
    | `NEWSLETTER_FROM` | Vd `"Cẩm nang An toàn số <noreply@tuyentruyen.khoaktt.vn>"` (phải đúng domain đã xác minh ở bước 2, hoặc dùng `onboarding@resend.dev` nếu đang thử nghiệm) |
    | `ADMIN_EMAIL` | Email admin nhận bản nháp để duyệt (vd `vuongppa@gmail.com`) |
    | `NEWSLETTER_SIGNING_SECRET` | 1 chuỗi ngẫu nhiên dài tự đặt (vd chạy `openssl rand -hex 32`) — **giữ bí mật**, dùng để ký link duyệt |
@@ -170,11 +177,13 @@ kiểm tra kỹ sau khi thiết lập.
    `https://tuyentruyen.khoaktt.vn/.netlify/functions/on-subscribe`.
 7. **Deploy lại** (biến môi trường mới chỉ áp dụng từ lần deploy sau khi thêm).
 8. **Test**: tự đăng ký bằng email của mình ở form trên trang → phải nhận được email chào
-   mừng trong vài giây. Sau đó truy cập
+   mừng trong vài giây, và email đó xuất hiện trong Resend → Audiences → General. Sau đó
+   truy cập
    `https://tuyentruyen.khoaktt.vn/.netlify/functions/compose-newsletter?secret=<COMPOSE_SECRET>`
    → phải nhận được email bản nháp ở `ADMIN_EMAIL` → bấm nút "Duyệt & Gửi" → phải nhận
-   được bản tin thật ở chính email vừa đăng ký (vì đó là người duy nhất trong Audience
-   lúc test).
+   được bản tin thật ở chính email vừa đăng ký (vì đó là người duy nhất trong segment lúc
+   test — nếu chưa xác minh domain, Resend chỉ cho gửi tới email chủ tài khoản, nên dùng
+   đúng email đã đăng ký Resend để test).
 
 ### Lưu ý quan trọng
 
@@ -186,10 +195,10 @@ kiểm tra kỹ sau khi thiết lập.
 - **Nội dung bản nháp chỉ lấy sự kiện đã có `body`** (không lấy sự kiện auto-feed từ
   hvcsnd.edu.vn) — nếu 1 kỳ không có sự kiện thật nào mới đủ nội dung, function trả về
   thông báo "không có gì để gửi" thay vì gửi bản tin rỗng.
-- **Chưa test thật với Resend** (không có API key khi viết code) — endpoint
-  `/audiences/{id}/contacts` dùng để lấy danh sách người đăng ký lấy theo tài liệu Resend
-  tại thời điểm viết, **cần đối chiếu lại với docs Resend hiện tại** nếu gặp lỗi 404/400
-  ở bước gửi hàng loạt.
+- **Chưa test đầu-cuối với dữ liệu thật** — API key vừa tạo chưa được dán vào Netlify env
+  vars, nên luồng chào mừng/duyệt/gửi hàng loạt chưa chạy thử thật lần nào. Cấu trúc
+  request đã đối chiếu trực tiếp với tài liệu API-docs hiển thị trong tài khoản Resend
+  thật (Contacts API + Broadcasts API), không còn dựa trên phỏng đoán.
 - Gói Resend free: 3.000 email/tháng, 100 email/ngày — đủ dùng cho quy mô 1 khoa, nếu
   vượt cần nâng cấp gói trả phí của Resend (không liên quan credit Netlify).
 

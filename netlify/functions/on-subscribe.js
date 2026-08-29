@@ -6,15 +6,13 @@
 //   https://<ten-site>.netlify.app/.netlify/functions/on-subscribe
 // (hoac domain that: https://tuyentruyen.khoaktt.vn/.netlify/functions/on-subscribe)
 //
-// Viec ham lam: (1) gui email chao mung cho nguoi vua dang ky, (2) neu co
-// cau hinh RESEND_AUDIENCE_ID thi them ho vao Audience de sau nay
-// compose-newsletter.js/approve-newsletter.js gui ban tin dinh ky cho ca
-// danh sach.
+// Viec ham lam: (1) gui email chao mung cho nguoi vua dang ky, (2) them ho
+// vao danh ba Resend (Contacts) de sau nay compose-newsletter.js/
+// approve-newsletter.js gui ban tin dinh ky qua Broadcasts cho ca danh sach.
 
-const { sendEmail, newsletterLayout } = require("./_lib");
+const { sendEmail, createContact, newsletterLayout } = require("./_lib");
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
@@ -72,22 +70,10 @@ exports.handler = async (event) => {
     // Khong tra loi 500 vi Netlify se retry webhook nhieu lan gay spam - chi log.
   }
 
-  if (RESEND_AUDIENCE_ID) {
-    try {
-      const res = await fetch(`https://api.resend.com/audiences/${RESEND_AUDIENCE_ID}/contacts`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, unsubscribed: false }),
-      });
-      if (!res.ok) {
-        console.error("on-subscribe: them vao Audience that bai", await res.text());
-      }
-    } catch (e) {
-      console.error("on-subscribe: loi khi them vao Audience", e);
-    }
+  try {
+    await createContact({ email });
+  } catch (e) {
+    console.error("on-subscribe: loi khi them vao danh ba Resend", e);
   }
 
   return { statusCode: 200, body: "OK" };
