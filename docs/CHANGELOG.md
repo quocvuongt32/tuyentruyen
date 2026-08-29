@@ -7,6 +7,15 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-29 (tiếp 7) — Thu gọn khối đăng ký bản tin
+
+Người dùng phản ánh khối "Nhận cảnh báo thủ đoạn lừa đảo mới nhất" chiếm quá nhiều diện
+tích. Nguyên nhân: `.newsletter-inner` vừa có class `.section-inner` (padding 64px) vừa có
+padding-top/bottom riêng 48px chồng lên nhau → 96px đệm dọc, cộng đoạn mô tả bị giới hạn
+max-width 480px nên wrap thành 3 dòng. Đã giảm padding còn 22px, giảm cỡ chữ tiêu đề/mô
+tả/ô nhập/nút, tăng max-width mô tả lên 620px để wrap gọn 2 dòng — chiều cao khối giảm từ
+~300px xuống ~186px (giảm ~38%), test cả desktop lẫn mobile qua preview.
+
 ## 2026-08-29 (tiếp 6) — Sửa lỗi đăng ký bản tin 404, gộp menu "Thêm", thêm email liên hệ
 
 Ba việc riêng biệt trong phiên này:
