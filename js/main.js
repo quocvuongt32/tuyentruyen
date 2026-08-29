@@ -862,34 +862,6 @@ function setupNav() {
   });
 }
 
-function setupNavMore() {
-  const wrap = document.getElementById("nav-more");
-  const toggle = document.getElementById("nav-more-toggle");
-  const links = document.getElementById("nav-more-links");
-  if (!wrap || !toggle || !links) return;
-
-  toggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const willOpen = !links.classList.contains("open");
-    links.classList.toggle("open", willOpen);
-    toggle.setAttribute("aria-expanded", String(willOpen));
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!wrap.contains(e.target)) {
-      links.classList.remove("open");
-      toggle.setAttribute("aria-expanded", "false");
-    }
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      links.classList.remove("open");
-      toggle.setAttribute("aria-expanded", "false");
-    }
-  });
-}
-
 // Nhay ve dung dinh #trang-chu se cuon khung thoi su (nam tren header, khong
 // dinh sticky) ra khoi man hinh. Bam "Trang chu" (hoac logo) thi cuon thang
 // len dau trang de van thay duoc dai tin.
@@ -982,9 +954,9 @@ function setupExtraTracking() {
     themeToggle.addEventListener("click", () => trackEvent("/theme-toggle", "Chuyển giao diện sáng/tối"));
   }
 
-  const navMoreToggle = document.getElementById("nav-more-toggle");
-  if (navMoreToggle) {
-    navMoreToggle.addEventListener("click", () => trackEvent("/menu/them", "Thêm"));
+  const footerContact = document.querySelector(".footer-contact a");
+  if (footerContact) {
+    footerContact.addEventListener("click", () => trackEvent("/lien-he/email", footerContact.textContent.trim()));
   }
 }
 
@@ -1586,7 +1558,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadTickerWeather();
   setInterval(loadTickerWeather, 15 * 60 * 1000);
   setupNav();
-  setupNavMore();
   setupHeroCarousel();
   setupHeaderCategoryLinks();
   setupAdminMenu();

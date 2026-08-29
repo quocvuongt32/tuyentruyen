@@ -71,7 +71,6 @@ a { color: inherit; }
   .activity-card,
   .skill-card,
   .banner-dot,
-  .nav-more-toggle,
   .theme-toggle,
   .admin-toggle,
   .hero-cta,
@@ -92,7 +91,6 @@ a { color: inherit; }
   .activity-card:active,
   .skill-card:active,
   .banner-dot:active,
-  .nav-more-toggle:active,
   .theme-toggle:active,
   .admin-toggle:active,
   .hero-cta:active,
@@ -611,15 +609,13 @@ a { color: inherit; }
   color: var(--gold);
 }
 
-/* Ngan cach nhe giua cac muc menu chinh (a truc tiep + nut "Them"), khong
-   ap dung cho theme-toggle/admin-menu (da co khung rieng). */
-.site-nav > a,
-.site-nav > .nav-more {
+/* Ngan cach nhe giua cac muc menu chinh, khong ap dung cho theme-toggle/
+   admin-menu (da co khung rieng). */
+.site-nav > a {
   position: relative;
 }
 
-.site-nav > a:not(:first-child)::before,
-.site-nav > .nav-more::before {
+.site-nav > a:not(:first-child)::before {
   content: "";
   position: absolute;
   left: -14px;
@@ -628,68 +624,6 @@ a { color: inherit; }
   width: 1px;
   height: 14px;
   background: rgba(255, 255, 255, 0.3);
-}
-
-.nav-more {
-  display: flex;
-  align-items: center;
-}
-
-/* Icon-only, to hon cac icon-button khac (30px) de de bam hon - day la
-   "cua ngo" toi 4 muc noi dung con lai nen can noi bat, khac han icon "..."
-   nho, kin dao cua admin-menu (chi de quan tri, co tinh an minh). */
-.nav-more-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 50%;
-  color: var(--on-accent);
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.nav-more-toggle:hover,
-.nav-more-toggle[aria-expanded="true"] {
-  color: var(--gold);
-  border-color: var(--gold);
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.nav-more-links {
-  position: absolute;
-  top: calc(100% + 12px);
-  left: 0;
-  min-width: 210px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px;
-  display: none;
-  flex-direction: column;
-  gap: 2px;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
-  z-index: 60;
-}
-
-.nav-more-links.open {
-  display: flex;
-}
-
-.nav-more-links a {
-  padding: 9px 10px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.nav-more-links a:hover {
-  background: var(--bg-alt);
-  color: var(--accent);
 }
 
 .theme-toggle {
@@ -752,8 +686,10 @@ a { color: inherit; }
   border-color: var(--gold);
 }
 
-/* Menu quan tri (Quan tri / Doi mat khau) gom vao 1 icon nho, kin dao
-   de khong lam giao dien thien ve "san pham quan ly" khi chia se cong khai. */
+/* Menu "Them" gop chung: 4 muc noi dung con lai (Doi moi sang tao, Khac,
+   Nghien cuu khoa hoc, Kiem tra nhanh) + 2 muc quan tri, ngan cach bang
+   .admin-links-sep. Gop vao 1 icon nho theo yeu cau nguoi dung, thay vi 2
+   nut rieng nhu truoc. */
 .admin-menu {
   position: relative;
 }
@@ -781,7 +717,7 @@ a { color: inherit; }
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 168px;
+  min-width: 210px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -807,6 +743,12 @@ a { color: inherit; }
 .admin-links a:hover {
   background: var(--bg-alt);
   color: var(--accent);
+}
+
+.admin-links-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
 }
 
 .nav-toggle {
@@ -1902,6 +1844,23 @@ a { color: inherit; }
   color: var(--border);
 }
 
+.footer-contact {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.3px;
+  color: var(--text-dim);
+}
+
+.footer-contact a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footer-contact a:hover {
+  text-decoration: underline;
+}
+
 /* ---------- Lightbox ---------- */
 
 .lightbox {
@@ -2103,34 +2062,8 @@ a { color: inherit; }
     color: var(--text-dim);
   }
 
-  .site-nav > a:not(:first-child)::before,
-  .site-nav > .nav-more::before {
+  .site-nav > a:not(:first-child)::before {
     display: none;
-  }
-
-  .nav-more {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .nav-more-toggle { display: none; }
-
-  .nav-more-links {
-    position: static;
-    display: flex;
-    flex-direction: column;
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-    padding: 0;
-  }
-
-  .nav-more-links a {
-    padding: 14px 20px;
-    border-top: 1px solid var(--border);
-    border-radius: 0;
-    font-size: inherit;
-    color: var(--text-dim);
   }
 
   .admin-toggle { display: none; }
@@ -2143,6 +2076,10 @@ a { color: inherit; }
     border: 0;
     box-shadow: none;
     padding: 0;
+  }
+
+  .admin-links-sep {
+    margin: 0;
   }
 }
 
