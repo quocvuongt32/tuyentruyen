@@ -127,6 +127,72 @@ qua console thật, vì lỗi CSP loại này không luôn hiện rõ ràng.
   mở `/admin` lại, đăng nhập lại. Đã có trường hợp thực tế: bài lưu **thành công** dù
   giao diện báo lỗi đỏ — luôn kiểm tra lại danh sách bài trước khi đăng lại trùng.
 
+## Hệ thống email bản tin (Resend + Netlify Functions) — CẦN THIẾT LẬP THỦ CÔNG
+
+Code đã viết xong (`netlify/functions/`) nhưng **chưa hoạt động được cho tới khi làm đủ
+các bước thủ công dưới đây** — chưa có tài khoản Resend nên chưa test được thật, cần tự
+kiểm tra kỹ sau khi thiết lập.
+
+### 3 function
+
+| File | Vai trò | Kích hoạt bởi |
+|---|---|---|
+| `netlify/functions/on-subscribe.js` | Gửi email chào mừng khi có người đăng ký form "Nhận cảnh báo..." + thêm email vào Resend Audience | Netlify Forms outgoing webhook (form `dang-ky-ban-tin`) |
+| `netlify/functions/compose-newsletter.js` | Soạn bản nháp bản tin (lấy 5 sự kiện thật gần nhất từ `data/events.json`), gửi cho `ADMIN_EMAIL` kèm link duyệt | Admin tự bấm link (không tự động theo lịch) |
+| `netlify/functions/approve-newsletter.js` | Xác minh link duyệt (chữ ký HMAC, hết hạn 48h), gửi email cho toàn bộ Resend Audience | Admin bấm nút "Duyệt & Gửi" trong email nháp |
+
+### Các bước thiết lập (làm 1 lần)
+
+1. **Tạo tài khoản** tại [resend.com](https://resend.com) (miễn phí, không cần thẻ).
+2. **Xác minh domain gửi** (Resend → Domains → Add Domain, thêm bản ghi DNS được yêu cầu
+   vào domain `khoaktt.vn`/`tuyentruyen.khoaktt.vn` tại nơi quản lý DNS — hiện là
+   Cloudflare theo mục "Thông tin hạ tầng" ở trên). Nếu chưa muốn đụng DNS ngay, có thể
+   tạm dùng địa chỉ gửi mặc định `onboarding@resend.dev` của Resend để thử nghiệm (giới
+   hạn hơn, chỉ gửi được tới chính email đăng ký tài khoản Resend — không dùng được cho
+   gửi hàng loạt thật).
+3. **Tạo Audience** (Resend → Audiences → Create Audience, đặt tên vd "Ban tin An toan
+   so") → copy **Audience ID**.
+4. **Tạo API Key** (Resend → API Keys → Create API Key, quyền "Sending access" là đủ) →
+   copy key (dạng `re_...`).
+5. **Thêm biến môi trường trong Netlify** (Site configuration → Environment variables):
+
+   | Tên biến | Giá trị |
+   |---|---|
+   | `RESEND_API_KEY` | API key bước 4 |
+   | `RESEND_AUDIENCE_ID` | Audience ID bước 3 |
+   | `NEWSLETTER_FROM` | Vd `"Cẩm nang An toàn số <noreply@tuyentruyen.khoaktt.vn>"` (phải đúng domain đã xác minh ở bước 2, hoặc dùng `onboarding@resend.dev` nếu đang thử nghiệm) |
+   | `ADMIN_EMAIL` | Email admin nhận bản nháp để duyệt (vd `vuongppa@gmail.com`) |
+   | `NEWSLETTER_SIGNING_SECRET` | 1 chuỗi ngẫu nhiên dài tự đặt (vd chạy `openssl rand -hex 32`) — **giữ bí mật**, dùng để ký link duyệt |
+   | `COMPOSE_SECRET` | 1 chuỗi ngẫu nhiên khác — dùng làm "mật khẩu" trong URL soạn bản tin, tránh người ngoài gọi được endpoint này |
+
+6. **Bật webhook cho form đăng ký** (Site configuration → Forms → Form notifications →
+   Add notification → Outgoing webhook): chọn form `dang-ky-ban-tin`, URL điền
+   `https://tuyentruyen.khoaktt.vn/.netlify/functions/on-subscribe`.
+7. **Deploy lại** (biến môi trường mới chỉ áp dụng từ lần deploy sau khi thêm).
+8. **Test**: tự đăng ký bằng email của mình ở form trên trang → phải nhận được email chào
+   mừng trong vài giây. Sau đó truy cập
+   `https://tuyentruyen.khoaktt.vn/.netlify/functions/compose-newsletter?secret=<COMPOSE_SECRET>`
+   → phải nhận được email bản nháp ở `ADMIN_EMAIL` → bấm nút "Duyệt & Gửi" → phải nhận
+   được bản tin thật ở chính email vừa đăng ký (vì đó là người duy nhất trong Audience
+   lúc test).
+
+### Lưu ý quan trọng
+
+- **Chưa có lịch tự động (cron)** — soạn bản tin là hành động ADMIN TỰ BẤM khi có nội
+  dung muốn gửi, đúng theo yêu cầu "cần gửi cho admin trước để kiểm duyệt". Nếu sau này
+  muốn tự động theo lịch (vd đầu tháng), có thể thêm Netlify Scheduled Function gọi
+  `compose-newsletter` định kỳ — chưa làm vì cần quyết định tần suất/nguồn nội dung cụ
+  thể trước.
+- **Nội dung bản nháp chỉ lấy sự kiện đã có `body`** (không lấy sự kiện auto-feed từ
+  hvcsnd.edu.vn) — nếu 1 kỳ không có sự kiện thật nào mới đủ nội dung, function trả về
+  thông báo "không có gì để gửi" thay vì gửi bản tin rỗng.
+- **Chưa test thật với Resend** (không có API key khi viết code) — endpoint
+  `/audiences/{id}/contacts` dùng để lấy danh sách người đăng ký lấy theo tài liệu Resend
+  tại thời điểm viết, **cần đối chiếu lại với docs Resend hiện tại** nếu gặp lỗi 404/400
+  ở bước gửi hàng loạt.
+- Gói Resend free: 3.000 email/tháng, 100 email/ngày — đủ dùng cho quy mô 1 khoa, nếu
+  vượt cần nâng cấp gói trả phí của Resend (không liên quan credit Netlify).
+
 ## Quy trình test local
 
 ```bash

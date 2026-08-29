@@ -7,6 +7,27 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-29 (tiếp 4) — Hệ thống email bản tin (Resend + Netlify Functions)
+
+Xây xong 3 Netlify Function cho ý 2+3 của người dùng (email chào mừng + bản tin định kỳ
+có admin duyệt trước khi gửi hàng loạt), dùng **Resend** (người dùng chọn) làm dịch vụ
+gửi email:
+
+- `netlify/functions/on-subscribe.js` — Netlify Forms gọi webhook khi có người đăng ký
+  form `dang-ky-ban-tin`, gửi email chào mừng + thêm vào Resend Audience.
+- `netlify/functions/compose-newsletter.js` — admin tự bấm link (không chạy theo lịch tự
+  động, đúng yêu cầu "gửi cho admin duyệt trước") để soạn bản nháp từ 5 sự kiện thật gần
+  nhất trong `data/events.json`, gửi cho `ADMIN_EMAIL` kèm nút "Duyệt & Gửi".
+- `netlify/functions/approve-newsletter.js` — khi admin bấm nút duyệt, xác minh chữ ký
+  HMAC + hạn 48h của link (không lưu trạng thái server-side, toàn bộ nội dung mã hoá
+  base64 ngay trong URL), rồi gửi email thật cho toàn bộ Resend Audience.
+
+**Chưa hoạt động được ngay** — cần người dùng tự tạo tài khoản Resend + khai báo 6 biến
+môi trường trong Netlify (`RESEND_API_KEY`, `RESEND_AUDIENCE_ID`, `NEWSLETTER_FROM`,
+`ADMIN_EMAIL`, `NEWSLETTER_SIGNING_SECRET`, `COMPOSE_SECRET`) + bật webhook trong Netlify
+Forms. Các bước chi tiết + cách test ở [DEPLOYMENT.md](DEPLOYMENT.md). Cũng đã soạn sẵn
+mẫu email chào mừng gửi trực tiếp trong tin nhắn trả lời người dùng.
+
 ## 2026-08-29 (tiếp 3) — 4 phản hồi UI sau khi dùng thử
 
 1. **Nút "Thêm" đổi thành icon tròn 38×38 (3 chấm ngang)** thay vì chữ "Thêm" + mũi tên nhỏ

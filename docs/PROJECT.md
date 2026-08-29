@@ -82,8 +82,12 @@ Anh-nhap-hoat-dong/    Thư mục thả ảnh trước khi nhập hàng loạt �
                        mới commit). Tự động rỗng lại sau mỗi lần chạy import.
 logo/, Thư viện/       Nguồn ảnh gốc (PSD/PNG lớn) để xử lý ra img/ — gitignore, KHÔNG
                        lên GitHub (chỉ tồn tại trên máy local của người dùng).
-netlify.toml           Build command + Content-Security-Policy headers. Xem
-                        DEPLOYMENT.md để hiểu từng dòng CSP vì sao cần thiết.
+netlify.toml           Build command + Content-Security-Policy headers + duong dan
+                        thu muc functions. Xem DEPLOYMENT.md de hieu tung dong CSP.
+netlify/functions/     Netlify Functions (Node, chay server-side, KHONG phai code
+                        chay trong trinh duyet nhu phan con lai) - he thong email
+                        ban tin qua Resend. Xem DEPLOYMENT.md muc "He thong email
+                        ban tin" de biet cach thiet lap.
 ```
 
 ## Các tính năng chính (map nhanh tới code)
@@ -165,6 +169,17 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   thấy, xem tài liệu Netlify Forms). Xem submissions tại Netlify dashboard → Forms. **Chưa
   có link theo dõi Zalo OA** (ưu tiên 4 gốc còn có ý gắn Zalo OA) — cần người dùng xác nhận
   đã có tài khoản Zalo OA thật trước khi thêm, tránh dẫn tới link không tồn tại.
+- **Email tự động cho người đăng ký bản tin** (`netlify/functions/*.js` — Netlify
+  Functions, KHÔNG chạy trong trình duyệt như phần còn lại của site): email chào mừng khi
+  đăng ký + hệ thống soạn/duyệt/gửi bản tin định kỳ qua **Resend** (dịch vụ email ngoài,
+  gói free). Kiến trúc, các bước thiết lập tài khoản/biến môi trường, và giới hạn hiện
+  tại nằm ở [DEPLOYMENT.md](DEPLOYMENT.md) mục "Hệ thống email bản tin" — **chưa hoạt
+  động được cho tới khi làm xong các bước thủ công đó** (tạo tài khoản Resend, khai báo
+  biến môi trường trong Netlify). Điểm kiến trúc đáng nhớ: không dùng database/Netlify
+  Blobs để lưu bản nháp chờ duyệt — toàn bộ nội dung được mã hoá base64 + ký HMAC ngay
+  trong URL "Duyệt & Gửi" (`approve-newsletter.js` xác minh chữ ký bằng
+  `NEWSLETTER_SIGNING_SECRET`, hết hạn sau 48h) — nên phải cắt ngắn mỗi mục xuống đoạn
+  trích ~220 ký tự để URL không quá dài.
 - **Bộ kỹ năng An toàn số** (`#ky-nang-section`, collection CMS `ky_nang` →
   `content/ky-nang/*.json` → `scripts/build-skills.js` → `data/skills.json`): lưới ảnh/
   infographic về thủ đoạn lừa đảo + cách phòng ngừa, bấm ảnh mở lightbox cỡ lớn. Khác
