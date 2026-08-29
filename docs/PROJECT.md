@@ -219,30 +219,52 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
 - **Menu chính rút gọn + dropdown "Thêm"**: `#site-nav` chỉ hiện trực tiếp 6 mục cố định
   trong HTML (Trang chủ, Giới thiệu, Tuyên truyền, Chuyển đổi số, Bộ kỹ năng An toàn số,
   Liên hệ) + nút "Thêm" (`#nav-more-toggle`/`#nav-more-links`, `setupNavMore()` trong
-  `main.js`) gom các mục còn lại (hiện là Đổi mới sáng tạo, Khác, Nghiên cứu khoa học).
-  Mục nào hiện trực tiếp / mục nào vào "Thêm" là **lựa chọn thủ công của người dùng, sửa
-  trực tiếp trong `index.html`** (di chuyển thẻ `<a>` vào/ra khỏi `#nav-more-links`) —
-  không có logic tự động, không phải CMS hoá.
-- **Truy cập nhanh riêng cho mobile** (`#mobile-quick-nav`, dưới 940px — 3 icon-link Giới
-  thiệu/Tuyên truyền/Bộ kỹ năng, dùng chung sprite `<symbol>` ở đầu `<body>`): người dùng
-  phản hồi trên điện thoại toàn bộ menu (kể cả nút Sáng/Tối) bị ẩn hết vào hamburger, khó
-  bấm. Fix: `#mobile-quick-nav` là 1 khối RIÊNG, nằm ngoài `<nav id="site-nav">`, luôn
-  hiện trực tiếp trong vùng đỏ trên mobile (menu đầy đủ trong hamburger vẫn còn nguyên,
-  không xoá). `#theme-toggle` cũng được **di chuyển ra ngoài `<nav>`** (trước đây nằm
-  trong, nên bị collapse theo cùng site-nav trên mobile) để luôn hiện được ở cả 2 kích
-  thước màn hình — do đó CSS mobile override riêng cho `.theme-toggle` (full-width row
-  trong danh sách sổ xuống) đã bị xoá, giờ nó giữ nguyên style icon-button 30×30 như
-  desktop trên mọi kích thước.
+  `main.js`) gom các mục còn lại (hiện là Đổi mới sáng tạo, Khác, Nghiên cứu khoa học,
+  Kiểm tra nhanh). Mục nào hiện trực tiếp / mục nào vào "Thêm" là **lựa chọn thủ công của
+  người dùng, sửa trực tiếp trong `index.html`** (di chuyển thẻ `<a>` vào/ra khỏi
+  `#nav-more-links`) — không có logic tự động, không phải CMS hoá. Nút "Thêm" là **icon
+  tròn 38×38 (3 chấm ngang)**, không còn chữ "Thêm" + mũi tên như bản đầu (người dùng phản
+  hồi chữ nhỏ khó bấm, muốn icon to/đẹp hơn) — cố ý dùng **3 chấm NGANG** để phân biệt trực
+  quan với icon "..." (3 chấm DỌC, nhỏ, kín đáo) của `#admin-toggle` kế bên, tránh nhầm 2
+  menu có ý nghĩa khác hẳn nhau (nội dung công khai vs quản trị nội bộ).
+- **Truy cập nhanh riêng cho mobile** (`#mobile-quick-nav`, dưới 940px — pill chữ Giới
+  thiệu/Tuyên truyền/Bộ kỹ năng, KHÔNG dùng icon — thử icon trước đó bị người dùng phản
+  hồi không rõ nghĩa, đổi lại thành chữ): người dùng phản hồi trên điện thoại toàn bộ menu
+  (kể cả nút Sáng/Tối) bị ẩn hết vào hamburger, khó bấm. Fix: `#mobile-quick-nav` là 1 khối
+  RIÊNG, nằm ngoài `<nav id="site-nav">`, luôn hiện trực tiếp trong vùng đỏ trên mobile
+  (menu đầy đủ trong hamburger vẫn còn nguyên, không xoá), cuộn ngang (`overflow-x: auto`)
+  nếu không đủ chỗ thay vì xuống dòng/tràn. `#theme-toggle` cũng được **di chuyển ra ngoài
+  `<nav>`** (trước đây nằm trong, nên bị collapse theo cùng site-nav trên mobile) để luôn
+  hiện được ở cả 2 kích thước màn hình — do đó CSS mobile override riêng cho `.theme-toggle`
+  (full-width row trong danh sách sổ xuống) đã bị xoá, giờ nó giữ nguyên style icon-button
+  30×30 như desktop trên mọi kích thước.
 - **CMS hoá gần như toàn bộ chữ tĩnh**: header, hero, tiêu đề 2 mục Tuyên truyền/Hoạt
   động khác, footer đều sửa được qua `/admin` → "Nội dung chung trang web". Nhãn các
   nút/panel nhỏ (Thời sự, Số liệu nổi bật, Hòm thư góp ý...) vẫn cố định trong code
   (chưa CMS hoá, coi là "UI chrome" chứ không phải nội dung).
 
-- **Xem link tham khảo ngay trong trang**: bấm "Xem bài viết tham khảo" mở modal
-  `<iframe>` nhúng trang đó, không rời trang. Nhiều trang (Facebook, báo điện tử...)
-  tự chặn nhúng bằng `X-Frame-Options`/`frame-ancestors` — đây là bảo mật của chính
-  trang đó, modal sẽ trống/lỗi, không có cách "vượt qua" (và không nên). Nút "Mở tab
-  mới ↗" ở góc modal là lối thoát cho trường hợp này.
+- **Xem link tham khảo ngay trong trang** (`openLinkModal()` trong `main.js`): bấm "Xem
+  bài viết tham khảo" mở modal `<iframe>` nhúng trang đó, không rời trang. Nhiều trang
+  (`.gov.vn`, Facebook, Google...) tự chặn nhúng bằng `X-Frame-Options`/`frame-ancestors`
+  — bảo mật của chính trang đó, không có cách "vượt qua" (và không nên).
+  **Không có cách JS nào đáng tin cậy 100% để phát hiện việc bị chặn** — đã thử mẹo đọc
+  `iframe.contentWindow.location.href` (bị chặn thì còn `"about:blank"` không ném lỗi, tải
+  được thì ném `SecurityError`) nhưng kiểm chứng thực tế cho thấy Chrome hiện đại render 1
+  trang lỗi nội bộ (interstitial) cho request bị chặn — trang đó CŨNG khác gốc với trang
+  cha nên đọc `.href` CŨNG ném `SecurityError` giống hệt trường hợp tải thành công, không
+  phân biệt được. Giải pháp 2 lớp hiện tại:
+  1. `IFRAME_BLOCKED_HOST_PATTERNS` (danh sách tên miền **đã biết chắc sẽ chặn** — mọi
+     `*.gov.vn`, Facebook, Google, YouTube): bỏ qua hẳn iframe, `window.open()` tab mới
+     ngay lập tức, không loé modal trống rồi mới chuyển (theo đúng phản hồi người dùng —
+     không muốn thấy cảnh báo/phải tự bấm).
+  2. Tên miền còn lại: vẫn thử iframe bình thường, có `setTimeout` 6 giây — nếu `onload`
+     chưa từng bắn được (mạng treo/lỗi thật) thì tự đóng modal + mở tab mới. Trường hợp bị
+     chặn nhưng KHÔNG nằm trong danh sách (hiếm, chưa gặp) sẽ không tự động được vì
+     `onload` vẫn bắn bình thường cho trang lỗi interstitial — nút "Mở tab mới ↗" ở góc
+     modal vẫn còn làm lối thoát thủ công cho đúng trường hợp tồn đọng này.
+  3. Khi phát hiện thêm nguồn nào hay bị chặn nhưng chưa nằm trong danh sách, thêm pattern
+     tên miền mới vào `IFRAME_BLOCKED_HOST_PATTERNS` thay vì cố sửa lại cơ chế phát hiện
+     (đã xác nhận không khả thi ở bước trên).
 - **Offline / chưa deploy**: `/admin` cần Netlify Identity thật nên không chạy được ở
   local. Thêm nội dung khi không có mạng: `scripts/add-event.js` (bấm đúp
   `Them-su-kien.bat`) — CLI hỏi từng bước, ghi thẳng vào `content/events/*.json` và

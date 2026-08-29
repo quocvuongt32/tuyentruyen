@@ -635,32 +635,28 @@ a { color: inherit; }
   align-items: center;
 }
 
+/* Icon-only, to hon cac icon-button khac (30px) de de bam hon - day la
+   "cua ngo" toi 4 muc noi dung con lai nen can noi bat, khac han icon "..."
+   nho, kin dao cua admin-menu (chi de quan tri, co tinh an minh). */
 .nav-more-toggle {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: 0;
-  padding: 0;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
   color: var(--on-accent);
-  font: inherit;
-  font-size: 0.92rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .nav-more-toggle:hover,
 .nav-more-toggle[aria-expanded="true"] {
   color: var(--gold);
-}
-
-.nav-more-toggle svg {
-  transition: transform 0.15s ease;
-}
-
-.nav-more-toggle[aria-expanded="true"] svg {
-  transform: rotate(180deg);
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .nav-more-links {
@@ -725,25 +721,29 @@ a { color: inherit; }
 .mobile-quick-nav {
   display: none;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.mobile-quick-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .mobile-quick-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  padding: 7px 12px;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 8px;
+  border-radius: 999px;
   color: var(--on-accent);
   text-decoration: none;
-}
-
-.mobile-quick-link svg {
-  width: 17px;
-  height: 17px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .mobile-quick-link:hover,
@@ -2051,15 +2051,6 @@ a { color: inherit; }
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
-}
-
-.link-modal-note {
-  margin: 0;
-  padding: 8px 14px;
-  font-size: 0.78rem;
-  color: var(--text-dim);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
 }
 
 .link-modal-box iframe {

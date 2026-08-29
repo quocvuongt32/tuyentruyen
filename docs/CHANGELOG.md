@@ -7,6 +7,25 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-29 (tiếp 3) — 4 phản hồi UI sau khi dùng thử
+
+1. **Nút "Thêm" đổi thành icon tròn 38×38 (3 chấm ngang)** thay vì chữ "Thêm" + mũi tên nhỏ
+   — to hơn, dễ bấm hơn theo yêu cầu, cố ý khác hình 3 chấm dọc của icon quản trị bên cạnh
+   để không gây nhầm lẫn 2 menu khác nghĩa.
+2. **Đã thử soạn mẫu email xác nhận đăng ký bản tin + giải thích hạ tầng gửi email** — xem
+   tin nhắn trả lời trực tiếp, chưa đụng code vì cần người dùng chọn dịch vụ gửi email
+   trước (xem mục dưới).
+3. **Đặt vấn đề xây hệ thống bản tin định kỳ có admin duyệt trước khi gửi hàng loạt** — cần
+   quyết định hạ tầng (Netlify Functions + dịch vụ email ngoài), chưa triển khai.
+4. **Quick-nav mobile đổi lại từ icon sang chữ** ("Giới thiệu", "Tuyên truyền", "Bộ kỹ
+   năng") — icon trước đó không đủ rõ nghĩa theo phản hồi người dùng.
+5. **Bỏ hẳn dòng cảnh báo "Một số trang có thể chặn hiển thị..." trong modal xem link**,
+   tự động mở tab mới ngay khi phát hiện nguồn bị chặn thay vì bắt người dùng tự bấm "Mở
+   tab mới". Do JS không có cách đáng tin cậy 100% phân biệt "bị chặn" và "tải thành công"
+   (đã kiểm chứng — xem chi tiết trong PROJECT.md), dùng giải pháp 2 lớp: danh sách tên
+   miền đã biết chắc chặn (`*.gov.vn`, Facebook, Google, YouTube) mở tab mới ngay không
+   qua iframe; tên miền khác vẫn thử iframe, tự mở tab mới sau 6 giây nếu không tải được gì.
+
 ## 2026-08-29 (tiếp 2) — Phiếu dự thi + nâng cấp ưu tiên 3/4/7
 
 - **Điền lại `KTT_Phiếu dự thi.docx`**: file gốc do người dùng cung cấp là mẫu/ví dụ của

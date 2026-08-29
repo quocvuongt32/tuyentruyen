@@ -78,15 +78,9 @@
       <!-- Truy cap nhanh rieng cho mobile - hien truc tiep trong vung do,
            khong an vao trong nut hamburger nhu toan bo menu con lai. -->
       <div class="mobile-quick-nav" id="mobile-quick-nav">
-        <a href="#gioi-thieu" class="mobile-quick-link" aria-label="Giới thiệu" title="Giới thiệu">
-          <svg aria-hidden="true"><use href="#icon-info" /></svg>
-        </a>
-        <a href="#timeline-section" class="mobile-quick-link" aria-label="Tuyên truyền" title="Tuyên truyền">
-          <svg aria-hidden="true"><use href="#icon-megaphone" /></svg>
-        </a>
-        <a href="#ky-nang-section" class="mobile-quick-link" aria-label="Bộ kỹ năng An toàn số" title="Bộ kỹ năng An toàn số">
-          <svg aria-hidden="true"><use href="#icon-shield" /></svg>
-        </a>
+        <a href="#gioi-thieu" class="mobile-quick-link">Giới thiệu</a>
+        <a href="#timeline-section" class="mobile-quick-link">Tuyên truyền</a>
+        <a href="#ky-nang-section" class="mobile-quick-link">Bộ kỹ năng</a>
       </div>
 
       <nav class="site-nav" id="site-nav">
@@ -97,9 +91,12 @@
         <a href="#ky-nang-section" id="nav-kynang">Bộ kỹ năng An toàn số</a>
 
         <div class="nav-more" id="nav-more">
-          <button type="button" class="nav-more-toggle" id="nav-more-toggle" aria-haspopup="true" aria-expanded="false">
-            Thêm
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          <button type="button" class="nav-more-toggle" id="nav-more-toggle" aria-haspopup="true" aria-expanded="false" aria-label="Thêm mục menu" title="Thêm">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+              <circle cx="5" cy="12" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="19" cy="12" r="2" />
+            </svg>
           </button>
           <div class="nav-more-links" id="nav-more-links">
             <a href="#hoat-dong-khac-section" data-activity-filter="doi-moi-sang-tao">Đổi mới sáng tạo</a>
@@ -389,7 +386,6 @@
         <button type="button" id="link-modal-close" class="link-modal-close" aria-label="Đóng">✕</button>
       </div>
     </div>
-    <p class="link-modal-note">Một số trang có thể chặn hiển thị ở đây — dùng "Mở tab mới" nếu không thấy nội dung.</p>
     <iframe id="link-modal-iframe" src="" title="Nội dung liên kết" loading="lazy"></iframe>
   </div>
 </div>

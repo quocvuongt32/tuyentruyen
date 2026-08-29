@@ -643,16 +643,66 @@ function setupLightbox() {
   }, { passive: true });
 }
 
+// KHONG co cach JS nao dang tin cay 100% de phat hien X-Frame-Options/CSP
+// frame-ancestors chan iframe: da thu meo "doc contentWindow.location.href,
+// bi chan thi con about:blank khong nem loi, tai duoc thi nem SecurityError"
+// nhung kiem chung thuc te cho thay Chrome hien dai render 1 trang loi noi
+// bo (interstitial) cho request bi chan - trang do CUNG khac goc voi trang
+// cha nen doc .href CUNG nem SecurityError giong het truong hop tai thanh
+// cong, khong phan biet duoc. Vi vay dung 2 lop: (1) danh sach ten mien DA
+// BIET se chan (.gov.vn va cac nen tang lon) - bo qua iframe, mo tab moi
+// NGAY, khong loe modal trong 1 nhip roi moi chuyen; (2) voi ten mien con
+// lai, van thu iframe nhung neu qua han ma "onload" chua tung bao gio bao
+// (nghia la treo/loi mang that su) thi moi tu dong mo tab moi - truong hop
+// bi chan nhung khong nam trong danh sach (hiem, chua gap) se khong tu dong
+// duoc, nguoi dung van co nut "Mo tab moi" thu cong de du phong.
+const IFRAME_BLOCKED_HOST_PATTERNS = [
+  /\.gov\.vn$/i,
+  /(^|\.)facebook\.com$/i,
+  /(^|\.)fb\.com$/i,
+  /(^|\.)google\.com$/i,
+  /(^|\.)youtube\.com$/i,
+];
+
+function isKnownToBlockFraming(url) {
+  try {
+    const host = new URL(url, window.location.href).hostname;
+    return IFRAME_BLOCKED_HOST_PATTERNS.some((re) => re.test(host));
+  } catch (e) {
+    return false;
+  }
+}
+
 function openLinkModal(url) {
+  trackEvent(`/lien-ket-tham-khao`, url);
+
+  if (isKnownToBlockFraming(url)) {
+    window.open(url, "_blank", "noopener,noreferrer");
+    return;
+  }
+
   const overlay = document.getElementById("link-modal");
   const iframe = document.getElementById("link-modal-iframe");
   const openBtn = document.getElementById("link-modal-open");
   const titleEl = document.getElementById("link-modal-title");
-  iframe.src = url;
   openBtn.href = url;
   titleEl.textContent = url;
   overlay.classList.add("active");
-  trackEvent(`/lien-ket-tham-khao`, url);
+
+  let settled = false;
+  const timeoutId = setTimeout(() => {
+    if (settled) return;
+    settled = true;
+    closeLinkModal();
+    window.open(url, "_blank", "noopener,noreferrer");
+  }, 6000);
+
+  iframe.onload = () => {
+    settled = true;
+    clearTimeout(timeoutId);
+  };
+
+  iframe.src = url;
 }
 
 function closeLinkModal() {
