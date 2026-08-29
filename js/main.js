@@ -53,13 +53,19 @@ function setAllText(className, value) {
   });
 }
 
+// GoatCounter dem luot xem qua script rieng (count.js, tai async) - luot xem
+// CUA CHINH TRANG DANG MO co the chua kip cong vao TOTAL.json tai thoi diem
+// gong nay chay (race condition), nen +1 "lac quan" de tinh luot dang xem
+// hien tai, khong phai so gia. Goi lai dinh ky de con so "song" hon (van
+// mien phi, GoatCounter khong tinh phi theo so lan goi API dem cong khai).
 async function loadVisitCounter() {
   try {
     const res = await fetch("https://vuongnq.goatcounter.com/counter/TOTAL.json");
     if (!res.ok) return;
     const data = await res.json();
     if (!data || !data.count) return;
-    setAllText("js-stat-visits", data.count);
+    const raw = Number(String(data.count).replace(/[^\d]/g, ""));
+    setAllText("js-stat-visits", Number.isFinite(raw) ? raw + 1 : data.count);
   } catch (err) {
     // Am lang bo qua - tile van hien dau "—", khong anh huong phan con lai cua trang.
   }
@@ -163,6 +169,7 @@ function buildCard(ev, openByDefault) {
 function buildDetailFragment(ev) {
   const frag = document.createDocumentFragment();
   const images = Array.isArray(ev.images) ? ev.images.filter((it) => it && it.src) : [];
+  const allSrcs = images.map((it) => it.src);
   let galleryImages = images;
 
   // Uu tien video lam anh bia (da rat truc quan); neu khong co video thi
@@ -188,7 +195,7 @@ function buildDetailFragment(ev) {
     img.src = coverSrc;
     img.alt = ev.title || "";
     img.loading = "lazy";
-    img.addEventListener("click", () => openLightbox(coverSrc));
+    img.addEventListener("click", () => openLightbox(coverSrc, allSrcs, 0));
     cover.appendChild(img);
     frag.appendChild(cover);
     galleryImages = images.slice(1);
@@ -243,7 +250,7 @@ function buildDetailFragment(ev) {
       img.src = src;
       img.alt = ev.title || "";
       img.loading = "lazy";
-      img.addEventListener("click", () => openLightbox(src));
+      img.addEventListener("click", () => openLightbox(src, allSrcs, allSrcs.indexOf(src)));
       gallery.appendChild(img);
     }
     frag.appendChild(gallery);
@@ -394,6 +401,8 @@ function buildMediaLibrary() {
     return;
   }
 
+  const imageSrcs = items.filter((it) => it.type === "image").map((it) => it.src);
+
   items.forEach((item) => {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -405,7 +414,7 @@ function buildMediaLibrary() {
       img.alt = item.ev.title || "";
       img.loading = "lazy";
       btn.appendChild(img);
-      btn.addEventListener("click", () => openLightbox(item.src));
+      btn.addEventListener("click", () => openLightbox(item.src, imageSrcs, imageSrcs.indexOf(item.src)));
     } else {
       if (item.thumb) {
         const img = document.createElement("img");
@@ -538,16 +547,100 @@ function formatDate(iso) {
   return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-function openLightbox(src) {
-  const overlay = document.getElementById("lightbox");
+// Danh sach anh dang xem trong lightbox + vi tri hien tai, de vuot/bam mui
+// ten chuyen anh truoc/sau (kieu xem anh tren Windows). Gallery la tuy chon -
+// mo 1 anh don le van hoat dong binh thuong (mui ten/dem an di).
+let lightboxGallery = [];
+let lightboxIndex = 0;
+
+function updateLightboxView() {
   const img = document.getElementById("lightbox-img");
-  img.src = src;
+  const counter = document.getElementById("lightbox-counter");
+  const prevBtn = document.getElementById("lightbox-prev");
+  const nextBtn = document.getElementById("lightbox-next");
+  const multi = lightboxGallery.length > 1;
+
+  img.src = lightboxGallery[lightboxIndex] || "";
+  if (counter) {
+    counter.hidden = !multi;
+    counter.textContent = multi ? `${lightboxIndex + 1} / ${lightboxGallery.length}` : "";
+  }
+  if (prevBtn) prevBtn.hidden = !multi;
+  if (nextBtn) nextBtn.hidden = !multi;
+}
+
+function openLightbox(src, gallery, index) {
+  const overlay = document.getElementById("lightbox");
+  if (Array.isArray(gallery) && gallery.length > 1) {
+    lightboxGallery = gallery;
+    const found = typeof index === "number" && index >= 0 ? index : gallery.indexOf(src);
+    lightboxIndex = found >= 0 ? found : 0;
+  } else {
+    lightboxGallery = [src];
+    lightboxIndex = 0;
+  }
+  updateLightboxView();
   overlay.classList.add("active");
 }
 
 function closeLightbox() {
   document.getElementById("lightbox").classList.remove("active");
   document.getElementById("lightbox-img").src = "";
+  lightboxGallery = [];
+  lightboxIndex = 0;
+}
+
+function lightboxStep(delta) {
+  if (lightboxGallery.length < 2) return;
+  lightboxIndex = (lightboxIndex + delta + lightboxGallery.length) % lightboxGallery.length;
+  updateLightboxView();
+}
+
+function setupLightbox() {
+  const overlay = document.getElementById("lightbox");
+  const prevBtn = document.getElementById("lightbox-prev");
+  const nextBtn = document.getElementById("lightbox-next");
+  if (!overlay) return;
+
+  overlay.addEventListener("click", closeLightbox);
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      lightboxStep(-1);
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      lightboxStep(1);
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (!overlay.classList.contains("active")) return;
+    if (e.key === "ArrowLeft") lightboxStep(-1);
+    if (e.key === "ArrowRight") lightboxStep(1);
+  });
+
+  // Vuot cham trai/phai de chuyen anh truoc/sau, giong xem nhieu anh tren
+  // Windows. Nguong 50px + phai "ngang" ro rang hon "doc" de khong nham voi
+  // cu chi cuon trang doc thong thuong.
+  let touchStartX = 0;
+  let touchStartY = 0;
+  overlay.addEventListener("touchstart", (e) => {
+    if (!e.touches || !e.touches.length) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  overlay.addEventListener("touchend", (e) => {
+    if (!e.changedTouches || !e.changedTouches.length) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      lightboxStep(dx > 0 ? -1 : 1);
+    }
+  }, { passive: true });
 }
 
 function openLinkModal(url) {
@@ -963,7 +1056,7 @@ async function loadAbout() {
   }
 }
 
-function buildSkillCard(s) {
+function buildSkillCard(s, gallery) {
   const card = document.createElement(s.link ? "a" : "button");
   card.className = "skill-card";
   if (s.link) {
@@ -994,7 +1087,8 @@ function buildSkillCard(s) {
     img.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      openLightbox(s.image);
+      const list = Array.isArray(gallery) && gallery.length ? gallery : [s.image];
+      openLightbox(s.image, list, list.indexOf(s.image));
     });
     img.addEventListener("error", () => { img.remove(); }, { once: true });
     card.appendChild(img);
@@ -1034,12 +1128,13 @@ async function loadSkills() {
 
     const imageSkills = skills.filter((s) => s.image);
     const linkSkills = skills.filter((s) => !s.image && s.link);
+    const imageSkillSrcs = imageSkills.map((s) => s.image);
 
     gridImage.innerHTML = "";
     if (!imageSkills.length) {
       gridImage.innerHTML = '<p class="empty">Đang cập nhật — chưa có infographic nào.</p>';
     } else {
-      imageSkills.forEach((s) => gridImage.appendChild(buildSkillCard(s)));
+      imageSkills.forEach((s) => gridImage.appendChild(buildSkillCard(s, imageSkillSrcs)));
     }
 
     gridLink.innerHTML = "";
@@ -1314,6 +1409,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadAbout();
   loadSkills();
   loadVisitCounter();
+  setInterval(loadVisitCounter, 60 * 1000);
   loadTicker();
   setupTickerClock();
   loadTickerWeather();
@@ -1330,7 +1426,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCornerWidgets();
   setupFeedbackForm();
   setupHomeLinks();
-  document.getElementById("lightbox").addEventListener("click", closeLightbox);
+  setupLightbox();
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 });

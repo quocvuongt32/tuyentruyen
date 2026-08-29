@@ -7,6 +7,40 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-29 — Đợt phản hồi sau khi lên sóng (7 việc)
+
+Người dùng đưa web lên sóng, thu thập phản hồi thực tế và yêu cầu sửa 1 loạt:
+
+1. **Lightbox vuốt/bấm mũi tên chuyển ảnh trước-sau** (kiểu xem ảnh Windows) — thêm
+   `lightboxGallery`/`lightboxIndex` + `lightboxStep()` trong `main.js`, `openLightbox(src,
+   gallery, index)` giờ nhận thêm danh sách ảnh + vị trí (tương thích ngược, gọi
+   `openLightbox(src)` một mình vẫn hoạt động). Áp dụng cho cả 3 nơi: gallery chi tiết sự
+   kiện, Thư viện ảnh & video, lưới Infographic Bộ kỹ năng. Nút mũi tên (`#lightbox-prev`/
+   `#lightbox-next`), đếm `x / y` (`#lightbox-counter`), phím ArrowLeft/ArrowRight, và
+   `touchstart`/`touchend` (ngưỡng 50px, ngang rõ hơn dọc để không nhầm cuộn trang).
+2. **Menu mobile giờ có "truy cập nhanh" hiện trực tiếp** trong vùng đỏ (`#mobile-quick-nav`
+   — Giới thiệu/Tuyên truyền/Bộ kỹ năng, icon-only) + nút Sáng/Tối (`#theme-toggle`, di
+   chuyển ra khỏi `<nav class="site-nav">` để không còn bị ẩn vào hamburger). Toàn bộ menu
+   đầy đủ (kể cả 3 mục quick-access, để không phá vỡ trải nghiệm đầy đủ) vẫn còn trong
+   hamburger như cũ.
+3. **Ẩn tiêu đề + mô tả Hero trên mobile** (`#hero-title`, `#hero-subtitle`, dưới 640px) —
+   carousel banner đã đủ nổi bật, tiết kiệm không gian cuộn.
+4. **Icon cho 4 ô số liệu nổi bật** (lịch/ảnh/đồng hồ/mắt, sprite `<symbol>` dùng chung ở
+   đầu `<body>`). **Số lượt truy cập** giờ +1 "lạc quan" so với `TOTAL.json` gốc (bù trừ
+   race condition — luồt xem trang hiện tại có thể chưa kịp cộng vào lúc gọi API) và tự
+   làm mới mỗi 60 giây cho có cảm giác "sống" hơn — cả 2 đều miễn phí, không tốn credit
+   Netlify (GoatCounter là dịch vụ ngoài, tách biệt). **Từ chối yêu cầu cộng khống +10.000
+   lượt** — xem giải thích trong tin nhắn trả lời người dùng, không thực hiện trong code.
+5. **Hiệu ứng hover/chạm nhẹ dùng chung** cho các khối tương tác chính (thẻ, tile, nút,
+   toggle...) — thêm trạng thái `:active { transform: scale(0.96) }` còn thiếu, tôn trọng
+   `prefers-reduced-motion`, không ghi đè hiệu ứng hover riêng đã có.
+6. **Viết bổ sung nội dung tóm tắt kỹ năng cho 24 sự kiện tuyên truyền** trước đó để trống
+   `body` — với 7 sự kiện có `link` nguồn, đã `WebFetch` bài viết gốc để tóm tắt đúng nội
+   dung thật (paraphrase, không copy nguyên văn); 17 sự kiện còn lại viết theo đúng chủ đề
+   đã có sẵn trong tiêu đề/cấp học, không bịa số liệu/chi tiết không kiểm chứng được.
+7. **Tư vấn định hướng nâng cấp** — trả lời trực tiếp trong tin nhắn (không phải thay đổi
+   code), xem lịch sử chat.
+
 ## 2026-08-28 (tiếp 5)
 
 - **Sửa ảnh "chìm xuống dưới" khi bấm trong Thư viện ảnh & video**: `#lightbox` có

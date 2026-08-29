@@ -110,7 +110,15 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   `index.html`. Ô hiển thị fetch `https://vuongnq.goatcounter.com/counter/TOTAL.json`
   — API này **yêu cầu bật "Allow using the visitor counter"** trong Settings của
   GoatCounter, nếu chưa bật sẽ trả 403 và ô hiển thị giữ nguyên dấu "—" (không lỗi gì,
-  chỉ là chưa có số).
+  chỉ là chưa có số). `loadVisitCounter()` hiển thị `count + 1` (không phải số gốc) vì
+  script đếm của GoatCounter (`count.js`, tải `async`) có thể chưa kịp cộng lượt xem CỦA
+  CHÍNH TRANG ĐANG MỞ vào `TOTAL.json` tại thời điểm gọi — +1 là ước tính hợp lý cho lượt
+  đang xem, không phải số bịa. Gọi lại mỗi 60 giây (`setInterval`) để số "sống" hơn khi có
+  người khác truy cập trong lúc trang đang mở — miễn phí, GoatCounter không tính phí theo
+  lượt gọi API đếm công khai, không liên quan credit Netlify. **Không cộng khống số liệu**
+  (đã có người dùng đề nghị +10.000 lượt để "tăng uy tín" — từ chối, vì đây là dữ liệu có
+  thể kiểm chứng công khai qua chính API trên, cộng khống là thông tin sai sự thật, đi
+  ngược tôn chỉ "trung thực" của một trang tuyên truyền chống lừa đảo).
 - **Thư viện ảnh & video** (modal `#media-library-modal`, `collectMediaItems()` trong
   `main.js`): gộp ảnh + video từ **các sự kiện thật do đơn vị tự nhập** (bỏ qua sự kiện
   auto-feed hvcsnd.edu.vn — nhận diện qua `slug` bắt đầu `feed-` — vì ảnh feed luôn có
@@ -123,6 +131,16 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   chi tiết sự kiện đó. Lưới chỉ hiện ảnh thuần (không có chữ tiêu đề phủ lên như trước —
   người dùng phản hồi "rối mắt"), tên hoạt động chỉ còn ở thuộc tính `title` (tooltip khi
   hover), không hiển thị mặc định.
+- **Lightbox có điều hướng trước/sau** (`lightboxGallery`/`lightboxIndex`/
+  `lightboxStep()`/`setupLightbox()` trong `main.js`): `openLightbox(src, gallery, index)`
+  nhận thêm danh sách ảnh cùng nhóm + vị trí hiện tại (tham số tuỳ chọn, gọi
+  `openLightbox(src)` một mình vẫn hoạt động bình thường cho ảnh đơn lẻ). Dùng ở 3 nơi:
+  gallery ảnh trong chi tiết sự kiện (`allSrcs` = toàn bộ ảnh của sự kiện đó), Thư viện
+  ảnh & video (`imageSrcs` = toàn bộ ảnh trong lưới, theo đúng thứ tự hiển thị), lưới
+  Infographic Bộ kỹ năng (`imageSkillSrcs`). Điều hướng qua nút mũi tên
+  (`#lightbox-prev`/`#lightbox-next`), phím `ArrowLeft`/`ArrowRight`, hoặc vuốt chạm
+  (`touchstart`/`touchend`, ngưỡng lệch ngang > 50px VÀ lớn hơn lệch dọc × 1.5 để không
+  nhầm với cử chỉ cuộn trang dọc thông thường) — mô phỏng UX xem nhiều ảnh trên Windows.
 - **Bộ kỹ năng An toàn số** (`#ky-nang-section`, collection CMS `ky_nang` →
   `content/ky-nang/*.json` → `scripts/build-skills.js` → `data/skills.json`): lưới ảnh/
   infographic về thủ đoạn lừa đảo + cách phòng ngừa, bấm ảnh mở lightbox cỡ lớn. Khác
@@ -181,6 +199,16 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   Mục nào hiện trực tiếp / mục nào vào "Thêm" là **lựa chọn thủ công của người dùng, sửa
   trực tiếp trong `index.html`** (di chuyển thẻ `<a>` vào/ra khỏi `#nav-more-links`) —
   không có logic tự động, không phải CMS hoá.
+- **Truy cập nhanh riêng cho mobile** (`#mobile-quick-nav`, dưới 940px — 3 icon-link Giới
+  thiệu/Tuyên truyền/Bộ kỹ năng, dùng chung sprite `<symbol>` ở đầu `<body>`): người dùng
+  phản hồi trên điện thoại toàn bộ menu (kể cả nút Sáng/Tối) bị ẩn hết vào hamburger, khó
+  bấm. Fix: `#mobile-quick-nav` là 1 khối RIÊNG, nằm ngoài `<nav id="site-nav">`, luôn
+  hiện trực tiếp trong vùng đỏ trên mobile (menu đầy đủ trong hamburger vẫn còn nguyên,
+  không xoá). `#theme-toggle` cũng được **di chuyển ra ngoài `<nav>`** (trước đây nằm
+  trong, nên bị collapse theo cùng site-nav trên mobile) để luôn hiện được ở cả 2 kích
+  thước màn hình — do đó CSS mobile override riêng cho `.theme-toggle` (full-width row
+  trong danh sách sổ xuống) đã bị xoá, giờ nó giữ nguyên style icon-button 30×30 như
+  desktop trên mọi kích thước.
 - **CMS hoá gần như toàn bộ chữ tĩnh**: header, hero, tiêu đề 2 mục Tuyên truyền/Hoạt
   động khác, footer đều sửa được qua `/admin` → "Nội dung chung trang web". Nhãn các
   nút/panel nhỏ (Thời sự, Số liệu nổi bật, Hòm thư góp ý...) vẫn cố định trong code
@@ -261,6 +289,16 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   cấu trúc HTML, feed sẽ tự động trả về rỗng cho danh mục đó (không lỗi build, xem log
   `[activity-feed]`) — cần cập nhật lại regex trong `parseHvcsndTagPage()`.
 
+- **Nội dung tóm tắt (`body`) của sự kiện tuyên truyền**: khi 1 sự kiện có tiêu đề/địa
+  điểm/link nhưng để trống `body`, phần "buổi hôm đó báo cáo viên đã truyền đạt kỹ năng
+  gì" là phần quan trọng nhất với mục đích tuyên truyền của site — **nếu người nhập chưa
+  viết, chủ động viết bổ sung** thay vì để trống, theo nguyên tắc: sự kiện nào có `link`
+  nguồn thật thì `WebFetch` bài viết gốc rồi diễn giải lại (không copy nguyên văn, không
+  bịa số liệu ngoài bài); sự kiện không có `link` thì viết theo đúng chủ đề đã nêu sẵn
+  trong tiêu đề + cấp học tương ứng (tiểu học/THCS/THPT/đại học/cộng đồng dân cư — văn
+  phong và độ phức tạp kỹ năng khác nhau theo đối tượng), tuyệt đối không bịa số liệu cụ
+  thể (số người tham dự, trích dẫn...) khi không có nguồn xác thực.
+
 ## Việc CHƯA CMS hoá (nếu được yêu cầu làm tiếp)
 
 Nhãn UI chrome (tên các nút/panel/modal), meta SEO (title/description trong `<head>`).
@@ -274,3 +312,9 @@ Nhãn UI chrome (tên các nút/panel/modal), meta SEO (title/description trong 
   input không tin cậy dù do admin nhập.
 - **Ảnh/link chỉ chấp nhận nếu đúng định dạng an toàn** (`isSafeImagePath`,
   `isSafeUrl` trong các script build) — không tin trực tiếp giá trị từ JSON.
+- **Hiệu ứng hover/chạm dùng chung** (đầu `css/style.css`, ngay sau reset `a { color:
+  inherit }`): bọc trong `@media (prefers-reduced-motion: no-preference)`, chỉ THÊM
+  trạng thái `:active { transform: scale(0.96) }` cho các khối/nút tương tác chính —
+  không ghi đè `:hover` riêng đã có ở từng component (vd `.activity-card:hover` dịch lên
+  2px vẫn giữ nguyên chỗ định nghĩa cũ). Thêm class/selector mới vào 2 danh sách chọn
+  trong khối này nếu có component tương tác mới cần hiệu ứng tương tự.

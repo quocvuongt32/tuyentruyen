@@ -60,6 +60,49 @@ body, .site-header, .hero, .banner, .corner-stat, .stat-tile, .badge-icon, .part
 
 a { color: inherit; }
 
+/* ---------- Hieu ung tuong tac chung (hover chuot / cham tay) ---------- */
+/* Bo sung dong loat cho cac khoi/nut chinh tren toan site cam giac "co the
+   bam duoc": hover (chuot) nhun nhe len, cham/bam (:active, ca chuot lan
+   cam ung) nhun nhe xuong. Chi THEM trang thai con thieu, khong ghi de cac
+   hieu ung hover rieng da co (vd .activity-card:hover dich len 2px). */
+@media (prefers-reduced-motion: no-preference) {
+  .stat-tile,
+  .corner-stat,
+  .activity-card,
+  .skill-card,
+  .banner-dot,
+  .nav-more-toggle,
+  .theme-toggle,
+  .admin-toggle,
+  .hero-cta,
+  .corner-fab,
+  .event-summary,
+  .nav a,
+  .site-nav a {
+    transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .stat-tile:hover,
+  .corner-stat:hover {
+    transform: translateY(-2px);
+  }
+
+  .stat-tile:active,
+  .corner-stat:active,
+  .activity-card:active,
+  .skill-card:active,
+  .banner-dot:active,
+  .nav-more-toggle:active,
+  .theme-toggle:active,
+  .admin-toggle:active,
+  .hero-cta:active,
+  .corner-fab:active,
+  .event-summary:active,
+  .site-nav a:active {
+    transform: scale(0.96);
+  }
+}
+
 /* ---------- Dai tin chay (thoi su chinh thong) ---------- */
 
 .news-ticker {
@@ -278,6 +321,12 @@ a { color: inherit; }
   border-radius: 8px;
   padding: 10px;
   cursor: default;
+}
+
+.corner-stat .stat-icon {
+  width: 16px;
+  height: 16px;
+  margin-bottom: 4px;
 }
 
 .corner-stat strong {
@@ -670,6 +719,39 @@ a { color: inherit; }
 :root[data-theme="light"] .theme-toggle .theme-icon-sun { display: flex; }
 :root[data-theme="light"] .theme-toggle .theme-icon-moon { display: none; }
 
+/* Truy cap nhanh tren mobile (Gioi thieu/Tuyen truyen/Bo ky nang) - chi hien
+   duoi nguong 940px, xem quy tac o media query ben duoi. Tren desktop cac
+   muc nay da co san dang chu trong .site-nav nen an di o day. */
+.mobile-quick-nav {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-quick-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  color: var(--on-accent);
+  text-decoration: none;
+}
+
+.mobile-quick-link svg {
+  width: 17px;
+  height: 17px;
+}
+
+.mobile-quick-link:hover,
+.mobile-quick-link:focus-visible {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
 /* Menu quan tri (Quan tri / Doi mat khau) gom vao 1 icon nho, kin dao
    de khong lam giao dien thien ve "san pham quan ly" khi chia se cong khai. */
 .admin-menu {
@@ -949,6 +1031,14 @@ a { color: inherit; }
   border: 1px solid var(--gold);
   border-radius: var(--radius);
   padding: 18px 12px;
+}
+
+.stat-icon {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin-bottom: 6px;
+  color: var(--gold);
 }
 
 .stat-tile strong {
@@ -1625,6 +1715,55 @@ a { color: inherit; }
   border-radius: 6px;
 }
 
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  cursor: pointer;
+  z-index: 1;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.lightbox-nav:hover,
+.lightbox-nav:focus-visible {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.lightbox-nav:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.lightbox-prev { left: 16px; }
+.lightbox-next { right: 16px; }
+
+@media (max-width: 640px) {
+  .lightbox-nav { width: 40px; height: 40px; }
+  .lightbox-prev { left: 6px; }
+  .lightbox-next { right: 6px; }
+}
+
+.lightbox-counter {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 0.8rem;
+  letter-spacing: 0.3px;
+}
+
 /* ---------- Link modal (xem link tham khao ngay trong trang) ---------- */
 
 .link-modal {
@@ -1735,6 +1874,7 @@ a { color: inherit; }
    grid...) van giu nguong 640/720px cu. */
 @media (max-width: 940px) {
   .nav-toggle { display: flex; }
+  .mobile-quick-nav { display: flex; }
 
   .site-nav {
     position: fixed;
@@ -1789,24 +1929,6 @@ a { color: inherit; }
     color: var(--text-dim);
   }
 
-  .theme-toggle {
-    width: 100%;
-    height: auto;
-    justify-content: flex-start;
-    gap: 10px;
-    padding: 14px 20px;
-    border: 0;
-    border-top: 1px solid var(--border);
-    border-radius: 0;
-    color: var(--text-dim);
-  }
-
-  .theme-toggle::after {
-    content: "Giao diện sáng / tối";
-    font-size: 0.92rem;
-    color: var(--text-dim);
-  }
-
   .admin-toggle { display: none; }
 
   .admin-links {
@@ -1822,10 +1944,19 @@ a { color: inherit; }
 
 @media (max-width: 640px) {
   .section-inner { padding: 44px 18px; }
-  .hero { padding: 20px 18px 72px; }
+  .hero { padding: 20px 18px 56px; }
   .timeline { padding-left: 20px; }
   .event-dot { left: -26px; }
   .event-summary { align-items: flex-start; }
 
   .banner { margin: 0 auto 28px; border-radius: 8px; }
+
+  /* Tiet kiem khong gian tren mobile - carousel banner da du noi bat, bo
+     tieu de + doan mo ta lap lai y nghia, giu lai nut CTA. */
+  #hero-title,
+  #hero-subtitle {
+    display: none;
+  }
+
+  .hero-icon { margin-bottom: 16px; }
 }
