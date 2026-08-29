@@ -119,6 +119,15 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   (đã có người dùng đề nghị +10.000 lượt để "tăng uy tín" — từ chối, vì đây là dữ liệu có
   thể kiểm chứng công khai qua chính API trên, cộng khống là thông tin sai sự thật, đi
   ngược tôn chỉ "trung thực" của một trang tuyên truyền chống lừa đảo).
+- **Đo lường thao tác (`trackEvent()`)**: gọi `window.goatcounter.count({path, title,
+  event: true})` — GoatCounter coi mỗi lời gọi là 1 "custom event", xem được trong
+  GoatCounter dashboard tách biệt với lượt xem trang thường. Rải rác khắp `main.js` ở mọi
+  nút/link quan trọng (menu, sự kiện, ảnh, link tham khảo, bộ lọc, quiz...). **Bẫy dễ gặp**:
+  các phần tử nằm NGOÀI `#site-nav` (như `#mobile-quick-nav`, `#theme-toggle` — xem mục
+  "Truy cập nhanh riêng cho mobile") sẽ KHÔNG được `setupNav()` tự động bắt (nó chỉ
+  `querySelectorAll("a")` bên trong `#site-nav`) — phải khai báo tracking riêng, xem
+  `setupExtraTracking()`. Khi thêm phần tử tương tác mới nằm ngoài `#site-nav`, nhớ thêm
+  `trackEvent()` thủ công vào đó.
 - **Thư viện ảnh & video** (modal `#media-library-modal`, `collectMediaItems()` trong
   `main.js`): gộp ảnh + video từ **các sự kiện thật do đơn vị tự nhập** (bỏ qua sự kiện
   auto-feed hvcsnd.edu.vn — nhận diện qua `slug` bắt đầu `feed-` — vì ảnh feed luôn có
@@ -141,6 +150,21 @@ netlify.toml           Build command + Content-Security-Policy headers. Xem
   (`#lightbox-prev`/`#lightbox-next`), phím `ArrowLeft`/`ArrowRight`, hoặc vuốt chạm
   (`touchstart`/`touchend`, ngưỡng lệch ngang > 50px VÀ lớn hơn lệch dọc × 1.5 để không
   nhầm với cử chỉ cuộn trang dọc thông thường) — mô phỏng UX xem nhiều ảnh trên Windows.
+- **Mini-quiz an toàn số** (`#quiz-section`, `setupQuiz()` trong `main.js`): 6 câu trắc
+  nghiệm cố định trong HTML (không qua CMS — nội dung giáo dục cần kiểm duyệt kỹ, không
+  nên để chỉnh sửa tự do), mỗi câu có `data-correct` (đáp án đúng) trên `.quiz-question`.
+  Nộp bài: tô xanh đáp án đúng/đỏ gạch ngang đáp án sai đã chọn, hiện `.quiz-explain`,
+  tính điểm + thông điệp động viên theo mức điểm, gọi `trackEvent("/quiz/nop-bai", "x/6")`
+  để biết mức độ hiểu bài của người dùng. Không cần backend — chấm hoàn toàn phía client.
+- **Form đăng ký bản tin** (`#newsletter-section`, `setupNewsletterForm()`): thu email qua
+  **Netlify Forms** — cùng cơ chế với `#feedback-form` (form tĩnh có `data-netlify="true"`
+  + `netlify-honeypot`, JS submit bằng `fetch("/")` POST `application/x-www-form-urlencoded`
+  thay vì để trình duyệt tự submit, để không rời trang). Netlify tự nhận diện form này lúc
+  build vì nó nằm tĩnh trong `index.html` (không phải form dựng bằng JS lúc runtime — nếu
+  sau này chuyển form sang dựng động, phải thêm 1 bản HTML tĩnh ẩn đâu đó để Netlify quét
+  thấy, xem tài liệu Netlify Forms). Xem submissions tại Netlify dashboard → Forms. **Chưa
+  có link theo dõi Zalo OA** (ưu tiên 4 gốc còn có ý gắn Zalo OA) — cần người dùng xác nhận
+  đã có tài khoản Zalo OA thật trước khi thêm, tránh dẫn tới link không tồn tại.
 - **Bộ kỹ năng An toàn số** (`#ky-nang-section`, collection CMS `ky_nang` →
   `content/ky-nang/*.json` → `scripts/build-skills.js` → `data/skills.json`): lưới ảnh/
   infographic về thủ đoạn lừa đảo + cách phòng ngừa, bấm ảnh mở lightbox cỡ lớn. Khác

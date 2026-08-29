@@ -843,6 +843,65 @@ function setupNavMore() {
 // Nhay ve dung dinh #trang-chu se cuon khung thoi su (nam tren header, khong
 // dinh sticky) ra khoi man hinh. Bam "Trang chu" (hoac logo) thi cuon thang
 // len dau trang de van thay duoc dai tin.
+function setupQuiz() {
+  const form = document.getElementById("quiz-form");
+  const result = document.getElementById("quiz-result");
+  const retryBtn = document.getElementById("quiz-retry");
+  if (!form || !result) return;
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const questions = form.querySelectorAll(".quiz-question");
+    let correct = 0;
+
+    questions.forEach((q) => {
+      const qid = q.dataset.qid;
+      const correctVal = q.dataset.correct;
+      const chosen = form.querySelector(`input[name="q${qid}"]:checked`);
+      q.querySelectorAll("label").forEach((label) => {
+        const input = label.querySelector("input");
+        label.classList.remove("is-correct", "is-wrong");
+        if (input.value === correctVal) {
+          label.classList.add("is-correct");
+        } else if (chosen && input.value === chosen.value) {
+          label.classList.add("is-wrong");
+        }
+      });
+      const explain = q.querySelector(".quiz-explain");
+      if (explain) explain.hidden = false;
+      if (chosen && chosen.value === correctVal) correct++;
+    });
+
+    const total = questions.length;
+    let feedback;
+    if (correct === total) {
+      feedback = "Xuất sắc! Bạn đã nắm rất vững các kỹ năng an toàn số.";
+    } else if (correct >= total * 0.7) {
+      feedback = "Khá tốt! Xem lại phần giải thích để nắm chắc hơn các tình huống còn lại.";
+    } else {
+      feedback = "Bạn nên đọc kỹ Bộ kỹ năng An toàn số phía trên để trang bị thêm kiến thức nhé.";
+    }
+
+    result.querySelector(".quiz-score").textContent = `Bạn trả lời đúng ${correct}/${total} câu.`;
+    result.querySelector(".quiz-feedback").textContent = feedback;
+    result.hidden = false;
+    result.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    trackEvent("/quiz/nop-bai", `${correct}/${total}`);
+  });
+
+  if (retryBtn) {
+    retryBtn.addEventListener("click", () => {
+      form.reset();
+      form.querySelectorAll(".quiz-explain").forEach((el) => { el.hidden = true; });
+      form.querySelectorAll("label").forEach((el) => el.classList.remove("is-correct", "is-wrong"));
+      result.hidden = true;
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+      trackEvent("/quiz/lam-lai", "Làm lại quiz");
+    });
+  }
+}
+
 function setupHomeLinks() {
   document.querySelectorAll('a[href="#trang-chu"]').forEach((link) => {
     link.addEventListener("click", (e) => {
@@ -851,6 +910,32 @@ function setupHomeLinks() {
       if (history.pushState) history.pushState(null, "", "#trang-chu");
     });
   });
+}
+
+// Do luong them cac thao tac chua duoc trackEvent() bao phu o noi khac:
+// CTA chinh cua Hero, hang truy cap nhanh mobile (nam ngoai #site-nav nen
+// khong duoc trackEvent trong setupNav() bat duoc), nut Sang/Toi, nut "Them".
+function setupExtraTracking() {
+  const heroCta = document.querySelector(".hero-cta");
+  if (heroCta) {
+    heroCta.addEventListener("click", () => trackEvent("/hero-cta", "Xem Cẩm nang"));
+  }
+
+  document.querySelectorAll(".mobile-quick-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      trackEvent(`/mobile-quick${link.getAttribute("href")}`, link.getAttribute("aria-label") || "");
+    });
+  });
+
+  const themeToggle = document.getElementById("theme-toggle");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => trackEvent("/theme-toggle", "Chuyển giao diện sáng/tối"));
+  }
+
+  const navMoreToggle = document.getElementById("nav-more-toggle");
+  if (navMoreToggle) {
+    navMoreToggle.addEventListener("click", () => trackEvent("/menu/them", "Thêm"));
+  }
 }
 
 // Carousel o vi tri logo lon trong Hero: bat dau bang huy hieu, roi chay qua
@@ -1089,6 +1174,7 @@ function buildSkillCard(s, gallery) {
       e.stopPropagation();
       const list = Array.isArray(gallery) && gallery.length ? gallery : [s.image];
       openLightbox(s.image, list, list.indexOf(s.image));
+      trackEvent(`/ky-nang/${s.slug}`, s.title);
     });
     img.addEventListener("error", () => { img.remove(); }, { once: true });
     card.appendChild(img);
@@ -1387,6 +1473,41 @@ function setupFeedbackForm() {
   });
 }
 
+function setupNewsletterForm() {
+  const form = document.getElementById("newsletter-form");
+  const submitBtn = document.getElementById("newsletter-submit");
+  const note = document.getElementById("newsletter-note");
+  if (!form || !submitBtn || !note) return;
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    note.hidden = true;
+
+    const body = new URLSearchParams(new FormData(form)).toString();
+
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Gửi thất bại");
+        note.textContent = "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ gửi bản tin tới email này.";
+        note.hidden = false;
+        form.reset();
+        trackEvent("/dang-ky-ban-tin", "Đăng ký bản tin");
+      })
+      .catch(() => {
+        note.textContent = "Đăng ký không thành công, vui lòng thử lại sau.";
+        note.hidden = false;
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+      });
+  });
+}
+
 function setupThemeToggle() {
   const btn = document.getElementById("theme-toggle");
   if (!btn) return;
@@ -1426,6 +1547,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCornerWidgets();
   setupFeedbackForm();
   setupHomeLinks();
+  setupExtraTracking();
+  setupQuiz();
+  setupNewsletterForm();
   setupLightbox();
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());

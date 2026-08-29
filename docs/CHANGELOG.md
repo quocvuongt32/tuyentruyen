@@ -7,6 +7,33 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-29 (tiếp 2) — Phiếu dự thi + nâng cấp ưu tiên 3/4/7
+
+- **Điền lại `KTT_Phiếu dự thi.docx`**: file gốc do người dùng cung cấp là mẫu/ví dụ của
+  1 chi bộ khác (Chi bộ B3BVB2CQK16, sản phẩm "Học viện CSND - Tiên phong chuyển đổi số").
+  Đã sửa trực tiếp XML (`word/document.xml`, theo quy trình unzip → merge_runs → sửa text
+  → rezip bằng `zipfile` do máy không có lệnh `zip`/LibreOffice → validate XSD) để điền
+  đúng thông tin dự án Cẩm nang An toàn số: tên sản phẩm, đơn vị (Chi bộ Khoa Toán - Tin
+  học và Ứng dụng KHCN trong PCTP), 3 thành viên nhóm tác giả (lấy từ hồ sơ PHẦN I trong
+  `Kịch bản.backup...docx`), SĐT/email, và viết lại mục "Ý tưởng, thông điệp, giá trị sản
+  phẩm" phản ánh đúng hiện trạng thật của dự án (58 hoạt động, 3 trụ cột, v.v.). **Lưu ý**:
+  đổi khung ký tên từ "T/M CHI BỘ - BÍ THƯ" sang "T/M NHÓM TÁC GIẢ - TRƯỞNG NHÓM" vì không
+  xác nhận được ai là Bí thư chi bộ thật — người dùng cần tự kiểm tra lại phần ký tên
+  trước khi nộp.
+- **Ưu tiên 3 — Mini-quiz an toàn số** (`#quiz-section`, `setupQuiz()`): 6 câu trắc nghiệm
+  (deepfake, bắt cóc online, mật khẩu, tin giả, phishing, xử lý bắt nạt mạng), chấm điểm
+  + tô màu đúng/sai + giải thích ngay khi nộp bài, không cần backend.
+- **Ưu tiên 4 — Form đăng ký bản tin** (`#newsletter-section`, `setupNewsletterForm()`):
+  thu email qua Netlify Forms (giống cơ chế `#feedback-form` đã có, không cần backend
+  riêng). **Chưa có link Zalo OA** vì chưa xác nhận đơn vị đã có tài khoản Zalo OA thật
+  hay chưa — hỏi lại người dùng trước khi gắn link giả.
+- **Ưu tiên 7 — Bổ sung đo lường**: rà soát thấy nhiều thao tác chưa gọi `trackEvent()` —
+  CTA "Xem Cẩm nang", 3 link truy cập nhanh mobile (nằm ngoài `#site-nav` từ đợt sửa
+  trước nên lọt khỏi `trackEvent` chung), nút Sáng/Tối, nút "Thêm", và quan trọng nhất là
+  **toàn bộ thẻ Infographic Bộ kỹ năng** (bấm ảnh mở lightbox nhưng không được đo). Đã bổ
+  sung `setupExtraTracking()` + thêm `trackEvent()` vào `img.addEventListener("click")`
+  trong `buildSkillCard()`.
+
 ## 2026-08-29 (tiếp) — Ảnh chia sẻ mạng xã hội + tiêu đề trang
 
 - **Đổi ảnh chia sẻ khi dán link lên Facebook/Zalo** (`og:image`/`twitter:image`): người

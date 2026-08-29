@@ -105,6 +105,7 @@
             <a href="#hoat-dong-khac-section" data-activity-filter="doi-moi-sang-tao">Đổi mới sáng tạo</a>
             <a href="#hoat-dong-khac-section" data-activity-filter="khac">Khác</a>
             <a href="#hoat-dong-khac-section" data-activity-filter="nghien-cuu-khoa-hoc">Nghiên cứu khoa học</a>
+            <a href="#quiz-section">Kiểm tra nhanh</a>
           </div>
         </div>
 
@@ -269,6 +270,93 @@
       <div id="skills-grid-link" class="skills-grid">
         <p class="loading">Đang tải dữ liệu…</p>
       </div>
+    </div>
+  </section>
+
+  <section id="quiz-section" class="quiz-section">
+    <div class="section-inner">
+      <h2>Kiểm tra nhanh: Bạn đã an toàn số chưa?</h2>
+      <p class="section-hint">6 câu hỏi trắc nghiệm ngắn giúp bạn tự đánh giá kỹ năng an toàn số đã học ở trên. Chọn đáp án rồi bấm "Xem kết quả" để biết đúng/sai kèm giải thích.</p>
+
+      <form id="quiz-form" class="quiz-form">
+        <div class="quiz-question" data-qid="1" data-correct="b">
+          <p class="quiz-question-text">1. Bạn nhận được cuộc gọi video từ "người thân" yêu cầu chuyển tiền gấp, nhưng cử chỉ và giọng nói hơi bất thường. Đây có thể là dấu hiệu của thủ đoạn nào?</p>
+          <label><input type="radio" name="q1" value="a" /> Gọi điện quảng cáo thông thường</label>
+          <label><input type="radio" name="q1" value="b" /> Deepfake giả mạo hình ảnh, giọng nói người thân</label>
+          <label><input type="radio" name="q1" value="c" /> Cuộc gọi thông báo từ ngân hàng</label>
+          <label><input type="radio" name="q1" value="d" /> Không có gì đáng ngờ</label>
+          <p class="quiz-explain" hidden>Đúng là <strong>Deepfake</strong>: công nghệ AI có thể giả mạo hình ảnh, giọng nói người thân để yêu cầu chuyển tiền gấp — luôn gọi lại bằng số điện thoại quen thuộc để xác minh trước khi chuyển tiền.</p>
+        </div>
+
+        <div class="quiz-question" data-qid="2" data-correct="c">
+          <p class="quiz-question-text">2. Một người lạ trên mạng xã hội liên tục nhắn tin làm quen, hẹn gặp riêng và yêu cầu bạn giữ bí mật với gia đình. Bạn nên làm gì?</p>
+          <label><input type="radio" name="q2" value="a" /> Đồng ý gặp vì họ có vẻ thân thiện</label>
+          <label><input type="radio" name="q2" value="b" /> Chia sẻ thêm thông tin cá nhân để họ tin tưởng</label>
+          <label><input type="radio" name="q2" value="c" /> Từ chối, không giữ bí mật và báo ngay cho cha mẹ, thầy cô</label>
+          <label><input type="radio" name="q2" value="d" /> Tự đi gặp một mình để tìm hiểu thực hư</label>
+          <p class="quiz-explain" hidden>Đây là dấu hiệu điển hình của thủ đoạn <strong>"bắt cóc online"</strong>/dụ dỗ qua mạng — tuyệt đối không giữ bí mật với gia đình, luôn báo ngay người lớn tin cậy.</p>
+        </div>
+
+        <div class="quiz-question" data-qid="3" data-correct="c">
+          <p class="quiz-question-text">3. Cách đặt mật khẩu nào sau đây AN TOÀN nhất?</p>
+          <label><input type="radio" name="q3" value="a" /> Ngày sinh của bạn</label>
+          <label><input type="radio" name="q3" value="b" /> "123456"</label>
+          <label><input type="radio" name="q3" value="c" /> Kết hợp chữ hoa, chữ thường, số, ký tự đặc biệt, riêng cho từng tài khoản</label>
+          <label><input type="radio" name="q3" value="d" /> Tên của bạn viết hoa</label>
+          <p class="quiz-explain" hidden>Mật khẩu mạnh, <strong>riêng biệt cho từng tài khoản</strong> giúp hạn chế thiệt hại nếu chẳng may 1 tài khoản bị lộ.</p>
+        </div>
+
+        <div class="quiz-question" data-qid="4" data-correct="b">
+          <p class="quiz-question-text">4. Bạn đọc được một tin "giật gân" chưa rõ nguồn trên mạng xã hội. Việc nên làm trước khi chia sẻ là gì?</p>
+          <label><input type="radio" name="q4" value="a" /> Chia sẻ ngay để cảnh báo mọi người</label>
+          <label><input type="radio" name="q4" value="b" /> Kiểm chứng qua nguồn tin chính thống trước khi chia sẻ</label>
+          <label><input type="radio" name="q4" value="c" /> Bình luận nghi ngờ nhưng vẫn chia sẻ</label>
+          <label><input type="radio" name="q4" value="d" /> Gửi riêng cho bạn bè để họ tự kiểm chứng</label>
+          <p class="quiz-explain" hidden>Chia sẻ tin chưa kiểm chứng có thể vô tình <strong>tiếp tay lan truyền tin giả</strong>, thậm chí vi phạm pháp luật.</p>
+        </div>
+
+        <div class="quiz-question" data-qid="5" data-correct="c">
+          <p class="quiz-question-text">5. Nhận được tin nhắn kèm đường link lạ với nội dung "Bạn trúng thưởng, bấm vào để nhận quà". Bạn nên?</p>
+          <label><input type="radio" name="q5" value="a" /> Bấm vào ngay để nhận quà</label>
+          <label><input type="radio" name="q5" value="b" /> Nhập thông tin tài khoản ngân hàng theo yêu cầu</label>
+          <label><input type="radio" name="q5" value="c" /> Không bấm vào link lạ, xoá hoặc báo cáo tin nhắn</label>
+          <label><input type="radio" name="q5" value="d" /> Chuyển tiếp cho bạn bè để cùng nhận thưởng</label>
+          <p class="quiz-explain" hidden>Đây là thủ đoạn <strong>lừa đảo (phishing)</strong> phổ biến nhằm chiếm đoạt tài khoản, tài sản — không bấm vào link lạ.</p>
+        </div>
+
+        <div class="quiz-question" data-qid="6" data-correct="c">
+          <p class="quiz-question-text">6. Khi bị bắt nạt, đe doạ hoặc gặp nội dung xấu độc trên mạng, hành động đúng nhất là?</p>
+          <label><input type="radio" name="q6" value="a" /> Tự giải quyết một mình, không nói với ai</label>
+          <label><input type="radio" name="q6" value="b" /> Trả đũa lại bằng lời lẽ tương tự</label>
+          <label><input type="radio" name="q6" value="c" /> Lưu lại bằng chứng và báo ngay cho cha mẹ, thầy cô hoặc cơ quan chức năng</label>
+          <label><input type="radio" name="q6" value="d" /> Xoá tài khoản mạng xã hội và im lặng</label>
+          <p class="quiz-explain" hidden><strong>Lưu bằng chứng và báo người lớn tin cậy</strong> giúp xử lý kịp thời, đúng quy định, tránh để sự việc kéo dài.</p>
+        </div>
+
+        <button type="submit" class="quiz-submit">Xem kết quả</button>
+      </form>
+
+      <div id="quiz-result" class="quiz-result" hidden>
+        <p class="quiz-score"></p>
+        <p class="quiz-feedback"></p>
+        <button type="button" id="quiz-retry" class="quiz-retry">Làm lại</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="newsletter-section" class="newsletter-section">
+    <div class="section-inner newsletter-inner">
+      <div class="newsletter-text">
+        <h2>Nhận cảnh báo thủ đoạn lừa đảo mới nhất</h2>
+        <p class="section-hint">Để lại email để nhận bản tin định kỳ tổng hợp thủ đoạn lừa đảo mới và kỹ năng an toàn số — không spam, có thể huỷ bất cứ lúc nào.</p>
+      </div>
+      <form name="dang-ky-ban-tin" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="newsletter-form" id="newsletter-form">
+        <input type="hidden" name="form-name" value="dang-ky-ban-tin" />
+        <p class="feedback-honeypot"><label>Để trống ô này<input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
+        <input type="email" name="email" placeholder="Nhập email của bạn" required class="newsletter-input" />
+        <button type="submit" class="newsletter-submit" id="newsletter-submit">Đăng ký</button>
+      </form>
+      <p class="newsletter-note" id="newsletter-note" hidden></p>
     </div>
   </section>
 
