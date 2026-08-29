@@ -7,6 +7,22 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-29 (tiếp) — Ảnh chia sẻ mạng xã hội + tiêu đề trang
+
+- **Đổi ảnh chia sẻ khi dán link lên Facebook/Zalo** (`og:image`/`twitter:image`): người
+  dùng tự thiết kế ảnh mới (nền tối, phong cách công nghệ, có `img/og-image.png`) để thay
+  ảnh cũ. Ảnh gốc PNG nặng bất thường (775KB, dạng lossless không nén được thêm dù đã thử
+  `optimize=True`/`compress_level=9` — vẫn ra ~1.5MB do ảnh nhiều chi tiết/gradient) nên
+  đã chuyển sang **JPEG chất lượng 90** (`img/og-image.jpg`, còn ~300KB, không khác biệt
+  thị giác) — cập nhật cả 2 chỗ tham chiếu trong `index.html`. **Lưu ý cho người dùng**:
+  Facebook/Zalo cache ảnh preview theo URL khá lâu — nếu link đã từng được dán trước đó,
+  cần dùng Facebook Sharing Debugger (developers.facebook.com/tools/debug/) bấm "Scrape
+  Again" để họ lấy lại ảnh mới, không tự động cập nhật ngay cả khi web đã đổi ảnh.
+- **Tiêu đề trang rút gọn**: `<title>`/`og:title` từ "Cẩm nang An toàn số | Khoa Toán -
+  Tin học và Ứng dụng KHCN, Học viện CSND" → "Cẩm nang An toàn số | Khoa KTT, Học viện
+  Cảnh sát nhân dân" theo yêu cầu người dùng (dùng tên viết tắt "Khoa KTT" thay vì tên đầy
+  đủ dài dòng khi hiển thị dạng rút gọn trên link preview).
+
 ## 2026-08-29 — Đợt phản hồi sau khi lên sóng (7 việc)
 
 Người dùng đưa web lên sóng, thu thập phản hồi thực tế và yêu cầu sửa 1 loạt:
