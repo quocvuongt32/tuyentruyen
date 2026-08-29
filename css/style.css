@@ -1734,37 +1734,40 @@ a { color: inherit; }
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding-top: 48px;
-  padding-bottom: 48px;
+  gap: 20px;
+  padding-top: 22px;
+  padding-bottom: 22px;
 }
 
 .newsletter-text h2 {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
+  font-size: 1.15rem;
   color: var(--on-accent);
 }
 
 .newsletter-text .section-hint {
   margin: 0;
-  max-width: 480px;
+  max-width: 620px;
+  font-size: 0.86rem;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.85);
 }
 
 .newsletter-form {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .newsletter-input {
-  width: 260px;
+  width: 220px;
   max-width: 100%;
-  padding: 12px 16px;
+  padding: 9px 14px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.12);
   color: var(--on-accent);
-  font-size: 0.92rem;
+  font-size: 0.86rem;
 }
 
 .newsletter-input::placeholder {
@@ -1778,12 +1781,13 @@ a { color: inherit; }
 }
 
 .newsletter-submit {
-  padding: 12px 26px;
+  padding: 9px 20px;
   border-radius: 999px;
   background: var(--gold);
   color: #1a1206;
   border: 1px solid var(--gold);
   font-weight: 700;
+  font-size: 0.86rem;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s ease;
