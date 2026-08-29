@@ -7,6 +7,30 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-29 (tiếp 6) — Sửa lỗi đăng ký bản tin 404, gộp menu "Thêm", thêm email liên hệ
+
+Ba việc riêng biệt trong phiên này:
+
+1. **Debug lỗi "Đăng ký không thành công"** khi test form bản tin trên site thật: dùng
+   fetch trực tiếp để tái hiện, phát hiện `POST /` trả về **404** với
+   `cache-status: fwd-status=404` — nghĩa là Netlify chưa từng nhận diện form nào của site
+   (`Site configuration → Forms` cho thấy **Form detection đang tắt**). Đã bấm bật
+   "Enable form detection" trong Netlify UI. **Lưu ý: tính năng này chỉ quét form ở lần
+   deploy KẾ TIẾP**, nên form đăng ký sẽ vẫn lỗi cho tới khi có 1 lần deploy mới (redeploy
+   thường hoặc push code mới) — commit đợt này sẽ kích hoạt điều đó.
+2. **Đã tạo domain `tuyentruyen.khoaktt.vn` trên Resend** để xác minh gửi email (thay vì
+   dùng tạm `onboarding@resend.dev`), lấy được 3 bản ghi DNS cần thêm (DKIM TXT, MX + TXT
+   cho SPF) và đã bắt đầu nhập vào Cloudflare (zone `khoaktt.vn`) theo uỷ quyền của người
+   dùng. **Chưa xác nhận đã nhập xong** — phiên bị gián đoạn giữa chừng lúc chọn Type =
+   TXT cho bản ghi DKIM đầu tiên, cần kiểm tra lại ở Cloudflare DNS Records xem đã có đủ 3
+   bản ghi chưa trước khi coi là hoàn tất.
+3. **Gộp nút menu "Thêm"** (icon tròn 3 chấm ngang, `nav-more-toggle`) **vào chung icon 3
+   chấm vuông** (`admin-toggle`) theo yêu cầu người dùng — xoá hẳn nút tròn, 4 mục nội dung
+   (Đổi mới sáng tạo, Khác, Nghiên cứu khoa học, Kiểm tra nhanh) nay nằm chung dropdown với
+   Quản trị/Đổi mật khẩu, ngăn cách bằng 1 đường kẻ mảnh (`.admin-links-sep`).
+4. **Thêm dòng "Liên hệ: vuongppa@gmail.com"** vào footer (`.footer-contact`, mailto link)
+   — trước đó bấm "Liên hệ" chỉ cuộn xuống footer trống, không có thông tin liên lạc nào.
+
 ## 2026-08-29 (tiếp 5) — Sửa API Resend sai trong hệ thống bản tin + tạo API key thật
 
 Đăng nhập trực tiếp vào tài khoản Resend thật của người dùng (theo yêu cầu "tự làm đi") để
