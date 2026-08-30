@@ -1426,6 +1426,25 @@ function closeCornerPanels() {
   });
 }
 
+function setupScrollButtons() {
+  const topBtn = document.getElementById("scroll-top-fab");
+  const bottomBtn = document.getElementById("scroll-bottom-fab");
+
+  if (topBtn) {
+    topBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      trackEvent("/cuon-len-dau-trang", "Cuộn lên đầu trang");
+    });
+  }
+
+  if (bottomBtn) {
+    bottomBtn.addEventListener("click", () => {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
+      trackEvent("/cuon-xuong-cuoi-trang", "Cuộn xuống cuối trang");
+    });
+  }
+}
+
 function setupCornerWidgets() {
   const widgets = document.getElementById("corner-widgets");
   if (!widgets) return;
@@ -1565,6 +1584,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupLinkModal();
   setupActivityModal();
   setupMediaLibrary();
+  setupScrollButtons();
   setupCornerWidgets();
   setupFeedbackForm();
   setupHomeLinks();

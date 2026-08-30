@@ -62,6 +62,24 @@ function markdownToHtml(md) {
   return html;
 }
 
+// Theo yeu cau: cac su kien tuyen truyen o 5 truong nay luon xep dau chuoi
+// su kien, bat ke ngay thang; sau 5 truong nay moi xet den truong/hoat dong
+// gan day nhat. Khop theo dia diem (khong phan biet hoa/thuong), dung tu
+// khoa cu the (vd "thcs cầu giấy") de khong an nham cac dia diem chi nhac
+// "Cầu Giấy" nhu ten quan (vd "THCS Mai Dịch, Cầu Giấy").
+const PRIORITY_LOCATION_MARKERS = [
+  "amsterdam",
+  "marie curie",
+  "thcs cầu giấy",
+  "tiểu học đoàn thị điểm",
+  "symphony",
+];
+
+function isPriorityLocation(location) {
+  const loc = String(location || "").toLowerCase();
+  return PRIORITY_LOCATION_MARKERS.some((marker) => loc.includes(marker));
+}
+
 function isSafeUrl(url) {
   return typeof url === "string" && /^https?:\/\//i.test(url);
 }
@@ -413,10 +431,14 @@ async function main() {
   }
   events.push(...feedEvents);
 
-  // So sanh ISO date dang chuoi (YYYY-MM-DD) - luon dat gan nhat len dau, bat
-  // ke thu tu nhap lieu truoc/sau. Tra ve 0 khi bang nhau de giu thu tu on
-  // dinh (Array.sort da bao dam stable tu ES2019).
+  // Uu tien 5 truong trong PRIORITY_LOCATION_MARKERS len dau chuoi su kien
+  // (bat ke ngay thang), sau do moi so sanh ISO date dang chuoi (YYYY-MM-DD)
+  // - dat gan nhat len dau trong tung nhom. Tra ve 0 khi bang nhau de giu
+  // thu tu on dinh (Array.sort da bao dam stable tu ES2019).
   events.sort((a, b) => {
+    const pa = isPriorityLocation(a.location) ? 0 : 1;
+    const pb = isPriorityLocation(b.location) ? 0 : 1;
+    if (pa !== pb) return pa - pb;
     if (a.date === b.date) return 0;
     return a.date < b.date ? 1 : -1;
   });
