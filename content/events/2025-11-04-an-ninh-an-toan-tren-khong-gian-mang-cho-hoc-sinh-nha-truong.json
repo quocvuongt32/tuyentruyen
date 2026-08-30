@@ -6,18 +6,6 @@
   "body": "Báo cáo viên tiếp tục chương trình tuyên truyền an ninh, an toàn không gian mạng tại trường, trang bị cho học sinh kỹ năng bảo vệ tài khoản, thông tin cá nhân, nhận diện các thủ đoạn lừa đảo trực tuyến và cách ứng xử an toàn khi gặp tình huống nghi vấn trên mạng xã hội.",
   "images": [
     {
-      "image": "/uploads/marie-curie-01.jpg"
-    },
-    {
-      "image": "/uploads/marie-curie-02.jpg"
-    },
-    {
-      "image": "/uploads/marie-curie-03.jpg"
-    },
-    {
-      "image": "/uploads/marie-curie-04.jpg"
-    },
-    {
       "image": "/uploads/marie-curie-05.jpg"
     },
     {
@@ -34,6 +22,18 @@
     },
     {
       "image": "/uploads/marie-curie-10.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-01.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-02.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-03.jpg"
+    },
+    {
+      "image": "/uploads/marie-curie-04.jpg"
     }
   ],
   "link": "",
