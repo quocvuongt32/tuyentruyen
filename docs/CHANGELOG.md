@@ -7,6 +7,40 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-30 — Sửa trùng sự kiện/ảnh, ưu tiên 5 trường lên đầu timeline, thêm nút cuộn trang
+
+Người dùng phản ánh nhiều sự kiện và ảnh bị trùng nhau, gửi lại file Excel
+`uploads/mau-nhap-hoat-dong.xlsx` đã cập nhật để đối chiếu. Sau khi rà soát:
+
+- **Phát hiện nguyên nhân chính gây trùng sự kiện**: `content/nhap-hang-loat.json`
+  (cơ chế "nhập hàng loạt" đọc trực tiếp file Excel ở MỌI lần build) vẫn đang trỏ
+  tới `mau-nhap-hoat-dong.xlsx`, trong khi 28/29 dòng trong file này **đã được nhập
+  thành file riêng lẻ trong `content/events/` từ trước** — mỗi lần build, cả 28 dòng
+  đó bị ghép thêm lần nữa thành sự kiện trùng lặp song song với bản chính thức. Đã
+  tắt lô này (`"file": ""`) vì mọi dữ liệu cần thiết đã được "chốt" vào file riêng.
+  Số sự kiện giảm từ 86 xuống 58 sau khi tắt.
+- **Sửa 2 sự kiện bị gán nhầm ảnh**: `2025-11-17` (Tiểu học Đoàn Thị Điểm) và
+  `2025-11-24` (Symphony) đều đang mượn tạm 8 ảnh của 1 sự kiện khác (THPT Đoàn Thị
+  Điểm 2022-12-26) do trùng chữ "Đoàn Thị Điểm" trong tên. Đã copy + đổi tên đúng ảnh
+  gốc của từng sự kiện (11 ảnh và 12 ảnh, lấy từ các thư mục thô cùng tên trong
+  `uploads/`) rồi gán lại.
+- **Tạo sự kiện còn thiếu**: THPT Đoàn Thị Điểm — Tuyên truyền Đề án 06 (2022-12-26),
+  dùng đúng 8 ảnh vốn thuộc về nó.
+- **Xoá 1 sự kiện trùng thật**: Marie Curie `2025-11-04` và `2025-11-05` (cùng ảnh,
+  cùng địa điểm, cách nhau 1 ngày, chắc chắn là 1 sự kiện nhập 2 lần) — giữ lại
+  `2025-11-04`.
+- **Dọn ảnh trùng**: xoá 13 thư mục ảnh gốc trong `uploads/` đã được thay bằng bản
+  phẳng/đổi tên đúng chuẩn từ trước (Cầu giấy, Cầu giấy 2, Hà Nội Arm, Mai Dịch,
+  Marie Curie, Nguyễn Thị Minh Khai, Ngôi sao Hà Nội, Pacop, Thượng cát, Tiểu học
+  đoàn thị điểm, Symphony, Vần dính, Vừ a dính, Xuân Đỉnh, Đoàn Thị Điểm).
+- **Ưu tiên sắp xếp mới** (`scripts/build-events.js`): sự kiện tuyên truyền ở 5
+  trường Hà Nội - Amsterdam, Marie Curie, THCS Cầu Giấy, Tiểu học Đoàn Thị Điểm,
+  Symphony luôn xếp đầu chuỗi sự kiện (khớp theo `location`, không phân biệt hoa
+  thường), sắp theo ngày gần nhất trong nhóm; sau nhóm này mới xét tiếp các trường
+  khác theo ngày gần nhất như cũ.
+- **Thêm 2 nút cuộn trang** (lên đầu / xuống cuối) dạng FAB tròn, đặt cùng nhóm với
+  3 nút góc phải có sẵn (`index.html`, `js/main.js`).
+
 ## 2026-08-29 (tiếp 7) — Thu gọn khối đăng ký bản tin
 
 Người dùng phản ánh khối "Nhận cảnh báo thủ đoạn lừa đảo mới nhất" chiếm quá nhiều diện
