@@ -7,6 +7,14 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-30 (tiếp) — Đổi ảnh chính 3 sự kiện Marie Curie cho khác nhau
+
+Người dùng hỏi cách đổi ảnh chính của 1 sự kiện — trả lời: ảnh chính = ảnh **đầu tiên**
+trong danh sách "Ảnh minh chứng", đổi bằng cách kéo-thả lại thứ tự trong `/admin` (không
+có ô chọn riêng). Rà soát toàn bộ 34 sự kiện có ảnh, phát hiện 3 sự kiện Marie Curie
+(25/10, 04/11, 26/12/2025) dùng chung 1 bộ 10 ảnh nên cùng hiện 1 ảnh bìa — đã đổi thứ tự
+để mỗi sự kiện có ảnh đại diện riêng (giữ nguyên đủ 10 ảnh/sự kiện trong thư viện).
+
 ## 2026-08-30 — Sửa trùng sự kiện/ảnh, ưu tiên 5 trường lên đầu timeline, thêm nút cuộn trang
 
 Người dùng phản ánh nhiều sự kiện và ảnh bị trùng nhau, gửi lại file Excel
