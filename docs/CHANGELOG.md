@@ -7,6 +7,20 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-08-30 (tiếp 2) — Sự cố hết credit Netlify + nén ảnh giảm bandwidth
+
+Site bị Netlify tạm dừng ("Site not available - reached its usage limits") do lượng truy
+cập tăng đột biến làm hết 1.000 credits/tháng của gói Personal (dùng hết 1.182,4 credits,
+riêng bandwidth chiếm 641,2 credits — 54%). Đã mua ngay 1 gói credit thấp nhất (500
+credits, $5.00, trừ thẻ Visa …2114 đã lưu) để khôi phục site — có hiệu lực ngay, không
+cần deploy lại. Người dùng từ chối bật "Auto recharge" (không tự động mua thêm khi hết).
+
+Để giảm bandwidth tận gốc: nén lại toàn bộ ảnh trong `uploads/`. 7 ảnh infographic kỹ
+năng đang là PNG lossless dù nội dung nhiều màu/gradient (không hợp PNG) — đổi sang JPEG
+q87, giảm ~83% (1,8-2MB → ~320KB/ảnh), cập nhật lại `content/ky-nang/*.json`. Toàn bộ ảnh
+sự kiện + banner: giới hạn cạnh dài tối đa 1400px, nén JPEG q70. Tổng dung lượng ảnh:
+46,5MB → 21MB (giảm ~55%). Đã kiểm tra trực quan, chữ/hình vẫn rõ nét không vỡ ảnh.
+
 ## 2026-08-30 (tiếp) — Đổi ảnh chính 3 sự kiện Marie Curie cho khác nhau
 
 Người dùng hỏi cách đổi ảnh chính của 1 sự kiện — trả lời: ảnh chính = ảnh **đầu tiên**
