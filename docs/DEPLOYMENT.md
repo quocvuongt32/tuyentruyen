@@ -68,6 +68,42 @@ exceeded"`). Trang public vẫn sống bình thường trong lúc bị chặn, c
 phải cấu hình lại domain/SSL + Identity + Git Gateway từ đầu, rủi ro cao ngay trước
 deadline.
 
+## Giảm băng thông (nguyên nhân chính gây hết credit Netlify)
+
+Băng thông tải xuống tính **20 credit/GB** — 2 lần dừng site (30/8 và 6/9/2026) đều
+do traffic đợt dự thi + ảnh nặng đốt hết 1.000 credit/tháng, không phải do deploy.
+Các lớp phòng thủ đang có trong repo (không tốn thao tác, tự chạy mỗi build/deploy):
+
+1. **Cache-Control dài cho ảnh** (`netlify.toml`, khối `[[headers]]` cho `/uploads/*`
+   và `/img/*`): mặc định Netlify trả `max-age=0, must-revalidate` nên khách quay lại
+   tải lại **toàn bộ** ảnh. Đã đặt `max-age=604800` (uploads, 7 ngày) / `2592000`
+   (img, 30 ngày) + `stale-while-revalidate`. Đánh đổi: đổi ảnh **trùng tên** qua
+   `/admin` thì khách đã cache thấy bản cũ tối đa 7/30 ngày rồi mới tự cập nhật —
+   chấp nhận được với tần suất đổi ảnh của dự án. Muốn ép mới ngay: đổi tên file.
+2. **Carousel Hero nạp ảnh theo lượt** (`index.html` dùng `data-src`,
+   `setupHeroCarousel()` trong `main.js`): 16 `<img>` xếp chồng ở đầu trang khiến
+   `loading="lazy"` vô tác dụng — trình duyệt tải cả ~1,8 MB banner ngay khi mở
+   trang. Giờ chỉ gán `src` cho ảnh đang hiện + ảnh kế tiếp, khách lướt qua chỉ tải
+   2–3 ảnh. **Nếu thêm ảnh banner mới**: dùng `data-src`, KHÔNG dùng `src`.
+3. **`data/*.json` revalidate qua ETag** (bỏ `{ cache: "no-store" }` trong 5 hàm
+   `load*()` của `main.js`): trước đây mỗi lần F5 tải lại nguyên `events.json`
+   (~68 KB). Giờ trình duyệt gửi request có điều kiện, nhận `304` khi nội dung không
+   đổi; mỗi lần deploy ETag đổi nên vẫn tự cập nhật.
+
+**Việc CHƯA làm — cần chủ tài khoản thao tác thủ công, đòn bẩy lớn nhất còn lại:**
+
+4. **Bật proxy Cloudflare** (hiện DNS-only): trong Cloudflare → DNS, bật đám mây cam
+   cho bản ghi trỏ về Netlify; đặt SSL/TLS mode = **Full (strict)**; thêm Cache Rule
+   giữ (cache) cho `/uploads/*`, `/img/*`, `/css/*`, `/js/*` với Edge TTL dài.
+   Khi đó Cloudflare gánh phần lớn lượt tải ảnh, Netlify chỉ bị tính lần request
+   gốc → giảm mạnh cả băng thông lẫn số request tính credit. **Rủi ro cần test sau
+   khi bật**: `/admin` (Netlify Identity + Git Gateway) và Netlify Forms phải vẫn
+   hoạt động — nếu lỗi, tạo Page Rule / Cache Rule **bypass cache** cho `/admin/*`
+   và `/.netlify/*`. Làm ngoài giờ cao điểm, có thể tắt proxy về DNS-only ngay nếu
+   hỏng.
+5. **Theo dõi băng thông** tại Netlify → Usage trước mỗi đợt cao điểm; kết hợp
+   GoatCounter để biết traffic thực.
+
 ## Content-Security-Policy (`netlify.toml`) — vì sao mỗi dòng tồn tại
 
 Hai khối `[[headers]]` riêng biệt: `/*` (site public, khoá chặt) và `/admin/*` (nới

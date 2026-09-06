@@ -7,6 +7,35 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-09-06 — Site bị dừng lần 2 + xử lý gốc giảm băng thông
+
+Site lại bị Netlify tạm dừng ("reached its usage limits") — gói 500 credit mua thêm
+hôm 30/8 cũng đã cạn trong ~1 tuần vì traffic đợt dự thi, chu kỳ mới chưa reset (20/9).
+Xác nhận không phải do deploy (commit cuối cùng đẩy lên là 3/9). Nguyên nhân vẫn là
+băng thông tải xuống (20 credit/GB).
+
+Đã bổ sung 3 lớp giảm băng thông trong repo (chi tiết ở [DEPLOYMENT.md](DEPLOYMENT.md)
+mục "Giảm băng thông"):
+
+1. **Cache-Control dài cho ảnh** (`netlify.toml`): thêm `[[headers]]` cho `/uploads/*`
+   (`max-age=604800`) và `/img/*` (`max-age=2592000`) + `stale-while-revalidate` —
+   trước đây Netlify trả `max-age=0` nên khách quay lại tải lại toàn bộ ảnh.
+2. **Carousel Hero nạp ảnh theo lượt**: 16 `<img>` banner xếp chồng ở đầu trang khiến
+   `loading="lazy"` vô tác dụng, trình duyệt tải cả ~1,8 MB ngay khi mở trang. Đổi
+   sang `data-src`, `setupHeroCarousel()` chỉ gán `src` cho ảnh đang hiện + ảnh kế
+   tiếp → khách lướt qua chỉ tải 2–3 ảnh. Đã test bằng preview: xác nhận chỉ
+   `banner-01` tải lúc mở trang, các ảnh sau nạp dần theo nhịp 4 giây.
+3. **`data/*.json` revalidate qua ETag**: bỏ `{ cache: "no-store" }` trong 5 hàm
+   `load*()` — mỗi lần F5 trước đây tải lại nguyên `events.json` (~68 KB), giờ nhận
+   `304` khi không đổi, vẫn tự cập nhật sau mỗi deploy (ETag đổi).
+
+**Đòn bẩy lớn nhất còn lại — chưa làm, cần chủ tài khoản**: bật proxy Cloudflare
+(hiện DNS-only) + Cache Rule cho ảnh/tĩnh, bypass cache cho `/admin/*` và
+`/.netlify/*`. Xem [DEPLOYMENT.md](DEPLOYMENT.md).
+
+Các thay đổi trên **chưa deploy** (chờ mua thêm gói credit $5 để deploy đi qua —
+1 lần deploy = 15 credit).
+
 ## 2026-08-30 (tiếp 2) — Sự cố hết credit Netlify + nén ảnh giảm bandwidth
 
 Site bị Netlify tạm dừng ("Site not available - reached its usage limits") do lượng truy

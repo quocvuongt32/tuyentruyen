@@ -21,3 +21,21 @@
   for = "/admin/*"
   [headers.values]
     Content-Security-Policy = "default-src 'self'; img-src 'self' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://identity.netlify.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' blob: https://api.netlify.com https://*.netlify.app https://identity.netlify.com; frame-src https://identity.netlify.com"
+
+# --- Cache anh de giam bang thong (nguyen nhan chinh gay het credit Netlify) ---
+# Mac dinh Netlify tra "max-age=0, must-revalidate" cho file tinh -> moi khach
+# quay lai van tai lai TOAN BO anh. Dat max-age dai cho anh (noi dung on dinh,
+# ten file gan nhu khong bao gio doi) de trinh duyet + CDN giu cache, khong tai
+# lai. Neu co doi anh trung ten qua /admin: khach da cache se thay ban cu toi
+# ~7 ngay (uploads) hoac ~30 ngay (img) roi tu cap nhat - chap nhan duoc voi
+# tan suat doi anh cua du an. stale-while-revalidate cho phep tra ngay ban
+# cache trong luc kiem tra ban moi o nen. Xem docs/DEPLOYMENT.md.
+[[headers]]
+  for = "/uploads/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000, stale-while-revalidate=86400"

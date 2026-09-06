@@ -18,7 +18,12 @@ const ANM_CATEGORY = "an-ninh-mang";
 async function loadEvents() {
   const container = document.getElementById("timeline");
   try {
-    const res = await fetch("data/events.json", { cache: "no-store" });
+    // Khong dung { cache: "no-store" } nua: Netlify tra ETag + max-age=0,
+    // must-revalidate cho file tinh, nen trinh duyet gui request co dieu kien
+    // va nhan 304 (khong ton bang thong) khi noi dung khong doi. Moi lan deploy
+    // ETag doi -> tu dong tai ban moi. Tiet kiem bang thong cho khach quay lai
+    // va cho moi lan F5. Xem docs/DEPLOYMENT.md muc "Giam bang thong".
+    const res = await fetch("data/events.json");
     if (!res.ok) throw new Error("Không tải được dữ liệu sự kiện");
     const payload = await res.json();
     const events = Array.isArray(payload.events) ? payload.events : [];
@@ -963,18 +968,35 @@ function setupExtraTracking() {
 // Carousel o vi tri logo lon trong Hero: bat dau bang huy hieu, roi chay qua
 // het anh Banner, lap lai vo han - moi anh hien 4 giay, truot ngang cham vua
 // du de khong hoa mat.
+//
+// Cac anh Banner trong HTML dung data-src (khong phai src) - xem chu thich o
+// index.html. primeSlide() gan src that khi sap toi luot anh do, nen khach chi
+// luot qua trang chu chi tai 2-3 anh thay vi ca 15 anh (~1,8MB). Anh da gan
+// src roi thi thoi, khong gan lai.
 function setupHeroCarousel() {
   const track = document.getElementById("hero-icon");
   if (!track) return;
   const slides = Array.from(track.querySelectorAll("img"));
   if (slides.length < 2) return;
 
+  const primeSlide = (i) => {
+    const img = slides[i];
+    if (img && !img.getAttribute("src") && img.dataset.src) {
+      img.src = img.dataset.src;
+    }
+  };
+
   let idx = slides.findIndex((img) => img.classList.contains("is-active"));
   if (idx < 0) idx = 0;
+
+  primeSlide(idx);
+  primeSlide((idx + 1) % slides.length);
 
   setInterval(() => {
     const prev = idx;
     idx = (idx + 1) % slides.length;
+    primeSlide(idx);
+    primeSlide((idx + 1) % slides.length); // nap truoc anh ke tiep de truot muot
     slides[prev].classList.remove("is-active");
     slides[prev].classList.add("is-prev");
     slides[idx].classList.add("is-active");
@@ -1058,7 +1080,7 @@ function setText(id, value) {
 // bang noi dung tu CMS khi tai xong, khong bat buoc.
 async function loadSite() {
   try {
-    const res = await fetch("data/site.json", { cache: "no-store" });
+    const res = await fetch("data/site.json"); // revalidate qua ETag, xem loadEvents()
     if (!res.ok) throw new Error("Không tải được nội dung chung");
     const data = await res.json();
 
@@ -1096,7 +1118,7 @@ async function loadSite() {
 
 async function loadAbout() {
   try {
-    const res = await fetch("data/about.json", { cache: "no-store" });
+    const res = await fetch("data/about.json"); // revalidate qua ETag, xem loadEvents()
     if (!res.ok) throw new Error("Không tải được nội dung Giới thiệu");
     const data = await res.json();
 
@@ -1229,7 +1251,7 @@ async function loadSkills() {
   const gridLink = document.getElementById("skills-grid-link");
   if (!gridImage || !gridLink) return;
   try {
-    const res = await fetch("data/skills.json", { cache: "no-store" });
+    const res = await fetch("data/skills.json"); // revalidate qua ETag, xem loadEvents()
     if (!res.ok) throw new Error("Không tải được Bộ kỹ năng An toàn số");
     const data = await res.json();
     const skills = Array.isArray(data.skills) ? data.skills : [];
@@ -1335,7 +1357,7 @@ async function loadTicker() {
   const panelList = document.getElementById("news-panel-list");
 
   try {
-    const res = await fetch("data/ticker.json", { cache: "no-store" });
+    const res = await fetch("data/ticker.json"); // revalidate qua ETag, xem loadEvents()
     if (!res.ok) throw new Error("Không tải được tin");
     const payload = await res.json();
     const items = Array.isArray(payload.items) ? payload.items.filter((it) => it && it.title && it.url) : [];
