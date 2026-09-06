@@ -7,6 +7,25 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-09-06 (tiếp 2) — Đã cutover xong sang Cloudflare Pages
+
+Site đã LIVE trên `https://tuyentruyen.khoaktt.vn` phục vụ bởi **Cloudflare Pages**
+(xác minh: header `server: cloudflare` + `cf-ray`; 58 thẻ sự kiện render; CSP có
+`web3forms`; `/admin/` redirect 302 về `/`). Web3Forms test end-to-end từ chính domain
+thật: `success: true`.
+
+- Pages project: `tuyentruyen` (account `Choanhhonmotcaj@gmail.com`, cùng account giữ
+  zone `khoaktt.vn`), connect Git repo `quocvuongt32/tuyentruyen` nhánh `main`, tự
+  build+deploy mỗi push.
+- Build: `node scripts/build-*.js` (chuỗi 5 lệnh), output `/`, `NODE_VERSION=18`.
+- Custom domain: DNS record `tuyentruyen` đổi CNAME `rainbow-seahorse-1aa78d.netlify.app`
+  → `tuyentruyen.pages.dev` (Cloudflare tự sửa vì zone cùng account).
+- Web3Forms access key đã dán vào 2 form, push commit `d6164de`.
+
+**Còn lại (Thầy làm khi site chạy ổn 1-2 ngày):** Netlify → site `rainbow-seahorse-1aa78d`
+→ Stop builds / Delete site, huỷ gói Personal $9 về Free. Xong thì báo Claude làm commit
+xoá `netlify.toml` / `netlify/` / `admin/`.
+
 ## 2026-09-06 (tiếp) — Chuyển hosting Netlify → Cloudflare Pages, bỏ /admin
 
 Quyết định thoát hẳn hoá đơn Netlify (băng thông 20 credit/GB là nguyên nhân gốc 2 lần
