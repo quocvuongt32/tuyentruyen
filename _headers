@@ -1,0 +1,21 @@
+# Cloudflare Pages doc header - thay cho phan [[headers]] cua netlify.toml.
+# Cu phap: dong dau la duong dan (glob), cac dong thut le ben duoi la header.
+# Quy tac cu the hon (vd /uploads/*) duoc cong them vao quy tac /* .
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=()
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://*.goatcounter.com https://cdn.hvcsnd.edu.vn; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.goatcounter.com https://api.open-meteo.com https://api.web3forms.com; frame-src https:; frame-ancestors 'none'
+
+# --- Cache anh de giam bang thong ---
+# Mac dinh Pages tra Cache-Control ngan. Dat max-age dai cho anh (noi dung on
+# dinh, ten file gan nhu khong doi). Neu doi anh trung ten: khach da cache thay
+# ban cu toi ~7 ngay (uploads) / ~30 ngay (img) roi tu cap nhat. Muon ep moi
+# ngay: doi ten file. Xem docs/DEPLOYMENT.md muc "Giam bang thong".
+/uploads/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+
+/img/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400

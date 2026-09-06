@@ -1,13 +1,3 @@
-// Netlify gui link moi/quen mat khau ve trang goc (vd: "/#invite_token=...")
-// nhung Identity widget chi duoc nap o /admin/. Neu khong chuyen huong, token
-// nam yen tren trang chu va khong bao gio duoc xu ly -> tai khoan khong bao
-// gio duoc xac nhan, du dat mat khau gi cung se bao "Email not confirmed".
-(function redirectIdentityTokens() {
-  if (/(invite_token|recovery_token|confirmation_token)=/.test(window.location.hash)) {
-    window.location.replace("/admin/" + window.location.hash);
-  }
-})();
-
 // Tra cuu su kien theo slug (dung cho banner an noi bat - can biet su kien
 // nam o timeline Tuyen truyen hay o luoi Hoat dong khac de mo dung cho).
 let eventsBySlug = {};
@@ -1501,10 +1491,15 @@ function setupCornerWidgets() {
   });
 }
 
-function setupFeedbackForm() {
-  const form = document.getElementById("feedback-form");
-  const submitBtn = document.getElementById("feedback-submit");
-  const note = document.getElementById("feedback-note");
+// Gui form qua Web3Forms (web3forms.com) - dich vu nhan form mien phi, khong
+// gioi han, khong can backend; submission gui thang ve email dang ky. Thay
+// Netlify Forms khi chuyen host sang Cloudflare Pages. access_key nam trong
+// <input type="hidden" name="access_key"> cua chinh form (1 key dung chung 2
+// form). Neu key con la "PASTE-WEB3FORMS-ACCESS-KEY-HERE" thi chua cau hinh.
+function wireWeb3Form(opts) {
+  const form = document.getElementById(opts.formId);
+  const submitBtn = document.getElementById(opts.submitId);
+  const note = document.getElementById(opts.noteId);
   if (!form || !submitBtn || !note) return;
 
   form.addEventListener("submit", (e) => {
@@ -1512,22 +1507,23 @@ function setupFeedbackForm() {
     submitBtn.disabled = true;
     note.hidden = true;
 
-    const body = new URLSearchParams(new FormData(form)).toString();
+    const payload = Object.fromEntries(new FormData(form).entries());
 
-    fetch("/", {
+    fetch("https://api.web3forms.com/submit", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(payload),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Gửi thất bại");
-        note.textContent = "Cảm ơn bạn đã góp ý! Chúng tôi đã ghi nhận.";
+      .then((res) => res.json().catch(() => ({})))
+      .then((data) => {
+        if (!data || !data.success) throw new Error("Gửi thất bại");
+        note.textContent = opts.okText;
         note.hidden = false;
         form.reset();
-        trackEvent("/hom-thu-gop-y", "Gửi góp ý");
+        trackEvent(opts.trackPath, opts.trackTitle);
       })
       .catch(() => {
-        note.textContent = "Gửi không thành công, vui lòng thử lại sau.";
+        note.textContent = opts.errText;
         note.hidden = false;
       })
       .finally(() => {
@@ -1536,38 +1532,27 @@ function setupFeedbackForm() {
   });
 }
 
+function setupFeedbackForm() {
+  wireWeb3Form({
+    formId: "feedback-form",
+    submitId: "feedback-submit",
+    noteId: "feedback-note",
+    okText: "Cảm ơn bạn đã góp ý! Chúng tôi đã ghi nhận.",
+    errText: "Gửi không thành công, vui lòng thử lại sau.",
+    trackPath: "/hom-thu-gop-y",
+    trackTitle: "Gửi góp ý",
+  });
+}
+
 function setupNewsletterForm() {
-  const form = document.getElementById("newsletter-form");
-  const submitBtn = document.getElementById("newsletter-submit");
-  const note = document.getElementById("newsletter-note");
-  if (!form || !submitBtn || !note) return;
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    submitBtn.disabled = true;
-    note.hidden = true;
-
-    const body = new URLSearchParams(new FormData(form)).toString();
-
-    fetch("/", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Gửi thất bại");
-        note.textContent = "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ gửi bản tin tới email này.";
-        note.hidden = false;
-        form.reset();
-        trackEvent("/dang-ky-ban-tin", "Đăng ký bản tin");
-      })
-      .catch(() => {
-        note.textContent = "Đăng ký không thành công, vui lòng thử lại sau.";
-        note.hidden = false;
-      })
-      .finally(() => {
-        submitBtn.disabled = false;
-      });
+  wireWeb3Form({
+    formId: "newsletter-form",
+    submitId: "newsletter-submit",
+    noteId: "newsletter-note",
+    okText: "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ gửi bản tin tới email này.",
+    errText: "Đăng ký không thành công, vui lòng thử lại sau.",
+    trackPath: "/dang-ky-ban-tin",
+    trackTitle: "Đăng ký bản tin",
   });
 }
 

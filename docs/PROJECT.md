@@ -15,10 +15,13 @@ KHCN, Học viện CSND. Live tại **https://tuyentruyen.khoaktt.vn/**, quản 
 ## Ngăn xếp công nghệ
 
 - **Jamstack tĩnh thuần**: HTML/CSS/JS, không framework, không build tool (Vite/Webpack/...).
-- **Decap CMS** (`/admin`) + **Netlify Identity** (đăng nhập) + **Git Gateway** (Decap
-  commit thẳng vào GitHub thay vì cần token cá nhân).
-- **Netlify**: hosting + build (chạy các script Node trong `scripts/`) + Identity/Git
-  Gateway backend.
+- **Hosting: đang chuyển Netlify → Cloudflare Pages** (6/9/2026, do Netlify tính băng
+  thông quá đắt làm hết credit). Xem [DEPLOYMENT.md](DEPLOYMENT.md) mục "Đang chuyển
+  hosting". Sau khi chuyển: Cloudflare Pages build (chạy các script Node trong
+  `scripts/`), băng thông miễn phí không giới hạn.
+- **Không còn CMS web**: đã bỏ `/admin` (Decap CMS + Netlify Identity + Git Gateway).
+  Thêm/sửa nội dung bằng script (`add-event.js`, `import-events-xlsx.js`) + `git push`.
+- **Form**: Web3Forms (`api.web3forms.com`) — thay Netlify Forms, không backend.
 - Không database, không API tự viết, không server-side code nào khác ngoài các script
   build chạy 1 lần lúc deploy.
 

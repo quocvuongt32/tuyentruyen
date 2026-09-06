@@ -7,6 +7,32 @@
 > **Quy tắc**: mỗi khi hoàn thành một nhiệm vụ mới, thêm 1 mục vào đầu file này —
 > không chờ gộp nhiều việc mới ghi.
 
+## 2026-09-06 (tiếp) — Chuyển hosting Netlify → Cloudflare Pages, bỏ /admin
+
+Quyết định thoát hẳn hoá đơn Netlify (băng thông 20 credit/GB là nguyên nhân gốc 2 lần
+dừng site). Cloudflare Pages: **băng thông miễn phí không giới hạn**. Thầy chọn **bỏ
+`/admin`** (không cần CMS web) → migrate đơn giản hẳn, không cần OAuth proxy cho Decap.
+
+Thay đổi trong repo (chưa deploy — chờ Thầy tạo Pages project + lấy Web3Forms key):
+
+- **`_headers`** (mới): doc header cho Cloudflare Pages, port từ `netlify.toml` (CSP +
+  bảo mật + cache ảnh `/uploads/*` `/img/*`). Thêm `api.web3forms.com` vào `connect-src`.
+- **`_redirects`** (mới): `/admin/*` → `/` (302).
+- **`.node-version`** (mới): `18`.
+- **2 form → Web3Forms**: `index.html` + `wireWeb3Form()` trong `main.js` thay
+  `setupFeedbackForm`/`setupNewsletterForm`. POST JSON tới `api.web3forms.com/submit`,
+  `access_key` trong `<input hidden>` (còn là `PASTE-WEB3FORMS-ACCESS-KEY-HERE`, Thầy
+  thay). Honeypot đổi `bot-field` → `botcheck`. Bỏ `data-netlify`.
+- **Dọn phần Netlify Identity**: xoá `redirectIdentityTokens()` trong `main.js`, xoá 2
+  link "Quản trị"/"Đổi mật khẩu" trên menu.
+- **Giữ tạm** `netlify.toml`, `netlify/functions/`, `admin/` làm đường lùi — xoá ở
+  commit dọn dẹp sau khi cutover xong.
+- Đã test preview: 2 form POST đúng endpoint Web3Forms với đủ field, xử lý lỗi êm khi
+  `success:false`; menu không còn link `/admin`; trang render đủ nội dung.
+
+Checklist thao tác Cloudflare + Web3Forms: [DEPLOYMENT.md](DEPLOYMENT.md) mục "Đang
+chuyển hosting". Sau cutover: **$0/tháng**, không cần mua gói credit $5.
+
 ## 2026-09-06 — Site bị dừng lần 2 + xử lý gốc giảm băng thông
 
 Site lại bị Netlify tạm dừng ("reached its usage limits") — gói 500 credit mua thêm

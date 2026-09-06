@@ -105,9 +105,6 @@
             <a href="#hoat-dong-khac-section" data-activity-filter="khac">Khác</a>
             <a href="#hoat-dong-khac-section" data-activity-filter="nghien-cuu-khoa-hoc">Nghiên cứu khoa học</a>
             <a href="#quiz-section">Kiểm tra nhanh</a>
-            <div class="admin-links-sep" aria-hidden="true"></div>
-            <a href="/admin/">Quản trị</a>
-            <a href="/admin/doi-mat-khau.html">Đổi mật khẩu</a>
           </div>
         </div>
       </nav>
@@ -342,9 +339,11 @@
         <h2>Nhận cảnh báo thủ đoạn lừa đảo mới nhất</h2>
         <p class="section-hint">Để lại email để nhận bản tin định kỳ tổng hợp thủ đoạn lừa đảo mới và kỹ năng an toàn số — không spam, có thể huỷ bất cứ lúc nào.</p>
       </div>
-      <form name="dang-ky-ban-tin" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="newsletter-form" id="newsletter-form">
-        <input type="hidden" name="form-name" value="dang-ky-ban-tin" />
-        <p class="feedback-honeypot"><label>Để trống ô này<input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
+      <form action="https://api.web3forms.com/submit" method="POST" class="newsletter-form" id="newsletter-form">
+        <input type="hidden" name="access_key" value="PASTE-WEB3FORMS-ACCESS-KEY-HERE" />
+        <input type="hidden" name="subject" value="Đăng ký bản tin — Cẩm nang An toàn số" />
+        <input type="hidden" name="from_name" value="Cẩm nang An toàn số" />
+        <input type="checkbox" name="botcheck" class="feedback-honeypot" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
         <input type="email" name="email" placeholder="Nhập email của bạn" required class="newsletter-input" />
         <button type="submit" class="newsletter-submit" id="newsletter-submit">Đăng ký</button>
       </form>
@@ -450,9 +449,11 @@
       <button type="button" class="corner-panel-close" data-close-panel="feedback-panel" aria-label="Đóng">✕</button>
     </div>
     <div class="corner-panel-body">
-      <form name="gop-y" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="feedback-form" id="feedback-form">
-        <input type="hidden" name="form-name" value="gop-y" />
-        <p class="feedback-honeypot"><label>Để trống ô này<input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
+      <form action="https://api.web3forms.com/submit" method="POST" class="feedback-form" id="feedback-form">
+        <input type="hidden" name="access_key" value="PASTE-WEB3FORMS-ACCESS-KEY-HERE" />
+        <input type="hidden" name="subject" value="Góp ý mới — Cẩm nang An toàn số" />
+        <input type="hidden" name="from_name" value="Cẩm nang An toàn số" />
+        <input type="checkbox" name="botcheck" class="feedback-honeypot" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
         <label class="feedback-field">Họ tên
           <input type="text" name="ho-ten" required />
         </label>

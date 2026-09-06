@@ -52,18 +52,13 @@ git push -u origin main
 2. Copy **Client ID** và **Client Secret** vào Netlify: **Identity → Services →
    External providers → GitHub**.
 
+> **Đang chuyển hosting Netlify → Cloudflare Pages (6/9/2026)** và **đã bỏ `/admin`**
+> (CMS web). Xem [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) mục "Đang chuyển hosting".
+
 ## Thêm/sửa nội dung
 
-### Bình thường (đã deploy, có mạng)
-
-Dùng `/admin`. Mỗi lần lưu, Decap CMS commit thẳng vào GitHub → Netlify tự build lại
-→ trang cập nhật sau ~1 phút (trừ khi hết credit build, xem
-[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)). Đổi mật khẩu tại
-[/admin/doi-mat-khau.html](/admin/doi-mat-khau.html).
-
-### Khi offline / chưa deploy
-
-`/admin` cần Netlify Identity thật nên **không hoạt động offline**. Thay vào đó:
+Không còn `/admin`. Mọi thay đổi nội dung làm bằng script ở máy rồi `git push` — Cloudflare
+Pages tự build lại (băng thông miễn phí, không lo credit). Cách làm:
 
 - **Thêm 1 hoạt động**: bấm đúp **Them-su-kien.bat** (chạy `scripts/add-event.js`)
   — CLI hỏi lần lượt tiêu đề, phân loại, ngày, địa điểm, nội dung, ảnh (đường dẫn file

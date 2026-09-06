@@ -1,17 +1,71 @@
 # Vận hành & Deploy
 
 > Đọc [PROJECT.md](PROJECT.md) trước để hiểu kiến trúc. File này là phần "vận hành":
-> Netlify, CSP, và các sự cố đã gặp + cách đã sửa (để không lặp lại).
+> hosting, CSP, và các sự cố đã gặp + cách đã sửa (để không lặp lại).
 
-## Thông tin hạ tầng
+## ⚠️ Đang chuyển hosting: Netlify → Cloudflare Pages (6/9/2026)
 
-- **Domain**: tuyentruyen.khoaktt.vn — DNS ở Cloudflare, **DNS-only (không proxy)**,
-  Netlify phục vụ trực tiếp (đã xác minh header `Server: Netlify`, không phải
-  `cloudflare` — nên không có tầng cache Cloudflare xen giữa cần lo).
+Lý do: Netlify tính **băng thông 20 credit/GB**, traffic đợt dự thi làm hết credit và
+**tạm dừng cả site** 2 lần (30/8 và 6/9). Cloudflare Pages **miễn phí băng thông không
+giới hạn**. Đã bỏ `/admin` (Decap CMS + Netlify Identity) — từ nay thêm/sửa nội dung
+bằng script + `git push` (xem [README.md](../README.md)).
+
+### Thay đổi đã làm trong repo (commit 6/9/2026)
+
+| File | Việc |
+|---|---|
+| `_headers` | Doc header cho Cloudflare Pages — thay khối `[[headers]]` của `netlify.toml` (CSP, bảo mật, cache ảnh) |
+| `_redirects` | `/admin/*` → `/` (bookmark cũ không còn 404) |
+| `.node-version` | `18` — Pages build đúng phiên bản Node |
+| `index.html`, `js/main.js` | 2 form (góp ý + đăng ký bản tin) chuyển từ **Netlify Forms** sang **Web3Forms** (`api.web3forms.com`, free, không backend). Bỏ `redirectIdentityTokens()`, bỏ link `/admin` trên menu |
+| `netlify.toml`, `netlify/functions/`, `admin/` | **Giữ tạm** để có đường lùi nếu Pages trục trặc; xoá ở commit dọn dẹp sau khi cutover xong |
+
+### Checklist Thầy bấm (1 lần)
+
+1. **Web3Forms**: vào [web3forms.com](https://web3forms.com) → nhập email `vuongppa@gmail.com`
+   → nhận "Access Key" qua mail → thay chuỗi `PASTE-WEB3FORMS-ACCESS-KEY-HERE` (2 chỗ
+   trong `index.html`) bằng key đó → commit + push. 1 key dùng chung cả 2 form,
+   submission gửi thẳng về email.
+2. **Tạo Pages project**: Cloudflare Dashboard → **Workers & Pages → Create → Pages →
+   Connect to Git** → chọn repo `quocvuongt32/tuyentruyen`, branch `main`.
+   - Build command: `node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js && node scripts/build-skills.js`
+   - Build output directory: `.` (dấu chấm — publish cả repo, giống Netlify)
+   - Environment variables: thêm `NODE_VERSION` = `18` (dự phòng cho `.node-version`)
+   - Save & Deploy → chờ build → mở bản `*.pages.dev` kiểm tra.
+3. **Test trên `*.pages.dev`**: trang load đủ nội dung, gửi thử form góp ý phải nhận
+   được mail, bấm thử `/admin` phải nhảy về trang chủ.
+4. **Đổi domain** (lúc cutover): Pages project → **Custom domains → Set up a custom
+   domain** → `tuyentruyen.khoaktt.vn` → Cloudflare tự sửa bản ghi DNS (domain đã nằm
+   trong tài khoản). Vài phút sau site live trên Pages.
+5. **Dọn Netlify**: sau khi Pages chạy ổn 1-2 ngày → Netlify → site settings → **Stop
+   builds** hoặc xoá site; huỷ gói Personal $9 về Free (hoặc bỏ hẳn). Báo Claude để làm
+   commit xoá `netlify.toml` / `netlify/` / `admin/`.
+
+### Sau khi cutover
+
+- Chi phí: **$0/tháng**. Băng thông không giới hạn → sự cố hết credit không tái diễn.
+- Không cần proxy Cloudflare thủ công nữa (Pages đã ở sẵn trên mạng Cloudflare).
+- Mất: `/admin`; email chào mừng bản tin tự động qua Resend (`netlify/functions/`, vốn
+  **chưa từng chạy live**). Đăng ký bản tin giờ rơi vào hộp mail qua Web3Forms — muốn
+  tự động hoá lại thì port `netlify/functions/*.js` sang **Pages Functions** (thư mục
+  `functions/`, cùng là JS, khác chữ ký handler) — chưa làm.
+
+### Hạ tầng (mục tiêu sau cutover)
+
+- **Domain**: tuyentruyen.khoaktt.vn — DNS ở Cloudflare, trỏ tới Cloudflare Pages.
+- **Repo GitHub**: `quocvuongt32/tuyentruyen`, branch `main` — Pages build tự động mỗi
+  lần push.
+- **Build**: chuỗi `node scripts/build-*.js`, output `.` (toàn repo). `data/*.json`
+  sinh ra lúc build (gitignore).
+- **Form**: Web3Forms (không backend). **Không còn** Netlify Identity / Git Gateway /
+  Netlify Forms / Netlify Functions.
+
+---
+
+## Thông tin hạ tầng Netlify (cũ — giữ tham khảo tới khi cutover xong)
+
 - **Netlify site**: `rainbow-seahorse-1aa78d` (tên nội bộ Netlify), team `quocvuongt32`,
   chủ tài khoản email `vuongppa@gmail.com`.
-- **Repo GitHub**: `quocvuongt32/tuyentruyen`, branch `main`, Netlify build tự động
-  mỗi khi push (`Auto publishing is on`) — **trừ khi hết credit, xem mục dưới**.
 - **Build command** (trong `netlify.toml`):
   ```
   node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js && node scripts/build-site.js && node scripts/build-skills.js
