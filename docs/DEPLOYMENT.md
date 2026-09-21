@@ -1,5 +1,22 @@
 # Vận hành & Deploy
 
+> **Trạng thái 21/9/2026:** Đã cấp lại quyền CLI đúng tài khoản
+> `vuongppa@gmail.com` và đặt team `quocvuongt32` hạ từ Personal 9 USD xuống Free.
+> Netlify xác nhận `scheduled_downgrade_date: 2026-10-20`, đích đến `credit-free`;
+> gói Personal vẫn dùng được hết kỳ hiện tại nhưng không tự gia hạn sang kỳ trả phí mới.
+> Website chính vẫn chạy Cloudflare Pages. Cấu hình mới: Node.js 24, build command
+> `npm run build`, output `dist/`, Pages Functions trong `functions/`.
+
+## Cấu hình Cloudflare Pages hiện hành
+
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Node.js: `24`
+- Biến môi trường bản tin: `RESEND_API_KEY`, `RESEND_SEGMENT_ID`, `NEWSLETTER_FROM`
+- Chỉ `dist/` được public; `docs/`, `content/`, `scripts/`, `admin/`, `netlify.toml`
+  không được xuất bản.
+- Workflow `.github/workflows/backup-content.yml` sao lưu nội dung hằng tuần, giữ 90 ngày.
+
 > Đọc [PROJECT.md](PROJECT.md) trước để hiểu kiến trúc. File này là phần "vận hành":
 > hosting, CSP, và các sự cố đã gặp + cách đã sửa (để không lặp lại).
 
@@ -13,7 +30,8 @@ bằng script + `git push` (xem [README.md](../README.md)).
 **Trạng thái: site đã LIVE trên `https://tuyentruyen.khoaktt.vn` qua Cloudflare Pages**
 (project `tuyentruyen`, account `Choanhhonmotcaj@gmail.com` — cùng account giữ zone
 `khoaktt.vn`). DNS record `tuyentruyen` đã trỏ CNAME → `tuyentruyen.pages.dev`.
-Còn lại: gỡ site Netlify + huỷ gói $9 (xem cuối mục này).
+Còn lại: cân nhắc gỡ site Netlify cũ sau khi xác nhận không còn dữ liệu cần giữ. Gói 9 USD
+đã được đặt hạ về Free vào cuối kỳ hiện tại.
 
 ### Thay đổi đã làm trong repo (commit 6/9/2026)
 
@@ -37,12 +55,12 @@ Còn lại: gỡ site Netlify + huỷ gói $9 (xem cuối mục này).
    `rainbow-seahorse-1aa78d.netlify.app` → `tuyentruyen.pages.dev`. Site live, SSL OK,
    `server: cloudflare`.
 
-### Việc CÒN LẠI — Thầy làm khi Pages chạy ổn 1-2 ngày
+### Việc còn lại — tùy chọn sau khi Pages chạy ổn
 
-5. **Gỡ Netlify**: [app.netlify.com](https://app.netlify.com) → site `rainbow-seahorse-1aa78d`
-   → Site configuration → Build & deploy → **Stop builds** (hoặc Danger zone → Delete
-   site). Sau đó Billing → huỷ gói Personal $9 về Free (hoặc đóng team). Xong thì **báo
-   Claude** để làm commit xoá `netlify.toml` / `netlify/` / `admin/` khỏi repo.
+5. ✅ **Đã hủy tự gia hạn Netlify**: ngày 21/9/2026, team `quocvuongt32` được đặt hạ
+   từ Personal 9 USD xuống Free vào `2026-10-20`. API đã được đọc lại hai lần để xác nhận.
+6. **Tùy chọn gỡ site cũ**: chỉ xóa site `rainbow-seahorse-1aa78d` sau khi xác nhận không
+   còn dữ liệu cần giữ. Việc hạ gói không xóa site hay tài khoản.
 
 ### Sau khi cutover
 

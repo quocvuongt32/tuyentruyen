@@ -7,7 +7,8 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), camera=(), microphone=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://*.goatcounter.com https://cdn.hvcsnd.edu.vn; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.goatcounter.com https://api.open-meteo.com https://api.web3forms.com; frame-src https:; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://*.goatcounter.com https://cdn.hvcsnd.edu.vn; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.goatcounter.com https://api.open-meteo.com https://api.web3forms.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com; frame-ancestors 'none'
 
 # --- Cache anh de giam bang thong ---
 # Mac dinh Pages tra Cache-Control ngan. Dat max-age dai cho anh (noi dung on

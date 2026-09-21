@@ -1,0 +1,579 @@
+/* ---------- About ---------- */
+
+.about {
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.about h2 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.about-top-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.about-intro-box {
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.about-intro-box p {
+  margin: 0;
+  color: var(--text-dim);
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.partner-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.partner-badge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  max-width: 100%;
+  flex: 1;
+}
+
+.badge-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.partner-badge span {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.about-points {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.point {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 16px;
+  font-size: 0.92rem;
+}
+
+.point span:last-child {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.point-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.directive-basis {
+  margin-top: 16px;
+  padding: 18px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--radius);
+}
+
+.directive-basis h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.directive-basis ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.directive-basis li {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.directive-basis strong {
+  color: var(--text);
+}
+
+@media (max-width: 720px) {
+  .about-top-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Timeline section ---------- */
+
+.timeline-section h2 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+}
+
+.section-hint {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin: 0 0 20px;
+}
+
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.category-pill {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.category-pill:hover {
+  border-color: var(--accent-dim);
+  color: var(--text);
+}
+
+.category-pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.activity-card.filtered-out {
+  display: none;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 28px;
+  border-left: 2px solid var(--border);
+}
+
+.loading, .empty, .error {
+  color: var(--text-dim);
+  padding: 20px 0;
+}
+
+.error { color: var(--danger); }
+
+.event-card {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.event-dot {
+  position: absolute;
+  left: -34px;
+  top: 22px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.event-summary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+}
+
+.event-card.open .event-summary {
+  border-color: var(--accent-dim);
+}
+
+.event-summary-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-date {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+}
+
+.event-title {
+  margin: 0 0 4px;
+  font-size: 1.08rem;
+}
+
+.event-location {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+}
+
+.event-category {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-dim);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  vertical-align: middle;
+}
+
+.toggle-icon {
+  flex-shrink: 0;
+  color: var(--text-dim);
+  transition: transform 0.25s ease;
+}
+
+.event-card.open .toggle-icon {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+.event-panel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+}
+
+.event-card.open .event-panel {
+  max-height: 3000px;
+  opacity: 1;
+}
+
+.event-panel-inner {
+  padding: 16px 18px 4px;
+}
+
+.event-body { color: var(--text); font-size: 0.96rem; }
+.event-body p { margin: 0 0 10px; }
+.event-body ul { margin: 0 0 10px 20px; padding: 0; }
+.event-body a { color: var(--accent); }
+
+.event-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 4px 0 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #000;
+}
+
+.event-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.event-cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 4px 0 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--gold);
+}
+
+.event-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+
+.event-cover img:hover { transform: scale(1.02); }
+
+.event-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 4px 0 14px;
+}
+
+.event-gallery img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  cursor: zoom-in;
+  transition: transform 0.15s ease;
+}
+
+.event-gallery img:hover { transform: scale(1.03); }
+
+.event-link {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.event-link:hover { text-decoration: underline; }
+
+.event-plan-number {
+  margin: 0 0 10px;
+  color: var(--text-dim);
+  font-size: 0.86rem;
+  font-style: italic;
+}
+
+/* ---------- Hoat dong khac (luoi the dang tap chi) ---------- */
+
+.activity-section {
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+.activity-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.activity-card:hover {
+  border-color: var(--accent-dim);
+  transform: translateY(-2px);
+}
+
+.activity-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  object-fit: cover;
+  background: var(--bg-alt);
+}
+
+.activity-body {
+  padding: 14px 16px 16px;
+}
+
+.activity-cat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.activity-title {
+  margin: 6px 0 4px;
+  font-size: 0.96rem;
+  line-height: 1.35;
+}
+
+.activity-meta {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+/* ---------- Bo ky nang An toan so (luoi anh/infographic) ---------- */
+
+.skills-section {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.skills-subheading {
+  margin: 0 0 14px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.skills-grid + .skills-subheading {
+  margin-top: 32px;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+.skill-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-align: left;
+  color: var(--text);
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.skill-card:hover {
+  border-color: var(--accent-dim);
+  transform: translateY(-2px);
+}
+
+.skill-thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: block;
+  object-fit: cover;
+  background: var(--bg-alt);
+  cursor: zoom-in;
+}
+
+.skill-body {
+  padding: 12px 14px 14px;
+}
+
+.skill-title {
+  margin: 0 0 4px;
+  font-size: 0.94rem;
+  line-height: 1.35;
+}
+
+.skill-summary {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.skill-open-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.activity-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 110;
+}
+
+.activity-modal.active { display: flex; }
+
+.activity-modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 22px 26px;
+}
+
+.activity-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.activity-modal-content .event-title {
+  padding-right: 32px;
+}
+
+.activity-modal-content .event-location {
+  margin-bottom: 14px;
+}
+
+@media (max-width: 640px) {
+  .activity-modal { padding: 0; }
+  .activity-modal-box { max-width: none; max-height: 100vh; height: 100vh; border-radius: 0; }
+}

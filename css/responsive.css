@@ -1,0 +1,77 @@
+/* ---------- Responsive ---------- */
+
+@media (max-width: 720px) {
+  .about-points { grid-template-columns: 1fr; }
+}
+
+/* Menu chinh gio co 9 muc (them 4 the phan loai + Bo ky nang) - o vung
+   640-900px moi muc tu co lai/xuong dong rieng le trong flex nowrap, chu
+   khong tran deu, nhin lech nhau. Gap som sang menu rut gon (hamburger) o
+   nguong rong hon rieng cho phan nav, cac quy tac layout khac (padding,
+   grid...) van giu nguong 640/720px cu. */
+@media (max-width: 940px) {
+  .nav-toggle { display: flex; }
+  .mobile-quick-nav { display: flex; }
+
+  .site-nav {
+    position: fixed;
+    top: calc(var(--header-brand-h) + var(--header-h));
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+
+  .site-nav.open { max-height: 480px; overflow-y: auto; }
+
+  .site-nav a {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .site-nav > a:not(:first-child)::before {
+    display: none;
+  }
+
+  .admin-toggle { display: none; }
+
+  .admin-links {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .admin-links-sep {
+    margin: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .section-inner { padding: 44px 18px; }
+  .hero { padding: 20px 18px 56px; }
+  .timeline { padding-left: 20px; }
+  .event-dot { left: -26px; }
+  .event-summary { align-items: flex-start; }
+
+  .banner { margin: 0 auto 28px; border-radius: 8px; }
+
+  /* Tiet kiem khong gian tren mobile - carousel banner da du noi bat, bo
+     tieu de + doan mo ta lap lai y nghia, giu lai nut CTA. */
+  #hero-title,
+  #hero-subtitle {
+    display: none;
+  }
+
+  .hero-icon { margin-bottom: 16px; }
+}

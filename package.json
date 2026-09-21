@@ -1,0 +1,14 @@
+{
+  "name": "cam-nang-an-toan-so",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node scripts/build-public.js",
+    "check": "node scripts/check-site.js",
+    "backup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backup-content.ps1",
+    "publisher": "node scripts/publisher-server.js"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

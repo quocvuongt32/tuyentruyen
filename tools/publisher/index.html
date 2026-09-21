@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng bài · Cẩm nang An toàn số</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true">AT</div>
+      <div class="brand-copy">
+        <strong>TRÌNH ĐĂNG BÀI</strong>
+        <span>Cẩm nang An toàn số · Chỉ chạy trên máy này</span>
+      </div>
+      <div class="secure-chip"><span></span> Kết nối cục bộ an toàn</div>
+    </header>
+
+    <main>
+      <section class="hero-panel">
+        <div>
+          <p class="eyebrow">MỘT LẦN NHẬP · TỰ ĐỘNG KIỂM TRA · CÓ LINK RIÊNG</p>
+          <h1>Tạo bài mới thật nhanh</h1>
+          <p>Chọn ảnh, xem trước, kiểm tra toàn bộ website rồi đăng lên Cloudflare Pages.</p>
+        </div>
+        <ol class="progress" aria-label="Các bước đăng bài">
+          <li class="active" data-step="1"><b>1</b><span>Soạn bài</span></li>
+          <li data-step="2"><b>2</b><span>Ảnh & xem trước</span></li>
+          <li data-step="3"><b>3</b><span>Kiểm tra & đăng</span></li>
+        </ol>
+      </section>
+
+      <div id="pending-banner" class="pending-banner" hidden>
+        <div><strong>Đang có một bài chờ đăng</strong><span id="pending-title"></span></div>
+        <div class="pending-actions">
+          <a id="pending-preview" class="button ghost" target="_blank">Xem trước</a>
+          <button id="pending-publish" class="button primary" type="button">Đăng ngay</button>
+          <button id="pending-discard" class="button danger" type="button">Hủy bản này</button>
+        </div>
+      </div>
+
+      <form id="post-form" novalidate>
+        <section class="workspace">
+          <div class="editor-column">
+            <article class="panel">
+              <div class="panel-heading">
+                <span class="step-number">01</span>
+                <div><h2>Loại nội dung</h2><p>Chọn mẫu phù hợp, các trường cần thiết sẽ tự hiện.</p></div>
+              </div>
+              <div class="type-picker">
+                <label class="type-card selected">
+                  <input type="radio" name="type" value="event" checked>
+                  <span class="type-icon">📣</span>
+                  <span><strong>Chương trình tuyên truyền</strong><small>Hoạt động, hội nghị, buổi tuyên truyền, sự kiện</small></span>
+                </label>
+                <label class="type-card">
+                  <input type="radio" name="type" value="skill">
+                  <span class="type-icon">🧭</span>
+                  <span><strong>Bài viết / chuỗi kỹ năng</strong><small>Chuyển đổi số, an toàn số, hướng dẫn thực hành</small></span>
+                </label>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <span class="step-number">02</span>
+                <div><h2>Nội dung bài</h2><p>Các ô có dấu * là bắt buộc.</p></div>
+              </div>
+              <div class="form-grid">
+                <label class="field full"><span>Tiêu đề *</span><input id="title" name="title" maxlength="180" required placeholder="Ví dụ: Tuyên truyền kỹ năng sử dụng dịch vụ công trực tuyến an toàn"></label>
+                <label class="field"><span>Ngày đăng *</span><input id="date" name="date" type="date" required></label>
+                <label class="field"><span>Chủ đề *</span><select id="category" name="category" required>
+                  <option value="an-ninh-mang">An ninh mạng</option>
+                  <option value="chuyen-doi-so">Chuyển đổi số</option>
+                  <option value="doi-moi-sang-tao">Đổi mới sáng tạo</option>
+                  <option value="nghien-cuu-khoa-hoc">Nghiên cứu khoa học</option>
+                  <option value="khac">Khác</option>
+                </select></label>
+                <label id="location-field" class="field full"><span>Địa điểm</span><input id="location" name="location" maxlength="220" placeholder="Ví dụ: Trường THPT..., TP Hà Nội"></label>
+                <label id="series-field" class="field" hidden><span>Tên chuỗi kỹ năng</span><input id="series" name="series" maxlength="160" placeholder="Ví dụ: Kỹ năng chuyển đổi số cho công dân"></label>
+                <label id="order-field" class="field" hidden><span>Thứ tự trong chuỗi</span><input id="order" name="order" type="number" min="1" max="999" placeholder="1"></label>
+                <label class="field full"><span>Tóm tắt *</span><textarea id="summary" name="summary" maxlength="320" rows="3" required placeholder="Hai đến ba câu ngắn giúp người đọc hiểu ngay bài viết nói về điều gì."></textarea><small><b id="summary-count">0</b>/320 ký tự</small></label>
+                <label class="field full"><span>Nội dung chi tiết *</span><textarea id="body" name="body" maxlength="30000" rows="13" required placeholder="Viết nội dung bài tại đây. Có thể dùng **chữ đậm**, *chữ nghiêng*, dòng bắt đầu bằng - để tạo danh sách, và ## để tạo tiêu đề phụ."></textarea><small>Hỗ trợ Markdown cơ bản: <code>**đậm**</code>, <code>*nghiêng*</code>, <code>- danh sách</code>, <code>## tiêu đề</code>.</small></label>
+                <details id="event-extra" class="advanced full">
+                  <summary>Liên kết bổ sung (không bắt buộc)</summary>
+                  <div class="form-grid nested">
+                    <label class="field full"><span>Link bài tham khảo</span><input id="link" name="link" type="url" placeholder="https://..."></label>
+                    <label class="field full"><span>Link video YouTube/Vimeo</span><input id="video" name="video" type="url" placeholder="https://..."></label>
+                  </div>
+                </details>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <span class="step-number">03</span>
+                <div><h2>Ảnh của bài</h2><p>Ảnh được tự xoay, tối ưu và kiểm tra trước khi đăng.</p></div>
+              </div>
+              <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Chọn ảnh">
+                <input id="image-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+                <div class="upload-symbol">＋</div>
+                <strong>Kéo ảnh vào đây hoặc bấm để chọn</strong>
+                <span>JPG, PNG, WebP · Tối đa 15 ảnh · Ảnh đầu tiên là ảnh đại diện</span>
+              </div>
+              <div class="image-quality"><span>✓ Tự xoay đúng chiều</span><span>✓ Thu nhỏ tối đa 1.920 px</span><span>✓ Chuẩn hóa JPEG</span><span>✓ Kiểm tra ảnh hỏng</span></div>
+              <div id="image-list" class="image-list"></div>
+              <label id="banner-option" class="check-row"><input id="featured-banner" type="checkbox"> Dùng ảnh đại diện trên banner nổi bật của trang chủ</label>
+            </article>
+          </div>
+
+          <aside class="preview-column">
+            <div class="preview-sticky">
+              <div class="preview-toolbar"><strong>Xem trước nhanh</strong><span id="preview-type">Hoạt động tuyên truyền</span></div>
+              <article class="preview-card">
+                <div id="preview-image" class="preview-image"><span>Ảnh đại diện</span></div>
+                <div class="preview-body">
+                  <div id="preview-meta" class="preview-meta"></div>
+                  <h2 id="preview-title">Tiêu đề bài viết sẽ hiện ở đây</h2>
+                  <p id="preview-summary">Tóm tắt bài viết sẽ giúp người đọc quyết định mở bài.</p>
+                  <span class="preview-link">Mở trang riêng để chia sẻ →</span>
+                </div>
+              </article>
+              <div class="url-preview"><span>Đường dẫn dự kiến</span><code id="slug-preview">/hoat-dong/ten-bai-viet/</code></div>
+              <div class="publish-note"><b>Không đăng ngay.</b> Nút bên dưới chỉ lưu và chạy kiểm tra. Bạn vẫn được xem trước lần cuối trước khi đẩy lên website.</div>
+              <button id="save-button" class="button primary large" type="submit"><span>Lưu & kiểm tra toàn bộ</span><small>Chưa đưa lên Internet</small></button>
+            </div>
+          </aside>
+        </section>
+      </form>
+
+      <section id="result-panel" class="result-panel" hidden>
+        <div id="result-icon" class="result-icon">✓</div>
+        <div class="result-copy"><h2 id="result-title">Bài đã sẵn sàng</h2><p id="result-message"></p><code id="result-url"></code></div>
+        <div class="result-actions">
+          <a id="result-preview" class="button ghost" target="_blank">Xem trước đầy đủ</a>
+          <button id="publish-button" class="button primary" type="button">Đăng lên website</button>
+          <button id="copy-button" class="button ghost" type="button" hidden>Sao chép liên kết</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="busy-overlay" class="busy-overlay" hidden>
+    <div class="busy-box"><div class="spinner"></div><h2 id="busy-title">Đang xử lý ảnh…</h2><p id="busy-message">Vui lòng không đóng cửa sổ.</p></div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

@@ -1,5 +1,24 @@
 # Nhật ký thay đổi
 
+## 21/9/2026 — Cứng hóa triển khai và bảo trì
+
+- Lần cấp quyền Netlify đầu tiên dùng nhầm team Free `vuongtoantin`; sau đó đã cấp lại
+  đúng tài khoản `vuongppa@gmail.com` và đặt team `quocvuongt32` hạ từ Personal 9 USD
+  xuống Free vào 20/10/2026. Đã kiểm tra chéo qua `getAccount` và `listAccountsForUser`.
+- Nâng runtime từ Node.js 18 lên Node.js 24 LTS.
+- Thêm `scripts/build-public.js`; Cloudflare chỉ xuất bản `dist/`, không còn lộ file nội bộ.
+- Tách `js/main.js` và `css/style.css` thành các mô-đun theo chức năng.
+- Bỏ iframe cho liên kết tham khảo; liên kết ngoài luôn mở tab mới an toàn, CSP chỉ còn
+  cho phép iframe YouTube/Vimeo.
+- Chuyển đăng ký bản tin sang Cloudflare Pages Function + Resend Contacts, có consent.
+- Thêm ticker dự phòng khi RSS lỗi và sao lưu nội dung tự động hằng tuần.
+- Thêm `Dang-bai.bat` và giao diện đăng bài cục bộ: chọn loại bài, soạn nội dung, kéo/thả
+  ảnh, chọn ảnh bìa, xem trước, build/check rồi commit/push đúng các tệp của bài.
+- Ảnh được tự xoay, chuẩn hóa JPEG, giới hạn tối đa 1.920 px/2,5 MB và kiểm tra lại kích
+  thước/định dạng ở máy chủ trước khi lưu; build chỉ thành công nếu ảnh có trong `dist/`.
+- Thêm trang tĩnh riêng `/hoat-dong/<slug>/`, `/ky-nang/<slug>/`, Open Graph, nút chia sẻ,
+  điều hướng chuỗi kỹ năng và `sitemap.xml`; cập nhật [PUBLISHING.md](PUBLISHING.md).
+
 > Ghi theo ngày, mới nhất lên đầu. Mục đích: biết nhanh "gần đây đã làm gì" mà không
 > phải đọc lại toàn bộ lịch sử chat hay `git log`. Chi tiết kỹ thuật của từng tính
 > năng nằm ở [PROJECT.md](PROJECT.md); sự cố vận hành ở [DEPLOYMENT.md](DEPLOYMENT.md).

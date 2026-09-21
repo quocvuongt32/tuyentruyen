@@ -1,5 +1,15 @@
 # Cẩm nang An toàn số — tổng quan dự án
 
+> **Cập nhật 21/9/2026:** Site đã chạy hoàn toàn trên Cloudflare Pages. Build bằng
+> `npm run build`, chỉ xuất bản `dist/`, Node.js 24. Frontend đã tách thành nhiều file
+> trong `js/` và `css/`. Form góp ý dùng Web3Forms; bản tin dùng Cloudflare Pages
+> Function + Resend. `/admin` và Netlify chỉ còn là mã/tài liệu lịch sử, không thuộc
+> luồng vận hành hiện tại. Nếu nội dung cũ bên dưới mâu thuẫn, ưu tiên ghi chú này và
+> [README.md](../README.md).
+
+> Quy trình đăng nội dung bằng giao diện `Dang-bai.bat` và URL riêng cho từng bài được
+> hướng dẫn tại [PUBLISHING.md](PUBLISHING.md).
+
 > Đọc file này trước tiên trong mọi phiên chat mới. Đây là bản đồ hệ thống, không phải
 > hướng dẫn cài đặt (xem [DEPLOYMENT.md](DEPLOYMENT.md) cho phần đó), không phải
 > nhật ký thay đổi (xem [CHANGELOG.md](CHANGELOG.md)), và không bao gồm hạng mục video dự
@@ -8,40 +18,40 @@
 ## Site là gì
 
 Website tuyên truyền an ninh mạng / chuyển đổi số của Khoa Toán - Tin học và Ứng dụng
-KHCN, Học viện CSND. Live tại **https://tuyentruyen.khoaktt.vn/**, quản trị nội dung tại
-**`/admin`** (Decap CMS). Đây là sản phẩm dự thi "Sáng tạo sản phẩm truyền thông số" của
+KHCN, Học viện CSND. Live tại **https://tuyentruyen.khoaktt.vn/**, quản trị nội dung bằng
+JSON + script tại máy. Đây là sản phẩm dự thi "Sáng tạo sản phẩm truyền thông số" của
 Đảng ủy Học viện CSND.
 
 ## Ngăn xếp công nghệ
 
 - **Jamstack tĩnh thuần**: HTML/CSS/JS, không framework, không build tool (Vite/Webpack/...).
-- **Hosting: đang chuyển Netlify → Cloudflare Pages** (6/9/2026, do Netlify tính băng
-  thông quá đắt làm hết credit). Xem [DEPLOYMENT.md](DEPLOYMENT.md) mục "Đang chuyển
-  hosting". Sau khi chuyển: Cloudflare Pages build (chạy các script Node trong
-  `scripts/`), băng thông miễn phí không giới hạn.
+- **Hosting: Cloudflare Pages**. Build Node.js 24 tạo thư mục `dist/`; chỉ thư mục này
+  được xuất bản.
 - **Không còn CMS web**: đã bỏ `/admin` (Decap CMS + Netlify Identity + Git Gateway).
-  Thêm/sửa nội dung bằng script (`add-event.js`, `import-events-xlsx.js`) + `git push`.
-- **Form**: Web3Forms (`api.web3forms.com`) — thay Netlify Forms, không backend.
-- Không database, không API tự viết, không server-side code nào khác ngoài các script
-  build chạy 1 lần lúc deploy.
+  Thêm/sửa nội dung bằng `Dang-bai.bat` hoặc script (`add-event.js`,
+  `import-events-xlsx.js`) + `git push`.
+- **Trang chi tiết tĩnh**: `scripts/build-pages.js` tạo URL riêng, Open Graph và
+  `sitemap.xml` cho hoạt động/kỹ năng.
+- **Form góp ý**: Web3Forms. **Bản tin**: Cloudflare Pages Function + Resend Contacts.
+- Không database riêng; server-side chỉ có Pages Function đăng ký bản tin.
 
 ## Luồng dữ liệu (quan trọng nhất cần hiểu)
 
 ```
-content/*.json, content/events/*.json   (nguồn — Decap CMS ghi vào đây qua Git Gateway)
+content/*.json, content/events/*.json   (nguồn — script tại máy tạo/sửa)
         │
-        ▼  scripts/build-*.js  (chạy lúc Netlify build, xem netlify.toml)
+        ▼  scripts/build-public.js (gọi các build-*.js)
         │
 data/*.json   (đã gitignore — sinh ra lúc build, không commit)
         │
-        ▼  js/main.js fetch() lúc trang load
+        ▼  js/*.js fetch() lúc trang load
         │
 DOM (index.html render động qua JS)
 ```
 
 4 cặp nguồn/script/output tương ứng:
 
-| Nguồn CMS | Script build | Output | Dùng cho |
+| Nguồn nội dung | Script build | Output | Dùng cho |
 |---|---|---|---|
 | `content/events/*.json` (1 file/sự kiện) + tuỳ chọn `content/nhap-hang-loat.json` (lô Excel đang chờ, xem "Nhập hàng loạt") | `scripts/build-events.js` | `data/events.json` | Timeline "Tuyên truyền An ninh mạng" + lưới "Hoạt động khác" |
 | `content/site.json` (1 file) | `scripts/build-site.js` | `data/site.json` | Header, Hero, tiêu đề 2 mục, Footer |
@@ -61,15 +71,13 @@ index.html          Toàn bộ trang public — hầu hết nội dung chữ là
                      hoặc có sẵn text mặc định, được main.js ghi đè bằng data/*.json.
                      Giữ text mặc định trong HTML để không bị trắng trang (FOUC) nếu
                      fetch lỗi hoặc JS chạy chậm.
-css/style.css        1 file duy nhất. Theme sáng/tối qua CSS custom properties ở :root
-                     và :root[data-theme="light"] — xem "Theme sáng/tối" bên dưới.
-js/main.js            Toàn bộ JS, không module bundler, load bằng <script defer>.
-admin/config.yml      Schema Decap CMS — 4 collection: site, gioi_thieu, events, ticker.
-admin/index.html      Bootstrap Decap CMS + Netlify Identity widget.
+css/*.css             CSS tách theo base/layout/content/forms/modals/widgets/responsive.
+js/*.js              JavaScript tách theo content/events/forms/media/ui; `main.js` khởi tạo.
+admin/                Mã Decap CMS cũ, không thuộc luồng vận hành hiện tại.
 content/              Nguồn dữ liệu CMS (commit vào Git, KHÔNG gitignore).
 data/                 Output build (gitignore, không commit — build lại mỗi lần).
-scripts/build-*.js    4 script build, chỉ dùng Node core (fs, path, fetch) — không
-                       cần npm install, không có package.json trong repo.
+scripts/build-*.js    Script build dùng Node core; `build-public.js` chỉ xuất bản tài sản
+                       cần thiết vào `dist/`.
 scripts/add-event.js  CLI thêm 1 sự kiện thủ công khi test local (không qua CMS).
 scripts/import-events-xlsx.js  Nhập hàng loạt tại máy — ghi ra content/events/*.json
                        riêng, tiêu thụ ảnh trong Anh-nhap-hoat-dong/. Xem mục

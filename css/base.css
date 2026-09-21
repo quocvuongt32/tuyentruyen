@@ -1,0 +1,225 @@
+:root {
+  --bg: #070c17;
+  --bg-alt: #0b1120;
+  --bg-card: #131c31;
+  --border: #22304a;
+  --text: #e6ebf5;
+  --text-dim: #bcc6de;
+  --accent: #d62828;
+  --accent-soft: rgba(214, 40, 40, 0.16);
+  --accent-dim: #7a1a1a;
+  --gold: #e8b923;
+  --gold-soft: rgba(232, 185, 35, 0.15);
+  --on-accent: #fff6f0;
+  --danger: #ff6b6b;
+  --header-bg: rgba(7, 12, 23, 0.85);
+  --hero-glow: #0f1a30;
+  --radius: 10px;
+  --max-width: 960px;
+  --header-brand-h: 92px;
+  --header-h: 56px;
+}
+
+/* Nen sang: trang anh vang, tinh than "co do sao vang" */
+:root[data-theme="light"] {
+  --bg: #fdf8ec;
+  --bg-alt: #f7ecd2;
+  --bg-card: #fffdf7;
+  --border: #e6d6a8;
+  --text: #241a10;
+  --text-dim: #54462d;
+  --accent: #d62828;
+  --accent-soft: rgba(214, 40, 40, 0.10);
+  --accent-dim: #b32626;
+  --gold: #9c6f0b;
+  --gold-soft: rgba(184, 134, 11, 0.14);
+  --on-accent: #fff8f0;
+  --danger: #c62828;
+  --header-bg: rgba(253, 248, 236, 0.88);
+  --hero-glow: #ffe9ae;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; font-size: 112.5%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+body, .site-header, .hero, .banner, .corner-stat, .stat-tile, .badge-icon, .partner-badges,
+.timeline-section, .activity-section, .activity-card, .site-footer,
+.admin-links, .activity-modal-box, .activity-modal-close, .news-ticker {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+a { color: inherit; }
+
+/* ---------- Hieu ung tuong tac chung (hover chuot / cham tay) ---------- */
+/* Bo sung dong loat cho cac khoi/nut chinh tren toan site cam giac "co the
+   bam duoc": hover (chuot) nhun nhe len, cham/bam (:active, ca chuot lan
+   cam ung) nhun nhe xuong. Chi THEM trang thai con thieu, khong ghi de cac
+   hieu ung hover rieng da co (vd .activity-card:hover dich len 2px). */
+@media (prefers-reduced-motion: no-preference) {
+  .stat-tile,
+  .corner-stat,
+  .activity-card,
+  .skill-card,
+  .banner-dot,
+  .theme-toggle,
+  .admin-toggle,
+  .hero-cta,
+  .corner-fab,
+  .event-summary,
+  .nav a,
+  .site-nav a {
+    transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .stat-tile:hover,
+  .corner-stat:hover {
+    transform: translateY(-2px);
+  }
+
+  .stat-tile:active,
+  .corner-stat:active,
+  .activity-card:active,
+  .skill-card:active,
+  .banner-dot:active,
+  .theme-toggle:active,
+  .admin-toggle:active,
+  .hero-cta:active,
+  .corner-fab:active,
+  .event-summary:active,
+  .site-nav a:active {
+    transform: scale(0.96);
+  }
+}
+
+/* ---------- Dai tin chay (thoi su chinh thong) ---------- */
+
+.news-ticker {
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+  padding: 7px 0;
+  overflow: hidden;
+}
+
+.news-ticker[hidden] { display: none; }
+
+.news-ticker-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ticker-meta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 12px;
+  border-right: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.ticker-weather {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ticker-weather[hidden] { display: none; }
+
+.ticker-weather-icon { font-size: 0.95rem; line-height: 1; }
+
+.news-ticker-label {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  background: var(--accent-soft);
+  border: 1px solid transparent;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.news-ticker-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent, black 28px, black calc(100% - 12px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 28px, black calc(100% - 12px), transparent);
+}
+
+.news-ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 44px;
+  width: max-content;
+  white-space: nowrap;
+  animation: news-ticker-scroll 220s linear infinite;
+}
+
+.news-ticker:hover .news-ticker-track,
+.news-ticker-track:focus-within {
+  animation-play-state: paused;
+}
+
+.news-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.news-ticker-item:hover,
+.news-ticker-item:focus-visible {
+  text-decoration: underline;
+}
+
+.news-ticker-source {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+@keyframes news-ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-ticker-track {
+    animation: none;
+  }
+  .news-ticker-viewport {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .news-ticker-inner { gap: 8px; }
+  .ticker-meta { gap: 8px; padding-right: 8px; }
+  .ticker-datetime { display: none; }
+  .news-ticker-item { font-size: 0.78rem; }
+}

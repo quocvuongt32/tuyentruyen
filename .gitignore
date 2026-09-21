@@ -2,6 +2,9 @@
 Thumbs.db
 ~$*
 node_modules/
+dist/
+backups/
+.dev.vars
 data/events.json
 data/ticker.json
 data/about.json

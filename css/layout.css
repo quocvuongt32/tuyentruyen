@@ -1,0 +1,506 @@
+/* ---------- Header / Nav ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Hang 1: logo + ten thuong hieu, can giua, rieng 1 hang - kieu masthead
+   bao dien tu (vd Cong an nhan dan). */
+.header-brand-row {
+  height: var(--header-brand-h);
+  background: var(--header-bg);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.brand .logo {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.brand .logo img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  /* Lam sang, ro net hon tren nen ca 2 theme - huy hieu goc hoi tram. */
+  filter: brightness(1.18) saturate(1.12) contrast(1.04);
+}
+
+.brand-text {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+  font-size: 1.05em;
+}
+
+.brand-line1,
+.brand-line2 {
+  font-size: clamp(1.5rem, 5.5vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.brand-line2 {
+  color: var(--gold);
+}
+
+/* Hang 2: thanh dieu huong mau accent, rieng 1 khung - kieu bao dien tu. */
+.header-nav-row {
+  background: var(--accent);
+  border-bottom: 1px solid var(--accent-dim);
+}
+
+.header-nav-inner {
+  max-width: var(--max-width);
+  height: var(--header-h);
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+
+.site-nav a {
+  text-decoration: none;
+  color: var(--on-accent);
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.site-nav a:hover,
+.site-nav a:focus-visible {
+  color: var(--gold);
+}
+
+/* Ngan cach nhe giua cac muc menu chinh, khong ap dung cho theme-toggle/
+   admin-menu (da co khung rieng). */
+.site-nav > a {
+  position: relative;
+}
+
+.site-nav > a:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  color: var(--on-accent);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.theme-toggle .theme-icon-sun { display: none; }
+.theme-toggle .theme-icon-moon { display: flex; }
+:root[data-theme="light"] .theme-toggle .theme-icon-sun { display: flex; }
+:root[data-theme="light"] .theme-toggle .theme-icon-moon { display: none; }
+
+/* Truy cap nhanh tren mobile (Gioi thieu/Tuyen truyen/Bo ky nang) - chi hien
+   duoi nguong 940px, xem quy tac o media query ben duoi. Tren desktop cac
+   muc nay da co san dang chu trong .site-nav nen an di o day. */
+.mobile-quick-nav {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.mobile-quick-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-quick-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  color: var(--on-accent);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mobile-quick-link:hover,
+.mobile-quick-link:focus-visible {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+/* Menu "Them" gop chung: 4 muc noi dung con lai (Doi moi sang tao, Khac,
+   Nghien cuu khoa hoc, Kiem tra nhanh) + 2 muc quan tri, ngan cach bang
+   .admin-links-sep. Gop vao 1 icon nho theo yeu cau nguoi dung, thay vi 2
+   nut rieng nhu truoc. */
+.admin-menu {
+  position: relative;
+}
+
+.admin-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  color: var(--on-accent);
+  cursor: pointer;
+}
+
+.admin-toggle:hover,
+.admin-toggle[aria-expanded="true"] {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.admin-links {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 210px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+  z-index: 60;
+}
+
+.admin-links.open {
+  display: flex;
+}
+
+.admin-links a {
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.admin-links a:hover {
+  background: var(--bg-alt);
+  color: var(--accent);
+}
+
+.admin-links-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  margin: 0 auto;
+  background: var(--on-accent);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 20px 96px;
+  text-align: center;
+  background: radial-gradient(ellipse at top, var(--hero-glow) 0%, var(--bg) 65%);
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(214, 40, 40, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214, 40, 40, 0.08) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse at top, black 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Banner anh noi bat, chon tay tu kho anh trong /admin */
+.banner {
+  position: relative;
+  max-width: var(--max-width);
+  height: clamp(200px, 32vw, 380px);
+  margin: 0 auto 36px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.banner[hidden] { display: none; }
+
+.banner-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.banner-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  cursor: pointer;
+}
+
+.banner-slide.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.banner-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.banner-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 34px 20px 14px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: #fff;
+  text-align: left;
+  font-size: 0.86rem;
+}
+
+.banner-caption strong {
+  display: block;
+  font-size: 0.98rem;
+  margin-bottom: 2px;
+}
+
+.banner-dots {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+
+.banner-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+.banner-dot.active {
+  width: 20px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+.hero-inner {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* Carousel chay ngang qua lai giua huy hieu va cac anh Banner, dang khoi
+   banner chu nhat 16:9, cao va sat ngay duoi dai tin "Thoi su". Be rong co
+   dinh (khong con dong bo theo chu tieu de - qua nho so voi 1 khoi banner).
+   Slide moi truot vao tu phai, slide cu truot ra trai (xem setupHeroCarousel
+   trong main.js). */
+.hero-icon {
+  position: relative;
+  display: block;
+  width: min(720px, 94vw);
+  aspect-ratio: 16 / 9;
+  margin: 0 auto 24px;
+  border-radius: 14px;
+  overflow: hidden;
+  filter: drop-shadow(0 0 28px var(--accent-soft));
+}
+
+.hero-icon img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translateX(100%);
+  transition: transform 0.9s ease;
+}
+
+.hero-icon img[data-logo="true"] {
+  object-fit: contain;
+  padding: 8%;
+}
+
+.hero-icon img.is-active { transform: translateX(0); }
+.hero-icon img.is-prev { transform: translateX(-100%); }
+
+.hero h1 {
+  margin: 0 0 14px;
+  font-size: clamp(1.35rem, 3.2vw, 1.9rem);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+@media (max-width: 460px) {
+  .hero h1 { white-space: normal; }
+}
+
+.hero p {
+  color: var(--text-dim);
+  margin: 0 auto 28px;
+  max-width: 680px;
+  white-space: pre-line;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--on-accent);
+  background: var(--accent);
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 999px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hero-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--accent-soft);
+}
+
+.stats-row {
+  position: relative;
+  max-width: var(--max-width);
+  margin: 48px auto 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.stat-tile {
+  font-family: inherit;
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 18px 12px;
+}
+
+.stat-icon {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin-bottom: 6px;
+  color: var(--gold);
+}
+
+.stat-tile strong {
+  display: block;
+  font-size: 1.6rem;
+  color: var(--gold);
+  letter-spacing: 0.3px;
+}
+
+.stat-tile span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.stat-tile-link {
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.stat-tile-link:hover,
+.stat-tile-link:focus-visible {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 720px) {
+  .stats-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .stats-row { margin-top: 32px; }
+}

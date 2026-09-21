@@ -23,6 +23,61 @@ function slugFromFilename(file) {
   return base.replace(/[^a-zA-Z0-9-]+/g, "-");
 }
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function inlineMd(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
+function markdownToHtml(md) {
+  if (!md) return "";
+  const lines = escapeHtml(md).split(/\r?\n/);
+  let html = "";
+  let inList = false;
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) {
+      if (inList) { html += "</ul>"; inList = false; }
+      continue;
+    }
+    const listMatch = line.match(/^[-*]\s+(.*)$/);
+    if (listMatch) {
+      if (!inList) { html += "<ul>"; inList = true; }
+      html += `<li>${inlineMd(listMatch[1])}</li>`;
+      continue;
+    }
+    if (inList) { html += "</ul>"; inList = false; }
+    const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      html += `<h${level}>${inlineMd(headingMatch[2])}</h${level}>`;
+    } else {
+      html += `<p>${inlineMd(line)}</p>`;
+    }
+  }
+  if (inList) html += "</ul>";
+  return html;
+}
+
+function normalizeImages(data) {
+  const raw = Array.isArray(data.images) ? data.images : [];
+  const images = raw
+    .map((item) => typeof item === "string" ? item : item && item.image)
+    .filter(isSafeImagePath);
+  if (isSafeImagePath(data.image) && !images.includes(data.image)) images.unshift(data.image);
+  return images;
+}
+
 fs.mkdirSync(outDir, { recursive: true });
 
 let files = [];
@@ -42,18 +97,28 @@ const skills = files
       console.warn(`[skills] Bỏ qua file lỗi định dạng: ${file}`);
       return null;
     }
-    const image = isSafeImagePath(data.image) ? data.image : "";
+    const images = normalizeImages(data);
+    const image = images[0] || "";
     const link = isSafeUrl(data.link) ? data.link : "";
-    if (!image && !link) {
-      console.warn(`[skills] Bỏ qua "${file}": cần có ảnh hoặc link, không có cả 2.`);
+    const bodyHtml = markdownToHtml(typeof data.body === "string" ? data.body : "");
+    if (!image && !link && !bodyHtml) {
+      console.warn(`[skills] Bỏ qua "${file}": cần có ảnh, nội dung hoặc link.`);
       return null;
     }
+    const slug = slugFromFilename(file);
     return {
-      slug: slugFromFilename(file),
+      slug,
       title: typeof data.title === "string" ? data.title : "",
       image,
+      images,
       summary: typeof data.summary === "string" ? data.summary : "",
       link,
+      bodyHtml,
+      date: typeof data.date === "string" ? data.date : "",
+      category: typeof data.category === "string" ? data.category : "",
+      series: typeof data.series === "string" ? data.series : "",
+      order: data.order !== null && data.order !== "" && Number.isFinite(Number(data.order)) ? Number(data.order) : null,
+      pageUrl: !link ? `/ky-nang/${slug}/` : "",
     };
   })
   .filter(Boolean);

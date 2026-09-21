@@ -7,6 +7,7 @@ const fs = require("fs");
 const path = require("path");
 
 const tickerDir = path.join(__dirname, "..", "content", "ticker");
+const fallbackFile = path.join(__dirname, "..", "content", "ticker-fallback.json");
 const outDir = path.join(__dirname, "..", "data");
 const outFile = path.join(outDir, "ticker.json");
 
@@ -124,6 +125,18 @@ function loadCuratedItems() {
     .filter(Boolean);
 }
 
+function loadFallbackItems() {
+  try {
+    const data = JSON.parse(fs.readFileSync(fallbackFile, "utf8"));
+    return Array.isArray(data.items)
+      ? data.items.filter((it) => it && it.title && isSafeUrl(it.url))
+      : [];
+  } catch (e) {
+    console.warn(`[ticker] Không đọc được dữ liệu dự phòng: ${e.message}`);
+    return [];
+  }
+}
+
 function matchesPriority(title) {
   const lower = title.toLowerCase();
   return PRIORITY_KEYWORDS.some((kw) => lower.includes(kw));
@@ -155,10 +168,17 @@ async function main() {
   priority.sort(byDateDesc);
   rest.sort(byDateDesc);
 
-  const items = [...priority, ...rest].slice(0, MAX_ITEMS);
+  let items = [...priority, ...rest].slice(0, MAX_ITEMS);
+  let fallback = false;
+  if (!items.length) {
+    items = loadFallbackItems().slice(0, MAX_ITEMS);
+    fallback = items.length > 0;
+    if (fallback) console.warn(`[ticker] RSS lỗi/rỗng; giữ ${items.length} tin dự phòng đã kiểm duyệt.`);
+  }
 
   const payload = {
     generatedAt: new Date().toISOString(),
+    fallback,
     items,
   };
 
@@ -167,7 +187,11 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error("[ticker] Lỗi không mong đợi, ghi file rỗng để không chặn build:", e);
+  console.error("[ticker] Lỗi không mong đợi, dùng dữ liệu dự phòng để không chặn build:", e);
   fs.mkdirSync(outDir, { recursive: true });
-  fs.writeFileSync(outFile, JSON.stringify({ generatedAt: new Date().toISOString(), items: [] }, null, 2), "utf8");
+  fs.writeFileSync(outFile, JSON.stringify({
+    generatedAt: new Date().toISOString(),
+    fallback: true,
+    items: loadFallbackItems().slice(0, MAX_ITEMS),
+  }, null, 2), "utf8");
 });

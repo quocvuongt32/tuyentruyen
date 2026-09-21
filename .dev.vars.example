@@ -1,0 +1,4 @@
+# Sao chép thành .dev.vars để chạy Pages Functions tại máy; không commit .dev.vars.
+RESEND_API_KEY=re_xxxxxxxxx
+RESEND_SEGMENT_ID=b9c64daa-85fb-42b4-9024-3715ea27eb70
+NEWSLETTER_FROM=Cẩm nang An toàn số <noreply@tuyentruyen.khoaktt.vn>

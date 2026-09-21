@@ -183,6 +183,7 @@ function loadIndividualEvents() {
       return {
         slug: slugFromFilename(file),
         title: typeof data.title === "string" ? data.title : "",
+        summary: typeof data.summary === "string" ? data.summary : "",
         category,
         categoryLabel: CATEGORY_LABELS[category],
         planNumber: typeof data.planNumber === "string" ? data.planNumber : "",
