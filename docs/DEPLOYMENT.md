@@ -17,6 +17,20 @@
   không được xuất bản.
 - Workflow `.github/workflows/backup-content.yml` sao lưu nội dung hằng tuần, giữ 90 ngày.
 
+### Tin nhanh tự cập nhật
+
+- Endpoint: `/api/quick-news` → `functions/api/quick-news.js`.
+- Nguồn: chuyên mục **an ninh mạng** của Cổng thông tin Bộ Công an và chuyên mục
+  **chuyển đổi số** của Báo điện tử Chính phủ.
+- Cloudflare cache response 6 giờ (`s-maxage=21600`) và cho phép dùng bản cũ thêm 24 giờ
+  trong lúc cập nhật (`stale-while-revalidate`). Như vậy tin tự thay đổi trong ngày mà
+  không cần commit/deploy mới và vẫn nằm trong gói miễn phí.
+- Trình duyệt cache 15 phút. Nếu function hoặc nguồn ngoài lỗi, frontend đọc
+  `data/ticker.json`; website không bị trắng hay chặn tải.
+- Bộ trích số liệu chỉ nhận câu có đơn vị rõ (%, tỷ, triệu, giao dịch, hồ sơ...) và luôn
+  gắn liên kết/ngày nguồn. Giao diện ghi rõ đây là trích dẫn, không phải số liệu thời gian
+  thực.
+
 > Đọc [PROJECT.md](PROJECT.md) trước để hiểu kiến trúc. File này là phần "vận hành":
 > hosting, CSP, và các sự cố đã gặp + cách đã sửa (để không lặp lại).
 

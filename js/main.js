@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadVisitCounter();
   setInterval(loadVisitCounter, 60 * 1000);
   loadTicker();
+  loadQuickNews();
   setupTickerClock();
   loadTickerWeather();
   setInterval(loadTickerWeather, 15 * 60 * 1000);

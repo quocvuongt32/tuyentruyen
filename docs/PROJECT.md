@@ -33,7 +33,8 @@ JSON + script tại máy. Đây là sản phẩm dự thi "Sáng tạo sản ph�
 - **Trang chi tiết tĩnh**: `scripts/build-pages.js` tạo URL riêng, Open Graph và
   `sitemap.xml` cho hoạt động/kỹ năng.
 - **Form góp ý**: Web3Forms. **Bản tin**: Cloudflare Pages Function + Resend Contacts.
-- Không database riêng; server-side chỉ có Pages Function đăng ký bản tin.
+- Không database riêng; server-side có Pages Function đăng ký bản tin và tổng hợp tin
+  nhanh từ nguồn chính thống.
 
 ## Luồng dữ liệu (quan trọng nhất cần hiểu)
 
@@ -58,6 +59,11 @@ DOM (index.html render động qua JS)
 | `content/gioi-thieu.json` (1 file) | `scripts/build-about.js` | `data/about.json` | Mục "Giới thiệu" |
 | — (RSS ngoài + `content/ticker/*.json` tuỳ chọn) | `scripts/build-ticker.js` | `data/ticker.json` | Dải tin chạy đầu trang |
 | `content/ky-nang/*.json` (1 file/kỹ năng) | `scripts/build-skills.js` | `data/skills.json` | Mục "Bộ kỹ năng An toàn số" |
+
+Tin nhanh ở `#tin-nhanh` không đi qua bước build: `functions/api/quick-news.js` đọc
+chuyên mục chính thức của Bộ Công an và Báo điện tử Chính phủ khi có người truy cập,
+chuẩn hóa tiêu đề/ngày/tóm tắt/số liệu, rồi lưu đệm tại Cloudflare trong 6 giờ. Frontend
+dùng `data/ticker.json` làm phương án dự phòng nếu hai nguồn ngoài tạm lỗi.
 
 **Nếu sửa code mà không thấy hiệu lực khi test local**: luôn chạy lại
 `node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js
@@ -107,11 +113,11 @@ netlify/functions/     Netlify Functions (Node, chay server-side, KHONG phai cod
   `data-theme="light"` dựa trên `localStorage.theme` (nếu người dùng từng bấm nút) hoặc
   giờ hiện tại (6h–12h = sáng, còn lại = tối). Nút bấm: `#theme-toggle`,
   logic ở `setupThemeToggle()` trong `main.js`.
-- **Dải tin chạy đầu trang ("Thời sự")**: `#news-ticker`, populate bởi `loadTicker()`.
-  Nguồn: 2 feed RSS thật của Bộ Công an (`bocongan.gov.vn/api/rss/35.xml` và `/36.xml`,
-  đã xác minh hoạt động) + `content/ticker/*.json` do admin tự thêm thủ công (mục
-  "Tin liên quan" trong `/admin`). Ưu tiên tin khớp từ khoá (chuyển đổi số, Nghị quyết
-  57, an ninh mạng...). Xem `scripts/build-ticker.js`.
+- **Dải tin chạy đầu trang ("Thời sự")** và **Tin nhanh & số liệu mới** dùng chung dữ
+  liệu từ `/api/quick-news`: chuyên mục an ninh mạng của Bộ Công an và chuyển đổi số của
+  Báo điện tử Chính phủ. Response cache 6 giờ, mỗi tin/số liệu đều giữ URL nguồn và ngày.
+  Nếu API lỗi, `loadTicker()`/`loadQuickNews()` tự dùng `data/ticker.json`; file này vẫn
+  được `scripts/build-ticker.js` tạo từ RSS Bộ Công an hoặc fallback đã kiểm duyệt.
 - **Widget góc phải dưới** (`#corner-widgets`): 3 nút tròn nổi — 📊 số liệu nổi bật
   (`#stats-panel`), 📰 tin liên quan (`#news-panel`), ✉️ hòm thư góp ý
   (`#feedback-panel`, form gửi qua **Netlify Forms**, không cần backend riêng).

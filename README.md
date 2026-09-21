@@ -24,6 +24,8 @@ dist/  → Cloudflare Pages
 - Đăng ký bản tin gọi Cloudflare Pages Function `/api/newsletter/subscribe`, lưu contact
   thật vào Resend và gắn vào segment bản tin.
 - Tin RSS có bản dự phòng tại `content/ticker-fallback.json` để không bị rỗng khi nguồn lỗi.
+- Khối **Tin nhanh & số liệu mới** gọi Pages Function `/api/quick-news`, tự làm mới từ
+  chuyên mục chính thức của Bộ Công an và Báo điện tử Chính phủ, lưu đệm 6 giờ.
 - Chỉ `dist/` được xuất bản; tài liệu, script, JSON nguồn và cấu hình nội bộ không được đưa
   lên website.
 
@@ -39,6 +41,8 @@ dist/  → Cloudflare Pages
 
 - Cách dễ nhất: bấm đúp `Dang-bai.bat`, soạn bài, chọn ảnh, xem trước rồi đăng. Công cụ
   tự tối ưu/kiểm tra ảnh, build/check, tạo commit riêng và trả về URL để chia sẻ.
+- Bài chọn **Chương trình tuyên truyền** mặc định được đưa thẳng vào dòng thời gian
+  `Tuyên truyền An ninh mạng`; có thể đổi sang khu vực `Hoạt động khác` ngay trên form.
 - Cách dòng lệnh cũ: thêm một hoạt động bằng `Them-su-kien.bat`.
 - Nhập nhiều hoạt động: điền `uploads/mau-nhap-hoat-dong.xlsx`, đặt ảnh nguồn vào
   `Anh-nhap-hoat-dong/`, rồi chạy `Nhap-hang-loat.bat`.

@@ -60,6 +60,7 @@ main { width: min(1400px, calc(100% - 32px)); margin: 28px auto 70px; }
 .field input, .field textarea, .field select { width: 100%; color: var(--ink); background: #fbfdfe; border: 1px solid #cfdce6; padding: 12px 13px; outline: none; transition: border .15s, box-shadow .15s; }
 .field textarea { resize: vertical; line-height: 1.55; }
 .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--cyan-dark); box-shadow: 0 0 0 3px rgba(19,196,216,.13); background: white; }
+.field select:disabled { color: #53697d; background: #eaf1f5; cursor: not-allowed; }
 .field small { color: var(--muted); font-size: .75rem; justify-self: end; }
 .field code { color: #36516c; background: #eef3f6; padding: 2px 4px; }
 .advanced { border: 1px solid var(--line); background: #f8fafc; }

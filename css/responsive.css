@@ -58,6 +58,12 @@
 }
 
 @media (max-width: 640px) {
+  :root { --header-brand-h: 80px; }
+  .header-brand-row { padding: 0 10px; }
+  .brand { gap: 9px; }
+  .brand .logo img { width: 58px; height: 58px; }
+  .brand-line1,
+  .brand-line2 { font-size: clamp(1.05rem, 6.2vw, 1.55rem); }
   .section-inner { padding: 44px 18px; }
   .hero { padding: 20px 18px 56px; }
   .timeline { padding-left: 20px; }
@@ -74,4 +80,12 @@
   }
 
   .hero-icon { margin-bottom: 16px; }
+}
+
+@media (max-width: 430px) {
+  :root { --header-brand-h: 72px; }
+  .brand { gap: 7px; }
+  .brand .logo img { width: 48px; height: 48px; }
+  .brand-line1,
+  .brand-line2 { font-size: 0.92rem; }
 }

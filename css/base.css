@@ -16,7 +16,7 @@
   --hero-glow: #0f1a30;
   --radius: 10px;
   --max-width: 960px;
-  --header-brand-h: 92px;
+  --header-brand-h: 112px;
   --header-h: 56px;
 }
 
@@ -42,6 +42,10 @@
 * { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; font-size: 112.5%; }
+
+section[id] {
+  scroll-margin-top: calc(var(--header-brand-h) + var(--header-h) + 12px);
+}
 
 body {
   margin: 0;

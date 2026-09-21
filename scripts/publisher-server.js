@@ -184,7 +184,9 @@ function createPost(input) {
   if (body.length < 30) throw new Error("Nội dung cần ít nhất 30 ký tự.");
   const date = cleanText(input.date, 10, "ngày đăng", true);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Ngày đăng phải theo định dạng YYYY-MM-DD.");
-  const category = categories.has(input.category) ? input.category : "khac";
+  const placement = type === "event" && input.placement === "activity" ? "activity" : "timeline";
+  let category = categories.has(input.category) ? input.category : "khac";
+  if (type === "event" && placement === "timeline") category = "an-ninh-mang";
   const preferred = slugify(input.slug || title);
   if (!preferred) throw new Error("Không tạo được đường dẫn từ tiêu đề.");
   const slug = uniqueSlug(type, preferred);
@@ -213,6 +215,7 @@ function createPost(input) {
         title,
         summary,
         category,
+        placement,
         date,
         location: cleanText(input.location, 220, "địa điểm"),
         body,

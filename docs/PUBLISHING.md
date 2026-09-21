@@ -9,7 +9,10 @@ trong lúc sử dụng; giao diện đăng bài sẽ tự mở trong trình duy�
 Quy trình:
 
 1. Chọn **Chương trình tuyên truyền** hoặc **Bài viết / chuỗi kỹ năng**.
-2. Nhập tiêu đề, ngày, chủ đề, tóm tắt và nội dung chi tiết.
+2. Nhập tiêu đề, ngày, chủ đề, tóm tắt và nội dung chi tiết. Với **Chương trình
+   tuyên truyền**, vị trí mặc định là **Dòng thời gian Tuyên truyền**; công cụ tự khóa
+   chủ đề `An ninh mạng` để bài xuất hiện ngay ở đúng dòng thời gian sau khi deploy.
+   Chỉ chọn **Khu vực Hoạt động khác** khi đây không phải bài tuyên truyền an ninh mạng.
 3. Kéo/thả hoặc chọn ảnh. Ảnh đầu tiên là ảnh đại diện; dùng các nút mũi tên/Bìa để
    đổi thứ tự hoặc chọn lại ảnh đại diện.
 4. Bấm **Lưu & kiểm tra toàn bộ**. Bước này chỉ lưu tại máy, tự chạy build/check và chưa
@@ -76,6 +79,18 @@ Khi chọn **Bài viết / chuỗi kỹ năng**, có thể nhập:
 
 Các bài có cùng tên chuỗi sẽ tự hiện liên kết bài trước/bài sau theo thứ tự. Nếu là bài
 độc lập, để trống hai trường này.
+
+## Bài mới xuất hiện ở đâu
+
+- **Chương trình tuyên truyền + Dòng thời gian Tuyên truyền** → đầu mục
+  `Tuyên truyền An ninh mạng`, sắp theo ngày mới nhất.
+- **Chương trình tuyên truyền + Khu vực Hoạt động khác** → lưới hoạt động và bộ lọc
+  theo chủ đề đã chọn.
+- **Bài viết / chuỗi kỹ năng** → mục `Bộ kỹ năng An toàn số`, đồng thời có URL riêng
+  `/ky-nang/<slug>/` để gửi Zalo, email hoặc mạng xã hội.
+
+Mọi vị trí đều được sinh lại trong cùng lần build. Vì vậy bài không phải chờ nhập lần
+hai hay sửa tay trên trang chủ.
 
 ## Cú pháp nội dung
 

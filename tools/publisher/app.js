@@ -52,8 +52,19 @@ function updateType() {
   $("#banner-option").hidden = type !== "event";
   $("#series-field").hidden = type !== "skill";
   $("#order-field").hidden = type !== "skill";
+  $("#placement-field").hidden = type !== "event";
   $("#preview-type").textContent = type === "event" ? "Hoạt động tuyên truyền" : "Bài viết / kỹ năng";
+  updatePlacement();
   updatePreview();
+}
+
+function updatePlacement() {
+  const isTimeline = currentType() === "event" && $("#placement").value === "timeline";
+  $("#category").disabled = isTimeline;
+  if (isTimeline) $("#category").value = "an-ninh-mang";
+  $("#placement-note").textContent = isTimeline
+    ? "Bài sẽ xuất hiện ngay trong dòng thời gian Tuyên truyền An ninh mạng."
+    : "Bài sẽ xuất hiện trong khu vực Hoạt động khác theo chủ đề đã chọn.";
 }
 
 function formatDate(value) {
@@ -248,6 +259,7 @@ function payload() {
     type: currentType(),
     title: $("#title").value,
     date: $("#date").value,
+    placement: $("#placement").value,
     category: $("#category").value,
     location: $("#location").value,
     summary: $("#summary").value,
@@ -372,6 +384,7 @@ async function initialize() {
 form.addEventListener("submit", savePost);
 form.addEventListener("input", updatePreview);
 document.querySelectorAll('input[name="type"]').forEach((input) => input.addEventListener("change", updateType));
+$("#placement").addEventListener("change", () => { updatePlacement(); updatePreview(); });
 const dropZone = $("#drop-zone");
 dropZone.addEventListener("click", () => $("#image-input").click());
 dropZone.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); $("#image-input").click(); } });

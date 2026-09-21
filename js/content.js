@@ -268,6 +268,119 @@ async function loadTickerWeather() {
 }
 
 let tickerItems = [];
+let officialNewsPromise = null;
+
+function getOfficialNews() {
+  if (officialNewsPromise) return officialNewsPromise;
+  officialNewsPromise = (async () => {
+    try {
+      const response = await fetch("/api/quick-news", { cache: "no-cache" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json();
+      if (!Array.isArray(payload.items) || !payload.items.length) throw new Error("Nguồn tin trống");
+      return { ...payload, fallback: false };
+    } catch (_) {
+      const response = await fetch("data/ticker.json");
+      if (!response.ok) throw new Error("Không tải được dữ liệu dự phòng");
+      const payload = await response.json();
+      return {
+        generatedAt: payload.generatedAt || "",
+        items: Array.isArray(payload.items) ? payload.items : [],
+        stats: [],
+        sources: [],
+        fallback: true,
+      };
+    }
+  })();
+  return officialNewsPromise;
+}
+
+function quickNewsDate(value) {
+  if (!value) return "";
+  const date = new Date(`${value}T00:00:00+07:00`);
+  return Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function externalNewsLink(className, item) {
+  const link = document.createElement("a");
+  link.className = className;
+  link.href = item.url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  return link;
+}
+
+async function loadQuickNews() {
+  const grid = document.getElementById("quick-news-grid");
+  const statsWrap = document.getElementById("quick-stats-wrap");
+  const statsGrid = document.getElementById("quick-stats-grid");
+  const updated = document.getElementById("quick-news-updated");
+  const status = updated?.closest(".quick-news-status");
+  if (!grid) return;
+
+  try {
+    const payload = await getOfficialNews();
+    const items = payload.items.filter((item) => item && item.title && item.url).slice(0, 8);
+    const stats = Array.isArray(payload.stats) ? payload.stats.slice(0, 3) : [];
+    grid.innerHTML = "";
+
+    items.forEach((item) => {
+      const card = externalNewsLink("quick-news-card", item);
+      const source = document.createElement("span");
+      source.className = "quick-news-source";
+      source.textContent = item.source || "Nguồn chính thống";
+      const title = document.createElement("h3");
+      title.textContent = item.title;
+      const summary = document.createElement("p");
+      summary.textContent = item.summary || "Mở bài viết gốc để xem nội dung chi tiết.";
+      const meta = document.createElement("span");
+      meta.className = "quick-news-meta";
+      meta.textContent = [quickNewsDate(item.date), "Mở nguồn gốc ↗"].filter(Boolean).join(" · ");
+      card.append(source, title, summary, meta);
+      card.addEventListener("click", () => trackEvent("/tin-nhanh", item.title));
+      grid.appendChild(card);
+    });
+
+    if (!items.length) grid.innerHTML = '<p class="empty">Chưa có tin phù hợp.</p>';
+
+    if (statsWrap && statsGrid) {
+      statsGrid.innerHTML = "";
+      stats.forEach((item) => {
+        const card = externalNewsLink("quick-stat-card", item);
+        const value = document.createElement("strong");
+        value.className = "quick-stat-value";
+        value.textContent = item.value;
+        const context = document.createElement("span");
+        context.className = "quick-stat-context";
+        context.textContent = item.context;
+        const source = document.createElement("span");
+        source.className = "quick-stat-source";
+        source.textContent = [item.source, quickNewsDate(item.date)].filter(Boolean).join(" · ");
+        card.append(value, context, source);
+        card.addEventListener("click", () => trackEvent("/so-lieu-chinh-thong", item.value));
+        statsGrid.appendChild(card);
+      });
+      statsWrap.hidden = !stats.length;
+    }
+
+    if (updated) {
+      const timestamp = payload.generatedAt ? new Date(payload.generatedAt) : null;
+      const label = timestamp && !Number.isNaN(timestamp.getTime())
+        ? new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(timestamp)
+        : "gần đây";
+      updated.textContent = payload.fallback ? "Đang dùng dữ liệu dự phòng" : `Cập nhật ${label}`;
+      status?.classList.toggle("is-fallback", payload.fallback === true);
+    }
+  } catch (error) {
+    grid.innerHTML = '<p class="empty">Chưa thể tải tin nhanh lúc này. Vui lòng thử lại sau.</p>';
+    if (updated) updated.textContent = "Tạm thời gián đoạn";
+    status?.classList.add("is-fallback");
+  }
+}
 
 async function loadTicker() {
   const wrap = document.getElementById("news-ticker");
@@ -275,9 +388,7 @@ async function loadTicker() {
   const panelList = document.getElementById("news-panel-list");
 
   try {
-    const res = await fetch("data/ticker.json"); // revalidate qua ETag, xem loadEvents()
-    if (!res.ok) throw new Error("Không tải được tin");
-    const payload = await res.json();
+    const payload = await getOfficialNews();
     const items = Array.isArray(payload.items) ? payload.items.filter((it) => it && it.title && it.url) : [];
     tickerItems = items;
 
@@ -287,6 +398,7 @@ async function loadTicker() {
     }
 
     if (wrap && track) {
+      track.innerHTML = "";
       const buildItem = (it) => {
         const a = document.createElement("a");
         a.className = "news-ticker-item";

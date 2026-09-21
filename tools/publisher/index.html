@@ -70,7 +70,11 @@
               <div class="form-grid">
                 <label class="field full"><span>Tiêu đề *</span><input id="title" name="title" maxlength="180" required placeholder="Ví dụ: Tuyên truyền kỹ năng sử dụng dịch vụ công trực tuyến an toàn"></label>
                 <label class="field"><span>Ngày đăng *</span><input id="date" name="date" type="date" required></label>
-                <label class="field"><span>Chủ đề *</span><select id="category" name="category" required>
+                <label id="placement-field" class="field"><span>Vị trí hiển thị *</span><select id="placement" name="placement" required>
+                  <option value="timeline">Dòng thời gian Tuyên truyền</option>
+                  <option value="activity">Khu vực Hoạt động khác</option>
+                </select><small id="placement-note">Bài sẽ xuất hiện ngay trong dòng thời gian An ninh mạng.</small></label>
+                <label id="category-field" class="field"><span>Chủ đề *</span><select id="category" name="category" required>
                   <option value="an-ninh-mang">An ninh mạng</option>
                   <option value="chuyen-doi-so">Chuyển đổi số</option>
                   <option value="doi-moi-sang-tao">Đổi mới sáng tạo</option>

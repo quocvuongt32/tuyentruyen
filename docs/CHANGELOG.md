@@ -1,5 +1,16 @@
 # Nhật ký thay đổi
 
+## 21/9/2026 — Tin nhanh chính thống, tự xếp bài tuyên truyền và tăng nhận diện header
+
+- Thêm khu vực **Tin nhanh & số liệu mới** trên trang chủ; tự tổng hợp chuyên mục an ninh
+  mạng của Bộ Công an và chuyển đổi số của Báo điện tử Chính phủ qua Pages Function,
+  cache 6 giờ, có ngày/nguồn/link kiểm chứng và dữ liệu dự phòng khi nguồn lỗi.
+- Trình đăng bài thêm lựa chọn vị trí. `Chương trình tuyên truyền` mặc định vào dòng thời
+  gian `Tuyên truyền An ninh mạng`; máy chủ vẫn ép đúng phân loại để tránh thao tác nhầm.
+- Tăng logo đầu trang từ 52 px lên 78 px, thêm đổ bóng nhẹ và điều chỉnh responsive cho
+  màn hình nhỏ để logo thành điểm nhấn nhưng không làm tràn tiêu đề.
+- Cập nhật `README.md`, `PROJECT.md`, `DEPLOYMENT.md` và `PUBLISHING.md` theo luồng mới.
+
 ## 21/9/2026 — Cứng hóa triển khai và bảo trì
 
 - Lần cấp quyền Netlify đầu tiên dùng nhầm team Free `vuongtoantin`; sau đó đã cấp lại
