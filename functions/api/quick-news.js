@@ -14,6 +14,7 @@ const SOURCES = {
 };
 
 const CACHE_SECONDS = 6 * 60 * 60;
+const CACHE_KEY_VERSION = "a05-academy-20260924";
 
 function decodeHtml(value = "") {
   const named = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
@@ -216,7 +217,9 @@ function json(payload, status = 200) {
 }
 
 export async function onRequestGet(context) {
-  const cacheKey = new Request(new URL("/api/quick-news", context.request.url), { method: "GET" });
+  const cacheKeyUrl = new URL("/api/quick-news", context.request.url);
+  cacheKeyUrl.searchParams.set("v", CACHE_KEY_VERSION);
+  const cacheKey = new Request(cacheKeyUrl, { method: "GET" });
   const cache = typeof caches !== "undefined" ? caches.default : null;
   const cached = cache ? await cache.match(cacheKey) : null;
   if (cached) return cached;
