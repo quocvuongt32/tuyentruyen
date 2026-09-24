@@ -1,13 +1,15 @@
 const SOURCES = {
-  mps: {
-    name: "Bộ Công an",
-    url: "https://www.bocongan.gov.vn/tag/701",
+  a05: {
+    name: "Cục A05 - Bộ Công an",
+    url: "https://www.bocongan.gov.vn/tag/1259",
     base: "https://www.bocongan.gov.vn",
+    hosts: ["bocongan.gov.vn", "www.bocongan.gov.vn"],
   },
-  government: {
-    name: "Báo Chính phủ",
-    url: "https://baochinhphu.vn/chuyen-doi-so.html",
-    base: "https://baochinhphu.vn",
+  academy: {
+    name: "Học viện CSND",
+    url: "https://hvcsnd.edu.vn/tin-tuc-su-kien",
+    base: "https://hvcsnd.edu.vn",
+    hosts: ["hvcsnd.edu.vn", "www.hvcsnd.edu.vn"],
   },
 };
 
@@ -38,7 +40,7 @@ function attribute(tag, name) {
 function absoluteUrl(value, source) {
   try {
     const url = new URL(value, source.base);
-    if (url.protocol !== "https:" || url.hostname !== new URL(source.base).hostname) return "";
+    if (url.protocol !== "https:" || !source.hosts.includes(url.hostname)) return "";
     return url.href;
   } catch (_) {
     return "";
@@ -56,7 +58,7 @@ function shorten(value, max = 360) {
 }
 
 export function parseMps(html) {
-  const source = SOURCES.mps;
+  const source = SOURCES.a05;
   const items = [];
   const articles = String(html).match(/<article\b[^>]*>[\s\S]*?<\/article>/gi) || [];
 
@@ -83,37 +85,43 @@ export function parseMps(html) {
       url,
       date: isoDate(dateText),
       source: source.name,
-      sourceKey: "mps",
+      sourceKey: "a05",
     });
     if (items.length >= 12) break;
   }
   return items;
 }
 
-export function parseGovernment(html) {
-  const source = SOURCES.government;
+export function parseAcademy(html) {
+  const source = SOURCES.academy;
   const items = [];
-  const pattern = /<div\b[^>]*class=["'][^"']*\bbox-stream-item\b[^"']*["'][^>]*>([\s\S]*?)(?=<div\b[^>]*class=["'][^"']*\bbox-stream-item\b|<div\b[^>]*class=["'][^"']*\bbox-stream-load\b|<\/section>)/gi;
+  const page = String(html);
+  const pattern = /<h[1-4]\b[^>]*class=["'][^"']*\bheadline\b[^"']*["'][^>]*>\s*<a\b[^>]*href=["'][^"']+["'][^>]*>[\s\S]*?<\/a>\s*<\/h[1-4]>/gi;
+  const matches = [...page.matchAll(pattern)];
 
-  for (const match of String(html).matchAll(pattern)) {
-    const block = match[0];
-    const linkTag = block.match(/<a\b[^>]*class=["'][^"']*\bbox-stream-link-title\b[^"']*["'][^>]*>/i)?.[0] || "";
+  for (let index = 0; index < matches.length; index += 1) {
+    const match = matches[index];
+    const heading = match[0];
+    const linkTag = heading.match(/<a\b[^>]*>/i)?.[0] || "";
     const href = attribute(linkTag, "href");
     const url = absoluteUrl(href, source);
-    const title = shorten(attribute(linkTag, "title") || plainText(linkTag), 190);
-    if (!url || !title || href.includes("/chu-de/")) continue;
+    const title = shorten(attribute(linkTag, "title") || plainText(heading), 190);
+    if (!url || !title || /\/(?:tag|tin-tuc-su-kien|home)(?:\/|$|\?)/i.test(new URL(url).pathname)) continue;
 
-    const summary = block.match(/<p\b[^>]*class=["'][^"']*\bbox-stream-sapo\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/i)?.[1] || "";
-    const timeTag = block.match(/<span\b[^>]*class=["'][^"']*\bbox-stream-time\b[^"']*["'][^>]*>[\s\S]*?<\/span>/i)?.[0] || "";
-    const dateText = plainText(timeTag);
+    const nextIndex = matches[index + 1]?.index ?? Math.min(page.length, (match.index || 0) + 2800);
+    const block = page.slice((match.index || 0) + heading.length, nextIndex);
+    const summaryHtml = block.match(/<(?:p|div)\b[^>]*class=["'][^"']*(?:sapo|summary|description|intro)[^"']*["'][^>]*>([\s\S]*?)<\/(?:p|div)>/i)?.[1]
+      || block.match(/<p\b[^>]*>([\s\S]*?)<\/p>/i)?.[1]
+      || "";
+    const dateText = plainText(block).match(/\b\d{2}\/\d{2}\/\d{4}\b/)?.[0] || plainText(summaryHtml);
 
     items.push({
       title,
-      summary: shorten(summary.replace(/^\s*\(Chinhphu\.vn\)\s*-?\s*/i, "")),
+      summary: shorten(summaryHtml),
       url,
       date: isoDate(dateText),
       source: source.name,
-      sourceKey: "government",
+      sourceKey: "academy",
     });
     if (items.length >= 12) break;
   }
@@ -177,22 +185,21 @@ async function fetchText(url) {
 }
 
 async function buildPayload() {
-  const [mpsResult, governmentResult] = await Promise.allSettled([
-    fetchText(SOURCES.mps.url),
-    fetchText(SOURCES.government.url),
+  const [a05Result, academyResult] = await Promise.allSettled([
+    fetchText(SOURCES.a05.url),
+    fetchText(SOURCES.academy.url),
   ]);
-  const mps = mpsResult.status === "fulfilled" ? parseMps(mpsResult.value) : [];
-  const government = governmentResult.status === "fulfilled" ? parseGovernment(governmentResult.value) : [];
-  const allItems = mergeRoundRobin([mps, government], 24);
-  const items = allItems.slice(0, 10);
+  const a05 = a05Result.status === "fulfilled" ? parseMps(a05Result.value) : [];
+  const academy = academyResult.status === "fulfilled" ? parseAcademy(academyResult.value) : [];
+  const items = mergeRoundRobin([a05, academy], 4);
 
   return {
     generatedAt: new Date().toISOString(),
     items,
-    stats: extractStats(allItems),
+    stats: [],
     sources: [
-      { name: SOURCES.mps.name, url: SOURCES.mps.url, ok: mps.length > 0 },
-      { name: SOURCES.government.name, url: SOURCES.government.url, ok: government.length > 0 },
+      { name: SOURCES.a05.name, url: SOURCES.a05.url, ok: a05.length > 0 },
+      { name: SOURCES.academy.name, url: SOURCES.academy.url, ok: academy.length > 0 },
     ],
   };
 }

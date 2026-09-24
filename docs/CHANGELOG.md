@@ -1,5 +1,42 @@
 # Nhật ký thay đổi
 
+## 24/9/2026 — Tin hằng ngày từ A05/Học viện và chuyên mục tóm tắt nguồn
+
+- Đổi nhãn khu vực thành **Tổng hợp tin tức hàng ngày**, bỏ khối số liệu cũ và chỉ hiển thị
+  4 tin luân phiên từ chuyên trang Cục An ninh mạng (A05) trên Cổng Bộ Công an và Học viện CSND.
+- Ba chuyên mục Chuyển đổi số, Đổi mới sáng tạo, Nghiên cứu khoa học giữ từ 4 đến 6 tin;
+  mỗi thẻ có tóm tắt, tên nguồn và liên kết bài gốc, không sinh trang bài riêng cho tin nguồn ngoài.
+- Bổ sung thông báo chân trang về phạm vi tuyên truyền trong và ngoài Học viện, tư cách sản phẩm
+  dự thi do Ban Thường vụ Đảng ủy Học viện phát động và trạng thái đang hoàn thiện thủ tục công nhận.
+
+## 24/9/2026 — Chuẩn hóa nhận diện, bảo vệ dữ liệu cá nhân và trang chính sách
+
+- Chuẩn hóa tên đơn vị thành **Khoa Toán - Tin học và Ứng dụng KHCN trong PCTP**; bổ sung đơn vị quản lý,
+  người chịu trách nhiệm quản lý nội dung và quản trị kỹ thuật tại footer.
+- Trang bài riêng dùng logo Cẩm nang An toàn số, ghi rõ đây là Cẩm nang của Khoa KTT, Học viện CSND và
+  có breadcrumb/footer chính thức.
+- Gỡ toàn bộ form bản tin, hòm thư thu thập họ tên/email, endpoint Resend và mã Web3Forms khỏi source.
+- Thêm `/privacy/`, `/terms/`, `/nguon-tin/`, `/contact/`; bổ sung các trang này vào sitemap.
+- Gia cố CSP và security headers; thêm kiểm tra build để ngăn chức năng thu thập email quay trở lại.
+- Thêm `CHANGES.md` và `DEPLOY_CHECKLIST.md` phục vụ bàn giao, kiểm tra và rollback.
+
+## 23/9/2026 — Tự tối ưu ảnh lớn trong trình đăng bài
+
+- Bỏ giới hạn từ chối ảnh gốc trên 30 MB; `Dang-bai.bat` nay nhận JPG/PNG/WebP tới 250 MB
+  và nén ngay trong trình duyệt trước khi gửi.
+- Giữ cạnh dài tối đa 1.920 px, bật nội suy chất lượng cao và tìm chất lượng JPEG tốt nhất
+  trong ngưỡng mục tiêu khoảng 1,4 MB; chỉ giảm kích thước thêm khi thật sự cần.
+- Hiển thị dung lượng trước/sau trên từng ảnh; máy chủ vẫn kiểm tra cứng JPEG, kích thước
+  và trần 2,5 MB để ảnh xuất bản ổn định.
+
+## 21/9/2026 — Tinh gọn tiêu đề tin nhanh và chuẩn hóa đăng nhập Cloudflare
+
+- Xóa nhãn **Nguồn tin chính thống**; đổi **Tin nhanh & số liệu mới** thành tiêu đề nổi bật
+  màu đỏ và rút gọn mô tả còn “Tự động tổng hợp từ Bộ Công an và Báo điện tử Chính phủ.”
+- Xác nhận Cloudflare hỗ trợ đăng nhập bằng Gmail/mật khẩu bên cạnh Google; hoàn tất luồng
+  quên mật khẩu qua mã gửi email và bổ sung hướng dẫn an toàn vào `DEPLOYMENT.md`/`README.md`.
+- Giữ nguyên nguyên tắc không lưu mật khẩu, mã khôi phục hay khóa API trong repo.
+
 ## 21/9/2026 — Tin nhanh chính thống, tự xếp bài tuyên truyền và tăng nhận diện header
 
 - Thêm khu vực **Tin nhanh & số liệu mới** trên trang chủ; tự tổng hợp chuyên mục an ninh

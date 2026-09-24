@@ -93,6 +93,32 @@ const CATEGORIES = [
 ];
 const CATEGORY_VALUES = new Set(CATEGORIES.map((c) => c.value));
 const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((c) => [c.value, c.label]));
+const SOURCE_SUMMARY_CATEGORIES = new Set(["chuyen-doi-so", "doi-moi-sang-tao", "nghien-cuu-khoa-hoc"]);
+const SOURCE_SUMMARY_MAX_PER_CATEGORY = 6;
+
+function plainSummary(value, max = 420) {
+  const text = String(value || "")
+    .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\[(.+?)\]\(https?:\/\/[^\s)]+\)/g, "$1")
+    .replace(/^[#>*-]+\s*/gm, "")
+    .replace(/[\r\n]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > max ? `${text.slice(0, max - 1).trim()}…` : text;
+}
+
+function sourceNameForUrl(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    if (host === "hvcsnd.edu.vn") return "Học viện CSND";
+    if (host === "bocongan.gov.vn") return "Bộ Công an";
+  } catch (_) {
+    return "";
+  }
+  return "";
+}
 
 // Du lieu cu (truoc khi co truong category) mac dinh la "An ninh mang" vi
 // toan bo su kien tao truoc do deu thuoc chu de nay.
@@ -180,10 +206,14 @@ function loadIndividualEvents() {
       }
       const category = normalizeCategory(data.category);
       const videoUrl = isSafeUrl(data.video) ? data.video : "";
+      const link = isSafeUrl(data.link) ? data.link : "";
+      const externalSource = Boolean(link && SOURCE_SUMMARY_CATEGORIES.has(category));
       return {
         slug: slugFromFilename(file),
         title: typeof data.title === "string" ? data.title : "",
-        summary: typeof data.summary === "string" ? data.summary : "",
+        summary: typeof data.summary === "string" && data.summary.trim()
+          ? plainSummary(data.summary)
+          : externalSource ? plainSummary(data.body) : "",
         category,
         categoryLabel: CATEGORY_LABELS[category],
         planNumber: typeof data.planNumber === "string" ? data.planNumber : "",
@@ -192,7 +222,9 @@ function loadIndividualEvents() {
         bodyHtml: markdownToHtml(data.body || ""),
         images: normalizeImages(data.images),
         featuredImage: isSafeImagePath(data.featuredImage) ? data.featuredImage : "",
-        link: isSafeUrl(data.link) ? data.link : "",
+        link,
+        source: typeof data.source === "string" && data.source.trim() ? data.source.trim() : sourceNameForUrl(link),
+        externalSource,
         videoUrl,
         videoEmbedUrl: videoUrl ? toEmbedUrl(videoUrl) : null,
       };
@@ -296,7 +328,7 @@ const ACTIVITY_FEED_SOURCES = [
   { url: "https://hvcsnd.edu.vn/tag/doi-moi-sang-tao-1884", category: "doi-moi-sang-tao" },
   { url: "https://hvcsnd.edu.vn/tag/nghien-cuu-khoa-hoc-207", category: "nghien-cuu-khoa-hoc" },
 ];
-const ACTIVITY_FEED_MAX_PER_CATEGORY = 9;
+const ACTIVITY_FEED_MAX_PER_CATEGORY = 6;
 const ACTIVITY_FEED_TIMEOUT_MS = 12000;
 const ACTIVITY_FEED_TRUSTED_IMAGE_HOST = "https://cdn.hvcsnd.edu.vn/";
 
@@ -310,6 +342,10 @@ function decodeHtmlEntities(s) {
     .trim();
 }
 
+function plainFeedText(value) {
+  return plainSummary(decodeHtmlEntities(String(value || "")));
+}
+
 // Trang tag co nhieu bien the layout (khac class/the bao quanh tuy vi tri),
 // nen khong dua vao 1 div bao ngoai co dinh - tim truc tiep tung the tieu
 // de <h1|h2 class="headline...">, roi lay ngay/anh tu doan HTML NGAY TRUOC
@@ -318,8 +354,9 @@ function parseHvcsndTagPage(html) {
   const items = [];
   const seenUrls = new Set();
   const headlineRegex = /<h[12] class="headline[^"]*">\s*<a href="([^"]+)" title="([^"]*)"/g;
-  let m;
-  while ((m = headlineRegex.exec(html))) {
+  const matches = [...String(html).matchAll(headlineRegex)];
+  for (let index = 0; index < matches.length; index += 1) {
+    const m = matches[index];
     const href = m[1];
     const title = decodeHtmlEntities(m[2]);
     if (!href || !title) continue;
@@ -329,6 +366,8 @@ function parseHvcsndTagPage(html) {
 
     const windowStart = Math.max(0, m.index - 700);
     const before = html.slice(windowStart, m.index);
+    const nextIndex = matches[index + 1]?.index ?? Math.min(html.length, m.index + 2800);
+    const after = html.slice(m.index + m[0].length, nextIndex);
 
     const dateMatches = [...before.matchAll(/uploads\/(\d{4})\/(\d{2})\/(\d{2})\//g)];
     const lastDate = dateMatches[dateMatches.length - 1];
@@ -337,12 +376,18 @@ function parseHvcsndTagPage(html) {
     const imgMatches = [...before.matchAll(/<img[^>]*\bsrc="(https:\/\/cdn\.hvcsnd\.edu\.vn\/[^"]+)"/g)];
     const lastImg = imgMatches[imgMatches.length - 1];
     const image = lastImg ? decodeHtmlEntities(lastImg[1]).replace(/&amp;/g, "&") : null;
+    const summaryHtml = after.match(/<(?:p|div)\b[^>]*class="[^"]*(?:sapo|summary|description|intro)[^"]*"[^>]*>([\s\S]*?)<\/(?:p|div)>/i)?.[1]
+      || after.match(/<p\b[^>]*>([\s\S]*?)<\/p>/i)?.[1]
+      || "";
+    const summary = plainFeedText(summaryHtml);
+    const visibleDate = plainFeedText(after).match(/\b(\d{2})\/(\d{2})\/(\d{4})\b/);
 
     items.push({
       url,
       title,
-      date,
+      date: visibleDate ? `${visibleDate[3]}-${visibleDate[2]}-${visibleDate[1]}` : date,
       image: image && image.startsWith(ACTIVITY_FEED_TRUSTED_IMAGE_HOST) ? image : null,
+      summary,
     });
   }
   return items;
@@ -399,7 +444,8 @@ async function loadActivityFeedEvents(existingSlugs, existingUrls) {
         planNumber: "",
         date: it.date || today,
         location: "",
-        bodyHtml: "",
+        summary: it.summary || "",
+        bodyHtml: it.summary ? `<p>${escapeHtml(it.summary)}</p>` : "",
         // featured: false co y - anh nay chi dung lam thumbnail cho the hoat
         // dong cua chinh no (buildActivityCard doc anh dau tien, khong quan
         // tam featured), KHONG dua vao banner trang chu (banner chi gom anh
@@ -407,6 +453,8 @@ async function loadActivityFeedEvents(existingSlugs, existingUrls) {
         images: it.image ? [{ src: it.image, featured: false }] : [],
         featuredImage: "",
         link: it.url,
+        source: "Học viện CSND",
+        externalSource: true,
         videoUrl: "",
         videoEmbedUrl: null,
       };
@@ -444,9 +492,18 @@ async function main() {
     return a.date < b.date ? 1 : -1;
   });
 
+  const sourceCategoryCounts = new Map();
+  const visibleEvents = events.filter((event) => {
+    if (!SOURCE_SUMMARY_CATEGORIES.has(event.category)) return true;
+    const count = sourceCategoryCounts.get(event.category) || 0;
+    if (count >= SOURCE_SUMMARY_MAX_PER_CATEGORY) return false;
+    sourceCategoryCounts.set(event.category, count + 1);
+    return true;
+  });
+
   const featured = [];
   let imageCount = 0;
-  for (const ev of events) {
+  for (const ev of visibleEvents) {
     for (const img of ev.images) {
       imageCount++;
       if (img.featured) {
@@ -471,17 +528,17 @@ async function main() {
   const payload = {
     generatedAt: new Date().toISOString(),
     stats: {
-      eventCount: events.length,
+      eventCount: visibleEvents.length,
       imageCount,
     },
     categories: CATEGORIES,
     featured,
-    events,
+    events: visibleEvents,
   };
 
   fs.writeFileSync(outFile, JSON.stringify(payload, null, 2), "utf8");
   console.log(
-    `Đã tạo ${events.length} sự kiện (${imageCount} ảnh, ${featured.length} ảnh nổi bật) vào ${path.relative(process.cwd(), outFile)}`
+    `Đã tạo ${visibleEvents.length} sự kiện (${imageCount} ảnh, ${featured.length} ảnh nổi bật) vào ${path.relative(process.cwd(), outFile)}`
   );
 }
 

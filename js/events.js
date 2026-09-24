@@ -218,7 +218,9 @@ function buildDetailFragment(ev) {
     const a = document.createElement("a");
     a.href = ev.link;
     a.className = "event-link";
-    a.textContent = "Xem bài viết tham khảo →";
+    a.textContent = ev.externalSource
+      ? `Nguồn: ${ev.source || "Bài viết gốc"} — Xem bài gốc ↗`
+      : "Xem bài viết tham khảo →";
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     a.addEventListener("click", () => trackEvent("/lien-ket-tham-khao", ev.link));
@@ -233,7 +235,7 @@ function buildDetailFragment(ev) {
     frag.appendChild(bodyEl);
   }
 
-  if (ev.slug && !ev.slug.startsWith("feed-")) {
+  if (ev.slug && !ev.slug.startsWith("feed-") && !ev.externalSource) {
     const pageLink = document.createElement("a");
     pageLink.href = `/hoat-dong/${encodeURIComponent(ev.slug)}/`;
     pageLink.className = "event-link event-page-link";
@@ -305,10 +307,24 @@ function buildActivityCard(ev) {
   title.textContent = ev.title || "";
   body.appendChild(title);
 
+  if (ev.summary) {
+    const summary = document.createElement("p");
+    summary.className = "activity-summary";
+    summary.textContent = ev.summary;
+    body.appendChild(summary);
+  }
+
   const meta = document.createElement("div");
   meta.className = "activity-meta";
   meta.textContent = [formatDate(ev.date), ev.location].filter(Boolean).join(" · ");
   body.appendChild(meta);
+
+  if (ev.externalSource && ev.link) {
+    const source = document.createElement("div");
+    source.className = "activity-source";
+    source.textContent = `Nguồn: ${ev.source || "Bài viết gốc"} · Xem bài gốc ↗`;
+    body.appendChild(source);
+  }
 
   card.appendChild(body);
 

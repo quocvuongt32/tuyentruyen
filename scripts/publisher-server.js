@@ -12,9 +12,24 @@ const distDir = path.join(root, "dist");
 const host = "127.0.0.1";
 const siteUrl = "https://tuyentruyen.khoaktt.vn";
 const token = crypto.randomBytes(24).toString("hex");
-const maxRequestBytes = 45 * 1024 * 1024;
-const maxImageBytes = 2_500_000;
 const maxImages = 15;
+
+function envNumber(name, fallback, min, max) {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) && value >= min && value <= max ? value : fallback;
+}
+
+const imageOptimization = Object.freeze({
+  maxEdge: Math.round(envNumber("PUBLISHER_IMAGE_MAX_EDGE", 1920, 1280, 2560)),
+  targetBytes: Math.round(envNumber("PUBLISHER_IMAGE_TARGET_BYTES", 1_400_000, 500_000, 2_300_000)),
+  maxBytes: Math.round(envNumber("PUBLISHER_IMAGE_MAX_BYTES", 2_500_000, 1_000_000, 5_000_000)),
+  minQuality: envNumber("PUBLISHER_IMAGE_MIN_QUALITY", 0.72, 0.6, 0.9),
+  maxQuality: envNumber("PUBLISHER_IMAGE_MAX_QUALITY", 0.9, 0.75, 0.98),
+  maxSourceBytes: Math.round(envNumber("PUBLISHER_IMAGE_MAX_SOURCE_BYTES", 250 * 1024 * 1024, 30 * 1024 * 1024, 500 * 1024 * 1024)),
+});
+const maxImageBytes = imageOptimization.maxBytes;
+// Base64 lon hon tep nhi phan khoang 1/3; chua them du dia cho noi dung bai.
+const maxRequestBytes = Math.max(45 * 1024 * 1024, Math.ceil(maxImages * maxImageBytes * 4 / 3) + 2 * 1024 * 1024);
 const categories = new Set(["an-ninh-mang", "chuyen-doi-so", "doi-moi-sang-tao", "nghien-cuu-khoa-hoc", "khac"]);
 let pending = null;
 
@@ -307,7 +322,7 @@ async function route(req, res) {
   const requestUrl = new URL(req.url, `http://${host}`);
   try {
     if (requestUrl.pathname === "/api/config" && req.method === "GET") {
-      sendJson(res, 200, { token, siteUrl, pending, maxImages, maxImageBytes });
+      sendJson(res, 200, { token, siteUrl, pending, maxImages, maxImageBytes, imageOptimization });
       return;
     }
     if (requestUrl.pathname === "/api/create" && req.method === "POST") {

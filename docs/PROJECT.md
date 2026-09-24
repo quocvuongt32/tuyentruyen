@@ -1,9 +1,9 @@
 # Cẩm nang An toàn số — tổng quan dự án
 
-> **Cập nhật 21/9/2026:** Site đã chạy hoàn toàn trên Cloudflare Pages. Build bằng
+> **Cập nhật 24/9/2026:** Site đã chạy hoàn toàn trên Cloudflare Pages. Build bằng
 > `npm run build`, chỉ xuất bản `dist/`, Node.js 24. Frontend đã tách thành nhiều file
-> trong `js/` và `css/`. Form góp ý dùng Web3Forms; bản tin dùng Cloudflare Pages
-> Function + Resend. `/admin` và Netlify chỉ còn là mã/tài liệu lịch sử, không thuộc
+> trong `js/` và `css/`. Website không còn biểu mẫu thu thập họ tên/email, Web3Forms,
+> endpoint bản tin hoặc mã Resend. `/admin` và Netlify chỉ còn là mã/tài liệu lịch sử, không thuộc
 > luồng vận hành hiện tại. Nếu nội dung cũ bên dưới mâu thuẫn, ưu tiên ghi chú này và
 > [README.md](../README.md).
 
@@ -30,11 +30,12 @@ JSON + script tại máy. Đây là sản phẩm dự thi "Sáng tạo sản ph�
 - **Không còn CMS web**: đã bỏ `/admin` (Decap CMS + Netlify Identity + Git Gateway).
   Thêm/sửa nội dung bằng `Dang-bai.bat` hoặc script (`add-event.js`,
   `import-events-xlsx.js`) + `git push`.
+- **Trình đăng bài xử lý ảnh lớn tại máy**: nhận JPG/PNG/WebP tới 250 MB, tự xoay,
+  thu cạnh dài về tối đa 1.920 px và nén JPEG thích ứng trước khi gửi cho máy chủ cục bộ.
 - **Trang chi tiết tĩnh**: `scripts/build-pages.js` tạo URL riêng, Open Graph và
   `sitemap.xml` cho hoạt động/kỹ năng.
-- **Form góp ý**: Web3Forms. **Bản tin**: Cloudflare Pages Function + Resend Contacts.
-- Không database riêng; server-side có Pages Function đăng ký bản tin và tổng hợp tin
-  nhanh từ nguồn chính thống.
+- **Không thu thập email**: không có form góp ý/bản tin; trang Liên hệ chỉ công bố đầu mối công vụ.
+- Không database riêng; server-side chỉ còn Pages Function tổng hợp tin nhanh từ nguồn chính thống.
 
 ## Luồng dữ liệu (quan trọng nhất cần hiểu)
 
@@ -60,10 +61,11 @@ DOM (index.html render động qua JS)
 | — (RSS ngoài + `content/ticker/*.json` tuỳ chọn) | `scripts/build-ticker.js` | `data/ticker.json` | Dải tin chạy đầu trang |
 | `content/ky-nang/*.json` (1 file/kỹ năng) | `scripts/build-skills.js` | `data/skills.json` | Mục "Bộ kỹ năng An toàn số" |
 
-Tin nhanh ở `#tin-nhanh` không đi qua bước build: `functions/api/quick-news.js` đọc
-chuyên mục chính thức của Bộ Công an và Báo điện tử Chính phủ khi có người truy cập,
-chuẩn hóa tiêu đề/ngày/tóm tắt/số liệu, rồi lưu đệm tại Cloudflare trong 6 giờ. Frontend
-dùng `data/ticker.json` làm phương án dự phòng nếu hai nguồn ngoài tạm lỗi.
+Tin hằng ngày ở `#tin-nhanh` không đi qua bước build: `functions/api/quick-news.js` đọc
+chuyên trang Cục An ninh mạng (A05) trên Cổng Bộ Công an và mục Tin tức - Sự kiện của
+Học viện CSND khi có người truy cập, chuẩn hóa tiêu đề/ngày/tóm tắt rồi lưu đệm tại
+Cloudflare trong 6 giờ. Giao diện hiển thị đúng 4 tin; nếu nguồn ngoài tạm lỗi thì dùng
+4 tin dự phòng đã kiểm duyệt trong `js/content.js`.
 
 **Nếu sửa code mà không thấy hiệu lực khi test local**: luôn chạy lại
 `node scripts/build-events.js && node scripts/build-ticker.js && node scripts/build-about.js
@@ -113,11 +115,10 @@ netlify/functions/     Netlify Functions (Node, chay server-side, KHONG phai cod
   `data-theme="light"` dựa trên `localStorage.theme` (nếu người dùng từng bấm nút) hoặc
   giờ hiện tại (6h–12h = sáng, còn lại = tối). Nút bấm: `#theme-toggle`,
   logic ở `setupThemeToggle()` trong `main.js`.
-- **Dải tin chạy đầu trang ("Thời sự")** và **Tin nhanh & số liệu mới** dùng chung dữ
-  liệu từ `/api/quick-news`: chuyên mục an ninh mạng của Bộ Công an và chuyển đổi số của
-  Báo điện tử Chính phủ. Response cache 6 giờ, mỗi tin/số liệu đều giữ URL nguồn và ngày.
-  Nếu API lỗi, `loadTicker()`/`loadQuickNews()` tự dùng `data/ticker.json`; file này vẫn
-  được `scripts/build-ticker.js` tạo từ RSS Bộ Công an hoặc fallback đã kiểm duyệt.
+- **Dải tin chạy đầu trang ("Thời sự")** dùng `data/ticker.json`; khối **Tổng hợp tin tức
+  hàng ngày** dùng `/api/quick-news` và giữ đúng 4 tin từ A05/Bộ Công an và Học viện CSND.
+  Response cache 6 giờ; mỗi tin giữ tóm tắt, URL nguồn và ngày. Nếu API lỗi,
+  `loadQuickNews()` dùng 4 tin dự phòng đã kiểm duyệt trong `js/content.js`.
 - **Widget góc phải dưới** (`#corner-widgets`): 3 nút tròn nổi — 📊 số liệu nổi bật
   (`#stats-panel`), 📰 tin liên quan (`#news-panel`), ✉️ hòm thư góp ý
   (`#feedback-panel`, form gửi qua **Netlify Forms**, không cần backend riêng).

@@ -36,11 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupMediaLibrary();
   setupScrollButtons();
   setupCornerWidgets();
-  setupFeedbackForm();
   setupHomeLinks();
   setupExtraTracking();
   setupQuiz();
-  setupNewsletterForm();
   setupLightbox();
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());

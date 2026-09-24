@@ -20,11 +20,15 @@
     "hint": "Bấm vào từng mốc để xem/ẩn chi tiết, ảnh minh chứng và video."
   },
   "activitySection": {
-    "heading": "Hoạt động khác",
-    "hint": "Chuyển đổi số, đổi mới sáng tạo và các hoạt động khác của Khoa. Bấm vào một thẻ để xem chi tiết."
+    "heading": "Tin chuyên đề và hoạt động",
+    "hint": "Các mục Chuyển đổi số, Đổi mới sáng tạo và Nghiên cứu khoa học hiển thị tối đa 6 bản tóm tắt, ghi rõ nguồn và liên kết tới bài gốc."
   },
   "footer": {
     "line1": "HỌC VIỆN CẢNH SÁT NHÂN DÂN",
-    "line2": "KHOA TOÁN - TIN HỌC VÀ ỨNG DỤNG KHOA HỌC CÔNG NGHỆ TRONG PHÒNG, CHỐNG TỘI PHẠM"
+    "line2": "KHOA TOÁN - TIN HỌC VÀ ỨNG DỤNG KHCN TRONG PCTP",
+    "notice": "Cẩm nang phục vụ tuyên truyền và giáo dục kỹ năng an toàn số trong và ngoài Học viện Cảnh sát nhân dân. Đây là sản phẩm dự thi Cuộc thi “Sáng tạo sản phẩm truyền thông số về ứng dụng khoa học công nghệ; chuyển đổi số và đổi mới sáng tạo” do Ban Thường vụ Đảng ủy Học viện Cảnh sát nhân dân phát động.",
+    "statusNotice": "Website đang trong giai đoạn vận hành, hoàn thiện thủ tục công nhận; nội dung có tính chất tuyên truyền, tham khảo và không thay thế Cổng Thông tin điện tử, văn bản hoặc thông báo chính thức của Học viện Cảnh sát nhân dân.",
+    "decisionNumber": "",
+    "decisionDate": ""
   }
 }

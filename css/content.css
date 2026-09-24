@@ -141,7 +141,7 @@
   .about-top-grid { grid-template-columns: 1fr; }
 }
 
-/* ---------- Tin nhanh & so lieu tu nguon chinh thong ---------- */
+/* ---------- Tổng hợp tin tức hàng ngày ---------- */
 
 .quick-news-section {
   background:
@@ -159,14 +159,21 @@
   margin-bottom: 24px;
 }
 
-.quick-news-heading-row h2 { margin: 2px 0 4px; }
-
-.section-kicker {
+.quick-news-kicker {
+  margin: 0 0 10px;
   color: var(--accent);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
+}
+
+.quick-news-title {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font-size: clamp(1.65rem, 4vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1.15;
 }
 
 .quick-news-status {
@@ -768,4 +775,24 @@
 @media (max-width: 640px) {
   .activity-modal { padding: 0; }
   .activity-modal-box { max-width: none; max-height: 100vh; height: 100vh; border-radius: 0; }
+}
+
+.activity-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 9px 0 0;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  text-align: left;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.activity-source {
+  margin-top: 10px;
+  color: var(--accent);
+  font-size: 0.73rem;
+  font-weight: 750;
+  text-align: left;
 }

@@ -115,10 +115,6 @@ function setupExtraTracking() {
     themeToggle.addEventListener("click", () => trackEvent("/theme-toggle", "Chuyển giao diện sáng/tối"));
   }
 
-  const footerContact = document.querySelector(".footer-contact a");
-  if (footerContact) {
-    footerContact.addEventListener("click", () => trackEvent("/lien-he/email", footerContact.textContent.trim()));
-  }
 }
 
 // Carousel o vi tri logo lon trong Hero: bat dau bang huy hieu, roi chay qua

@@ -58,6 +58,10 @@ const payload = {
   footer: {
     line1: str(footer.line1),
     line2: str(footer.line2),
+    notice: str(footer.notice),
+    statusNotice: str(footer.statusNotice),
+    decisionNumber: str(footer.decisionNumber),
+    decisionDate: str(footer.decisionDate),
   },
 };
 

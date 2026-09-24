@@ -31,6 +31,15 @@ async function loadSite() {
     const footer = data.footer || {};
     setText("footer-line1", footer.line1);
     setText("footer-line2", footer.line2);
+    setText("footer-notice", footer.notice);
+    setText("footer-status-notice", footer.statusNotice);
+    const decision = document.getElementById("footer-decision");
+    if (decision) {
+      const number = String(footer.decisionNumber || "").trim();
+      const date = String(footer.decisionDate || "").trim();
+      decision.textContent = number ? `Thành lập theo Quyết định số ${number}${date ? ` ngày ${date}` : ""} của Học viện Cảnh sát nhân dân.` : "";
+      decision.hidden = !number;
+    }
   } catch (err) {
     console.error(err);
   }
@@ -269,6 +278,36 @@ async function loadTickerWeather() {
 
 let tickerItems = [];
 let officialNewsPromise = null;
+const QUICK_NEWS_FALLBACK_ITEMS = [
+  {
+    title: "Cảnh báo tình trạng quay trở lại thủ đoạn cắt ghép hình ảnh nhạy cảm nhằm cưỡng đoạt tài sản",
+    summary: "Cục A05 khuyến cáo người dân hạn chế công khai dữ liệu cá nhân, cảnh giác trước nội dung giả mạo và báo ngay cơ quan Công an khi bị đe dọa, cưỡng đoạt tài sản.",
+    url: "https://www.bocongan.gov.vn/bai-viet/canh-bao-tinh-trang-quay-tro-lai-thu-doan-cat-ghep-hinh-anh-nhay-cam-nham-cuong-doat-tai-san-1788770637",
+    source: "Cục A05 - Bộ Công an",
+    date: "2026-09-07",
+  },
+  {
+    title: "Học viện Cảnh sát nhân dân khai giảng năm học 2026 - 2027",
+    summary: "Học viện xác định tiếp tục đổi mới giáo dục, đào tạo, nghiên cứu khoa học, đẩy mạnh khoa học công nghệ và chuyển đổi số trong năm học mới.",
+    url: "https://hvcsnd.edu.vn/hoc-vien-canh-sat-nhan-dan-khai-giang-nam-hoc-2026-2027-14204",
+    source: "Học viện CSND",
+    date: "2026-09-05",
+  },
+  {
+    title: "Phát động chuỗi hoạt động Ngày An ninh mạng Việt Nam năm 2026",
+    summary: "Hoạt động do Ban Chỉ đạo An ninh mạng quốc gia phối hợp Bộ Công an tổ chức, hướng tới một không gian mạng an toàn, lành mạnh và nhân văn cho mỗi người.",
+    url: "https://www.bocongan.gov.vn/bai-viet/phat-dong-chuoi-hoat-dong-ngay-an-ninh-mang-viet-nam-nam-2026-vi-mot-khong-gian-mang-nhan-van-cho-moi-nguoi-1785988798",
+    source: "Cục A05 - Bộ Công an",
+    date: "2026-08-06",
+  },
+  {
+    title: "Học viện CSND và UBND tỉnh Lai Châu tăng cường phối hợp ứng dụng khoa học, công nghệ trong phòng, chống tội phạm",
+    summary: "Hai đơn vị ký thỏa thuận hợp tác về ứng dụng khoa học công nghệ, đổi mới sáng tạo và chuyển đổi số trong đấu tranh phòng, chống tội phạm.",
+    url: "https://hvcsnd.edu.vn/hoc-vien-csnd-va-ubnd-tinh-lai-chau-tang-cuong-phoi-hop-ung-dung-khoa-hoc-cong-nghe-trong-phong-chong-toi-pham-14149",
+    source: "Học viện CSND",
+    date: "2026-08-07",
+  },
+];
 
 function getOfficialNews() {
   if (officialNewsPromise) return officialNewsPromise;
@@ -280,14 +319,14 @@ function getOfficialNews() {
       if (!Array.isArray(payload.items) || !payload.items.length) throw new Error("Nguồn tin trống");
       return { ...payload, fallback: false };
     } catch (_) {
-      const response = await fetch("data/ticker.json");
-      if (!response.ok) throw new Error("Không tải được dữ liệu dự phòng");
-      const payload = await response.json();
       return {
-        generatedAt: payload.generatedAt || "",
-        items: Array.isArray(payload.items) ? payload.items : [],
+        generatedAt: "",
+        items: QUICK_NEWS_FALLBACK_ITEMS,
         stats: [],
-        sources: [],
+        sources: [
+          { name: "Cục A05 - Bộ Công an", url: "https://www.bocongan.gov.vn/tag/1259", ok: false },
+          { name: "Học viện CSND", url: "https://hvcsnd.edu.vn/tin-tuc-su-kien", ok: false },
+        ],
         fallback: true,
       };
     }
@@ -316,23 +355,20 @@ function externalNewsLink(className, item) {
 
 async function loadQuickNews() {
   const grid = document.getElementById("quick-news-grid");
-  const statsWrap = document.getElementById("quick-stats-wrap");
-  const statsGrid = document.getElementById("quick-stats-grid");
   const updated = document.getElementById("quick-news-updated");
   const status = updated?.closest(".quick-news-status");
   if (!grid) return;
 
   try {
     const payload = await getOfficialNews();
-    const items = payload.items.filter((item) => item && item.title && item.url).slice(0, 8);
-    const stats = Array.isArray(payload.stats) ? payload.stats.slice(0, 3) : [];
+    const items = payload.items.filter((item) => item && item.title && item.url).slice(0, 4);
     grid.innerHTML = "";
 
     items.forEach((item) => {
       const card = externalNewsLink("quick-news-card", item);
       const source = document.createElement("span");
       source.className = "quick-news-source";
-      source.textContent = item.source || "Nguồn chính thống";
+      source.textContent = item.source || "Nguồn bài gốc";
       const title = document.createElement("h3");
       title.textContent = item.title;
       const summary = document.createElement("p");
@@ -346,26 +382,6 @@ async function loadQuickNews() {
     });
 
     if (!items.length) grid.innerHTML = '<p class="empty">Chưa có tin phù hợp.</p>';
-
-    if (statsWrap && statsGrid) {
-      statsGrid.innerHTML = "";
-      stats.forEach((item) => {
-        const card = externalNewsLink("quick-stat-card", item);
-        const value = document.createElement("strong");
-        value.className = "quick-stat-value";
-        value.textContent = item.value;
-        const context = document.createElement("span");
-        context.className = "quick-stat-context";
-        context.textContent = item.context;
-        const source = document.createElement("span");
-        source.className = "quick-stat-source";
-        source.textContent = [item.source, quickNewsDate(item.date)].filter(Boolean).join(" · ");
-        card.append(value, context, source);
-        card.addEventListener("click", () => trackEvent("/so-lieu-chinh-thong", item.value));
-        statsGrid.appendChild(card);
-      });
-      statsWrap.hidden = !stats.length;
-    }
 
     if (updated) {
       const timestamp = payload.generatedAt ? new Date(payload.generatedAt) : null;

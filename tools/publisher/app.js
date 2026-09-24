@@ -6,6 +6,13 @@ const state = {
   pending: null,
   maxImages: 15,
   maxImageBytes: 2_500_000,
+  imageOptimization: {
+    maxEdge: 1920,
+    targetBytes: 1_400_000,
+    minQuality: 0.72,
+    maxQuality: 0.9,
+    maxSourceBytes: 250 * 1024 * 1024,
+  },
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -111,7 +118,7 @@ function canvasToBlob(canvas, quality) {
 
 async function decodeImage(file) {
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error(`${file.name}: chỉ nhận JPG, PNG hoặc WebP.`);
-  if (file.size > 30 * 1024 * 1024) throw new Error(`${file.name}: ảnh gốc vượt quá 30 MB.`);
+  if (file.size > state.imageOptimization.maxSourceBytes) throw new Error(`${file.name}: ảnh gốc vượt quá giới hạn an toàn ${(state.imageOptimization.maxSourceBytes / 1024 / 1024).toFixed(0)} MB.`);
   if ("createImageBitmap" in window) {
     try { return await createImageBitmap(file, { imageOrientation: "from-image" }); } catch (_) {}
   }
@@ -124,33 +131,76 @@ async function decodeImage(file) {
   });
 }
 
+function drawImage(source, width, height) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d", { alpha: false });
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, width, height);
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(source, 0, 0, width, height);
+  return canvas;
+}
+
+async function encodeBestJpeg(canvas, targetBytes) {
+  let low = state.imageOptimization.minQuality;
+  let high = state.imageOptimization.maxQuality;
+  let best = await canvasToBlob(canvas, low);
+  if (best.size > targetBytes) return best;
+
+  const highest = await canvasToBlob(canvas, high);
+  if (highest.size <= targetBytes) return highest;
+
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const quality = (low + high) / 2;
+    const candidate = await canvasToBlob(canvas, quality);
+    if (candidate.size <= targetBytes) {
+      best = candidate;
+      low = quality;
+    } else {
+      high = quality;
+    }
+  }
+  return best;
+}
+
 async function optimizeImage(file) {
   const source = await decodeImage(file);
-  const sourceWidth = source.width || source.naturalWidth;
-  const sourceHeight = source.height || source.naturalHeight;
-  if (sourceWidth < 320 || sourceHeight < 320) throw new Error(`${file.name}: mỗi chiều ảnh cần ít nhất 320 px.`);
-  let scale = Math.min(1, 1920 / Math.max(sourceWidth, sourceHeight));
-  let width = Math.max(1, Math.round(sourceWidth * scale));
-  let height = Math.max(1, Math.round(sourceHeight * scale));
-  let blob;
-  let quality = .88;
-  for (let attempt = 0; attempt < 7; attempt++) {
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext("2d", { alpha: false });
-    context.fillStyle = "#ffffff";
-    context.fillRect(0, 0, width, height);
-    context.drawImage(source, 0, 0, width, height);
-    blob = await canvasToBlob(canvas, quality);
-    if (blob.size <= Math.min(state.maxImageBytes - 80_000, 2_200_000)) break;
-    quality = Math.max(.68, quality - .05);
-    width = Math.round(width * .9);
-    height = Math.round(height * .9);
+  try {
+    const sourceWidth = source.width || source.naturalWidth;
+    const sourceHeight = source.height || source.naturalHeight;
+    if (sourceWidth < 320 || sourceHeight < 320) throw new Error(`${file.name}: mỗi chiều ảnh cần ít nhất 320 px.`);
+
+    const scale = Math.min(1, state.imageOptimization.maxEdge / Math.max(sourceWidth, sourceHeight));
+    let width = Math.max(1, Math.round(sourceWidth * scale));
+    let height = Math.max(1, Math.round(sourceHeight * scale));
+    const targetBytes = Math.min(state.imageOptimization.targetBytes, state.maxImageBytes - 100_000);
+    let blob;
+
+    for (let attempt = 0; attempt < 7; attempt++) {
+      const canvas = drawImage(source, width, height);
+      blob = await encodeBestJpeg(canvas, targetBytes);
+      canvas.width = 1;
+      canvas.height = 1;
+      if (blob.size <= targetBytes) break;
+      width = Math.max(320, Math.round(width * 0.88));
+      height = Math.max(320, Math.round(height * 0.88));
+    }
+
+    if (!blob || blob.size > state.maxImageBytes) throw new Error(`${file.name}: không thể tối ưu xuống dưới 2,5 MB.`);
+    return {
+      name: file.name,
+      dataUrl: await blobToDataUrl(blob),
+      width,
+      height,
+      bytes: blob.size,
+      originalBytes: file.size,
+    };
+  } finally {
+    if (source.close) source.close();
   }
-  if (source.close) source.close();
-  if (!blob || blob.size > state.maxImageBytes) throw new Error(`${file.name}: không thể tối ưu xuống dưới 2,5 MB.`);
-  return { name: file.name, dataUrl: await blobToDataUrl(blob), width, height, bytes: blob.size };
 }
 
 async function addFiles(files) {
@@ -161,15 +211,22 @@ async function addFiles(files) {
     return;
   }
   setBusy(true, "Đang tối ưu ảnh…", `Đang xử lý 0/${list.length} ảnh.`);
+  let added = 0;
+  const errors = [];
   try {
     for (let index = 0; index < list.length; index++) {
       $("#busy-message").textContent = `Đang xử lý ${index + 1}/${list.length}: ${list[index].name}`;
-      state.images.push(await optimizeImage(list[index]));
+      try {
+        state.images.push(await optimizeImage(list[index]));
+        added++;
+        // Hien anh ngay sau khi toi uu xong, khong doi ca lo anh.
+        renderImages();
+      } catch (error) {
+        errors.push(error.message);
+      }
     }
-    renderImages();
-    showToast(`Đã thêm và kiểm tra ${list.length} ảnh.`);
-  } catch (error) {
-    showToast(error.message, true);
+    if (errors.length) showToast(`Đã thêm ${added}/${list.length} ảnh. ${errors[0]}`, true);
+    else showToast(`Đã tối ưu và thêm ngay ${added} ảnh.`);
   } finally {
     setBusy(false);
     $("#image-input").value = "";
@@ -203,7 +260,8 @@ function renderImages() {
     footer.className = "image-item-footer";
     const name = document.createElement("span");
     name.className = "image-item-name";
-    name.textContent = `${item.name} · ${(item.bytes / 1024).toFixed(0)} KB`;
+    const original = item.originalBytes ? `${(item.originalBytes / 1024 / 1024).toFixed(1)} MB → ` : "";
+    name.textContent = `${item.name} · ${original}${(item.bytes / 1024).toFixed(0)} KB`;
     footer.appendChild(name);
     const actions = document.createElement("div");
     actions.className = "image-item-actions";
@@ -370,6 +428,7 @@ async function initialize() {
     state.token = config.token;
     state.maxImages = config.maxImages;
     state.maxImageBytes = config.maxImageBytes;
+    if (config.imageOptimization) state.imageOptimization = { ...state.imageOptimization, ...config.imageOptimization };
     state.pending = config.pending;
     renderPending(config.pending);
   } catch (error) {

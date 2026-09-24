@@ -1,5 +1,10 @@
 # Vận hành & Deploy
 
+> **Cập nhật 24/9/2026:** Đã gỡ toàn bộ form thu thập họ tên/email, Web3Forms, endpoint bản tin
+> và mã Resend theo yêu cầu bảo vệ dữ liệu cá nhân. Các mục cũ về Web3Forms/Resend phía dưới chỉ
+> còn giá trị lịch sử, không được dùng để bật lại chức năng. Checklist hiện hành nằm tại
+> [DEPLOY_CHECKLIST.md](../DEPLOY_CHECKLIST.md).
+
 > **Trạng thái 21/9/2026:** Đã cấp lại quyền CLI đúng tài khoản
 > `vuongppa@gmail.com` và đặt team `quocvuongt32` hạ từ Personal 9 USD xuống Free.
 > Netlify xác nhận `scheduled_downgrade_date: 2026-10-20`, đích đến `credit-free`;
@@ -12,24 +17,33 @@
 - Build command: `npm run build`
 - Build output directory: `dist`
 - Node.js: `24`
-- Biến môi trường bản tin: `RESEND_API_KEY`, `RESEND_SEGMENT_ID`, `NEWSLETTER_FROM`
+- Không có biến môi trường cho chức năng thu thập email; các biến Resend cũ có thể gỡ sau khi
+  xác nhận không được ứng dụng khác dùng chung.
 - Chỉ `dist/` được public; `docs/`, `content/`, `scripts/`, `admin/`, `netlify.toml`
   không được xuất bản.
 - Workflow `.github/workflows/backup-content.yml` sao lưu nội dung hằng tuần, giữ 90 ngày.
 
+### Đăng nhập tài khoản Cloudflare
+
+- Tài khoản quản trị hỗ trợ đồng thời đăng nhập Google và đăng nhập bằng Gmail/mật khẩu.
+- Muốn dùng mật khẩu: tại trang đăng nhập, chọn **Sign in with another profile**, sau đó
+  nhập email và mật khẩu; không chọn hồ sơ Google đã lưu.
+- Nếu quên mật khẩu: đăng xuất Cloudflare, chọn **Forgot password**, nhập Gmail, lấy mã
+  khôi phục trong email rồi đặt mật khẩu mới tại trang **Reset your password**.
+- Mã khôi phục và mật khẩu không được gửi qua chat, ghi vào tài liệu hoặc commit lên Git.
+- Nếu chưa nhận thư, kiểm tra Spam và thư từ `noreply@notify.cloudflare.com`.
+
 ### Tin nhanh tự cập nhật
 
 - Endpoint: `/api/quick-news` → `functions/api/quick-news.js`.
-- Nguồn: chuyên mục **an ninh mạng** của Cổng thông tin Bộ Công an và chuyên mục
-  **chuyển đổi số** của Báo điện tử Chính phủ.
+- Nguồn: chuyên trang **Cục An ninh mạng (A05)** trên Cổng thông tin Bộ Công an và mục
+  **Tin tức - Sự kiện** của Cổng thông tin Học viện CSND.
 - Cloudflare cache response 6 giờ (`s-maxage=21600`) và cho phép dùng bản cũ thêm 24 giờ
   trong lúc cập nhật (`stale-while-revalidate`). Như vậy tin tự thay đổi trong ngày mà
   không cần commit/deploy mới và vẫn nằm trong gói miễn phí.
-- Trình duyệt cache 15 phút. Nếu function hoặc nguồn ngoài lỗi, frontend đọc
-  `data/ticker.json`; website không bị trắng hay chặn tải.
-- Bộ trích số liệu chỉ nhận câu có đơn vị rõ (%, tỷ, triệu, giao dịch, hồ sơ...) và luôn
-  gắn liên kết/ngày nguồn. Giao diện ghi rõ đây là trích dẫn, không phải số liệu thời gian
-  thực.
+- Trình duyệt cache 15 phút. Giao diện chỉ lấy 4 tin; nếu function hoặc nguồn ngoài lỗi,
+  frontend dùng 4 tin dự phòng đã kiểm duyệt ngay trong `js/content.js`, nên khu vực không bị trắng.
+- Mỗi thẻ giữ tóm tắt, ngày, tên nguồn và liên kết mở bài gốc trong tab mới.
 
 > Đọc [PROJECT.md](PROJECT.md) trước để hiểu kiến trúc. File này là phần "vận hành":
 > hosting, CSP, và các sự cố đã gặp + cách đã sửa (để không lặp lại).

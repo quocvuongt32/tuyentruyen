@@ -30,12 +30,15 @@ https://tuyentruyen.khoaktt.vn/ky-nang/<slug>/
 
 ## Xử lý ảnh
 
-Giao diện nhận JPG, PNG và WebP, tối đa 15 ảnh/bài. Mỗi ảnh trải qua hai lớp kiểm tra:
+Giao diện nhận JPG, PNG và WebP tới 250 MB/ảnh, tối đa 15 ảnh/bài. Mỗi ảnh trải qua hai lớp kiểm tra:
 
 1. Trình duyệt đọc ảnh, áp dụng chiều xoay, thu nhỏ cạnh dài tối đa 1.920 px, chuyển sang
-   JPEG nền trắng và điều chỉnh dung lượng.
+   JPEG nền trắng và tìm chất lượng cao nhất trong ngưỡng mục tiêu khoảng 1,4 MB. Kích
+   thước chỉ giảm thêm khi nén chất lượng vẫn chưa đủ.
 2. Máy chủ cục bộ kiểm tra lại chữ ký JPEG, kích thước tối thiểu 320 × 320 px, kích thước
    tối đa 2.200 px và dung lượng tối đa 2,5 MB trước khi ghi file.
+
+Thẻ ảnh hiển thị dung lượng trước và sau tối ưu để người đăng kiểm tra ngay.
 
 Tên ảnh được tạo mới theo ngày + slug + số thứ tự và lưu trong `uploads/`. Build public
 chỉ sao chép các ảnh thực sự được nội dung tham chiếu. `npm run check` xác nhận từng ảnh
