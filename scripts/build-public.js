@@ -8,7 +8,6 @@ const root = path.join(__dirname, "..");
 const dist = path.join(root, "dist");
 const buildScripts = [
   "build-events.js",
-  "build-ticker.js",
   "build-about.js",
   "build-site.js",
   "build-skills.js",
@@ -29,6 +28,13 @@ function copyFile(rel) {
   fs.copyFileSync(source, target);
 }
 
+function copyAs(sourceRel, targetRel) {
+  const source = path.join(root, sourceRel);
+  const target = path.join(dist, targetRel);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.copyFileSync(source, target);
+}
+
 function copyTree(rel, allowedExtensions = null) {
   const sourceDir = path.join(root, rel);
   if (!fs.existsSync(sourceDir)) return;
@@ -41,8 +47,9 @@ function copyTree(rel, allowedExtensions = null) {
 
 function collectUploadRefs(value, refs) {
   if (typeof value === "string") {
-    const match = value.match(/^\/?(uploads\/[^?#]+)$/i);
-    if (match) refs.add(match[1].replace(/\//g, path.sep));
+    for (const match of value.matchAll(/\/?(uploads\/[a-zA-Z0-9._/-]+)/g)) {
+      refs.add(match[1].replace(/\//g, path.sep));
+    }
     return;
   }
   if (Array.isArray(value)) value.forEach((item) => collectUploadRefs(item, refs));
@@ -54,7 +61,17 @@ fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(dist, { recursive: true });
 
 ["index.html", "_headers", "_redirects"].forEach(copyFile);
-["css", "js", "data"].forEach((dir) => copyTree(dir));
+["css", "js"].forEach((dir) => copyTree(dir));
+["app.css", "app.js", "login.css", "login.js"].forEach((name) => copyAs(`tools/publisher/${name}`, `admin/${name}`));
+copyAs("tools/publisher/index.html", "admin/index.html");
+copyAs("tools/publisher/login.html", "admin/login/index.html");
+["data/events.json", "data/about.json", "data/site.json", "data/skills.json"].forEach(copyFile);
+const staticEvents = JSON.parse(fs.readFileSync(path.join(root, "data", "events.json"), "utf8")).events || [];
+const staticSkills = JSON.parse(fs.readFileSync(path.join(root, "data", "skills.json"), "utf8")).skills || [];
+fs.writeFileSync(path.join(dist, "data", "static-slugs.json"), JSON.stringify({
+  event: staticEvents.map((item) => item.slug).filter(Boolean),
+  skill: staticSkills.map((item) => item.slug).filter(Boolean),
+}, null, 2), "utf8");
 copyTree("img", new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".ico"]));
 
 const uploadRefs = new Set();

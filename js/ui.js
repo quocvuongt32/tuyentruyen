@@ -16,11 +16,6 @@ function setupNav() {
     });
   });
 
-  nav.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
-      trackEvent(`/menu${link.getAttribute("href")}`, link.textContent.trim());
-    });
-  });
 }
 
 // Nhay ve dung dinh #trang-chu se cuon khung thoi su (nam tren header, khong
@@ -70,7 +65,6 @@ function setupQuiz() {
     result.hidden = false;
     result.scrollIntoView({ behavior: "smooth", block: "center" });
 
-    trackEvent("/quiz/nop-bai", `${correct}/${total}`);
   });
 
   if (retryBtn) {
@@ -80,7 +74,6 @@ function setupQuiz() {
       form.querySelectorAll("label").forEach((el) => el.classList.remove("is-correct", "is-wrong"));
       result.hidden = true;
       form.scrollIntoView({ behavior: "smooth", block: "start" });
-      trackEvent("/quiz/lam-lai", "Làm lại quiz");
     });
   }
 }
@@ -93,28 +86,6 @@ function setupHomeLinks() {
       if (history.pushState) history.pushState(null, "", "#trang-chu");
     });
   });
-}
-
-// Do luong them cac thao tac chua duoc trackEvent() bao phu o noi khac:
-// CTA chinh cua Hero, hang truy cap nhanh mobile (nam ngoai #site-nav nen
-// khong duoc trackEvent trong setupNav() bat duoc), nut Sang/Toi, nut "Them".
-function setupExtraTracking() {
-  const heroCta = document.querySelector(".hero-cta");
-  if (heroCta) {
-    heroCta.addEventListener("click", () => trackEvent("/hero-cta", "Xem Cẩm nang"));
-  }
-
-  document.querySelectorAll(".mobile-quick-link").forEach((link) => {
-    link.addEventListener("click", () => {
-      trackEvent(`/mobile-quick${link.getAttribute("href")}`, link.getAttribute("aria-label") || "");
-    });
-  });
-
-  const themeToggle = document.getElementById("theme-toggle");
-  if (themeToggle) {
-    themeToggle.addEventListener("click", () => trackEvent("/theme-toggle", "Chuyển giao diện sáng/tối"));
-  }
-
 }
 
 // Carousel o vi tri logo lon trong Hero: bat dau bang huy hieu, roi chay qua

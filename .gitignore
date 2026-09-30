@@ -6,7 +6,6 @@ dist/
 backups/
 .dev.vars
 data/events.json
-data/ticker.json
 data/about.json
 data/site.json
 data/skills.json
@@ -39,3 +38,7 @@ data/skills.json
 
 # Local Netlify folder
 .netlify
+
+# Tai khoan, phien dang nhap va hang doi bien tap chi luu tren may noi bo.
+.publisher/
+/.wrangler/

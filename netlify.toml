@@ -17,13 +17,7 @@
     Cross-Origin-Resource-Policy = "same-origin"
     X-Permitted-Cross-Domain-Policies = "none"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https://*.goatcounter.com https://cdn.hvcsnd.edu.vn; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.goatcounter.com https://api.open-meteo.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com; frame-ancestors 'none'; upgrade-insecure-requests"
-
-# Trang /admin cần tải Decap CMS + Netlify Identity từ CDN và gọi API Identity/Git Gateway.
-[[headers]]
-  for = "/admin/*"
-  [headers.values]
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://identity.netlify.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' blob: https://api.netlify.com https://*.netlify.app https://identity.netlify.com; frame-src https://identity.netlify.com"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-src https://www.youtube-nocookie.com; frame-ancestors 'none'; upgrade-insecure-requests"
 
 # --- Cache anh de giam bang thong (nguyen nhan chinh gay het credit Netlify) ---
 # Mac dinh Netlify tra "max-age=0, must-revalidate" cho file tinh -> moi khach

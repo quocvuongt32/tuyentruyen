@@ -6,9 +6,11 @@ const path = require("path");
 const root = path.join(__dirname, "..");
 const dist = path.join(root, "dist");
 const siteUrl = "https://tuyentruyen.khoaktt.vn";
-const academyName = "HỌC VIỆN CẢNH SÁT NHÂN DÂN";
-const unitName = "KHOA TOÁN - TIN HỌC VÀ ỨNG DỤNG KHCN TRONG PCTP";
-const siteName = "TRANG THÔNG TIN ĐIỆN TỬ CẨM NANG AN TOÀN SỐ";
+const siteConfig = JSON.parse(fs.readFileSync(path.join(root, "content", "site.json"), "utf8"));
+const footerConfig = siteConfig.footer || {};
+const academyName = footerConfig.governingBody || "Học viện Cảnh sát nhân dân";
+const unitName = footerConfig.managingUnit || "Khoa Toán - Tin học và Ứng dụng KHCN trong PCTP";
+const siteName = footerConfig.siteName || "Website chuyên đề Cẩm nang An toàn số";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -49,42 +51,71 @@ function formatDate(date) {
   return `${day}/${month}/${year}`;
 }
 
-function imageList(item) {
+function imageEntries(item) {
   const raw = Array.isArray(item.images) ? item.images : [];
   const list = raw
-    .map((entry) => typeof entry === "string" ? entry : entry && (entry.src || entry.image))
-    .filter(Boolean);
-  if (item.image && !list.includes(item.image)) list.unshift(item.image);
+    .map((entry) => typeof entry === "string"
+      ? { src: entry, role: "gallery", caption: "" }
+      : entry && { src: entry.src || entry.image, role: entry.role || "gallery", caption: entry.caption || "" })
+    .filter((entry) => entry && entry.src);
+  if (item.image && !list.some((entry) => entry.src === item.image)) list.unshift({ src: item.image, role: "cover", caption: "" });
+  const coverIndex = list.findIndex((entry) => entry.role === "cover");
+  if (coverIndex > 0) list.unshift(...list.splice(coverIndex, 1));
   return list;
 }
 
-function renderGallery(item) {
-  const images = imageList(item);
-  if (!images.length) return "";
-  const [cover, ...rest] = images;
+function renderCover(item) {
+  const cover = imageEntries(item)[0];
+  if (!cover) return "";
+  const caption = cover.caption ? `<figcaption>${escapeHtml(cover.caption)}</figcaption>` : "";
+  return `<figure class="article-cover"><img src="${escapeHtml(cover.src)}" alt="${escapeHtml(cover.caption || item.title)}" decoding="async">${caption}</figure>`;
+}
+
+function renderDocumentGallery(item) {
+  const rest = imageEntries(item).slice(1);
+  if (!rest.length) return "";
   return `
-    <figure class="article-cover"><img src="${escapeHtml(cover)}" alt="${escapeHtml(item.title)}" decoding="async"></figure>
-    ${rest.length ? `<div class="article-gallery">${rest.map((src) => `<a href="${escapeHtml(src)}" target="_blank" rel="noopener"><img src="${escapeHtml(src)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async"></a>`).join("")}</div>` : ""}`;
+    <section class="article-documentary-images" aria-label="Ảnh tư liệu">
+      <h2>Ảnh tư liệu</h2>
+      <div class="article-gallery">${rest.map((entry) => `<figure><a href="${escapeHtml(entry.src)}" target="_blank" rel="noopener"><img src="${escapeHtml(entry.src)}" alt="${escapeHtml(entry.caption || item.title)}" loading="lazy" decoding="async"></a>${entry.caption ? `<figcaption>${escapeHtml(entry.caption)}</figcaption>` : ""}</figure>`).join("")}</div>
+    </section>`;
 }
 
 function renderReferenceLinks(item) {
   const links = [];
   if (item.videoUrl) links.push(`<a class="article-reference" href="${escapeHtml(item.videoUrl)}" target="_blank" rel="noopener noreferrer">Xem video ↗</a>`);
-  if (item.link) links.push(`<a class="article-reference" href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer">Xem nguồn tham khảo ↗</a>`);
+  if (item.link) {
+    const label = /hvcsnd\.edu\.vn/i.test(item.link)
+      ? "Xem thông tin trên Cổng TTĐT Học viện CSND ↗"
+      : "Xem nguồn tham khảo ↗";
+    links.push(`<a class="article-reference" href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer">${label}</a>`);
+  }
   return links.length ? `<div class="article-references">${links.join("")}</div>` : "";
 }
 
 function renderOfficialFooter() {
+  const contactLines = [
+    footerConfig.address ? `<span>Địa chỉ: ${escapeHtml(footerConfig.address)}</span>` : "",
+    footerConfig.email ? `<span>Email công vụ: ${escapeHtml(footerConfig.email)}</span>` : "",
+    footerConfig.phone ? `<span>Điện thoại: ${escapeHtml(footerConfig.phone)}</span>` : "",
+  ].filter(Boolean).join("");
+  const legalDisclaimer = footerConfig.legalDisclaimerApproved === true && footerConfig.legalDisclaimer
+    ? `<span class="article-footer-status">${escapeHtml(footerConfig.legalDisclaimer)}</span>`
+    : "";
   return `<footer class="article-footer">
-    <strong>${academyName}</strong>
-    <span>${unitName}</span>
-    <span>${siteName}</span>
-    <span>Đơn vị quản lý: Khoa Toán - Tin học và Ứng dụng KHCN trong PCTP</span>
-    <span>Chịu trách nhiệm quản lý nội dung: Thượng tá Phạm Thị Ngân · Quản trị kỹ thuật: Đại úy Nguyễn Quốc Vương</span>
-    <span class="article-footer-notice">Cẩm nang phục vụ tuyên truyền và giáo dục kỹ năng an toàn số trong và ngoài Học viện Cảnh sát nhân dân. Đây là sản phẩm dự thi Cuộc thi “Sáng tạo sản phẩm truyền thông số về ứng dụng khoa học công nghệ; chuyển đổi số và đổi mới sáng tạo” do Ban Thường vụ Đảng ủy Học viện Cảnh sát nhân dân phát động.</span>
-    <span class="article-footer-status">Website đang trong giai đoạn vận hành, hoàn thiện thủ tục công nhận; nội dung có tính chất tuyên truyền, tham khảo và không thay thế Cổng Thông tin điện tử, văn bản hoặc thông báo chính thức của Học viện Cảnh sát nhân dân.</span>
+    <strong>${escapeHtml(academyName.toUpperCase())}</strong>
+    <span>${escapeHtml(unitName.toUpperCase())}</span>
+    <span>${escapeHtml(siteName.toUpperCase())}</span>
+    <span>Cơ quan chủ quản: ${escapeHtml(academyName)}</span>
+    <span>Đơn vị quản lý: ${escapeHtml(unitName)}</span>
+    <span>Chịu trách nhiệm quản lý nội dung: ${escapeHtml(footerConfig.contentManager || "")}</span>
+    <span>Quản trị kỹ thuật: ${escapeHtml(footerConfig.technicalManager || "")}</span>
+    ${contactLines}
+    <span class="article-footer-notice">${escapeHtml(footerConfig.notice || "")}</span>
+    <span class="article-footer-status">${escapeHtml(footerConfig.statusNotice || "")}</span>
+    ${legalDisclaimer}
     <nav aria-label="Thông tin pháp lý và liên hệ">
-      <a href="/#gioi-thieu">Giới thiệu</a><a href="/terms/">Điều khoản sử dụng</a><a href="/privacy/">Chính sách bảo vệ dữ liệu cá nhân</a><a href="/nguon-tin/">Bản quyền và nguồn tin</a><a href="/contact/">Liên hệ</a>
+      <a href="/#gioi-thieu">Giới thiệu</a><a href="/terms/">Điều khoản sử dụng</a><a href="/privacy/">Chính sách bảo vệ dữ liệu cá nhân</a><a href="/nguon-tin/">Bản quyền và nguồn thông tin</a><a href="/contact/">Liên hệ</a>
     </nav>
   </footer>`;
 }
@@ -94,7 +125,7 @@ function renderPage(item, kind, navigation = "") {
   const label = kind === "event" ? "Hoạt động tuyên truyền" : "Bộ kỹ năng số";
   const canonical = `${siteUrl}/${prefix}/${encodeURIComponent(item.slug)}/`;
   const desc = description(item);
-  const cover = absoluteAsset(imageList(item)[0]);
+  const cover = absoluteAsset(imageEntries(item)[0]?.src);
   const meta = [formatDate(item.date), item.categoryLabel || item.category, item.location].filter(Boolean);
   const body = item.bodyHtml || (item.summary ? `<p>${escapeHtml(item.summary)}</p>` : "");
   return `<!doctype html>
@@ -134,9 +165,11 @@ function renderPage(item, kind, navigation = "") {
       <h1>${escapeHtml(item.title)}</h1>
       ${meta.length ? `<p class="article-meta">${meta.map(escapeHtml).join(" · ")}</p>` : ""}
       ${item.summary ? `<p class="article-lead">${escapeHtml(item.summary)}</p>` : ""}
-      ${renderGallery(item)}
+      ${renderCover(item)}
       <div class="article-content">${body}</div>
+      ${renderDocumentGallery(item)}
       ${renderReferenceLinks(item)}
+      ${item.author ? `<p class="article-author">Tác giả: ${escapeHtml(item.author)}</p>` : ""}
       ${navigation}
       <div class="article-actions">
         <button type="button" id="copy-link" class="primary-action">Sao chép liên kết</button>
@@ -155,22 +188,22 @@ const policyPages = [
   {
     slug: "privacy",
     title: "Chính sách bảo vệ dữ liệu cá nhân",
-    description: "Thông tin về dữ liệu được xử lý khi truy cập Trang thông tin điện tử Cẩm nang An toàn số.",
+    description: "Thông tin về dữ liệu được xử lý khi truy cập website chuyên đề Cẩm nang An toàn số.",
     body: `
-      <p>Trang thông tin điện tử Cẩm nang An toàn số tôn trọng và bảo vệ dữ liệu cá nhân của người truy cập. Website không cung cấp biểu mẫu đăng ký bản tin, không yêu cầu tạo tài khoản công khai và không thu thập địa chỉ email.</p>
+      <p>Website chuyên đề Cẩm nang An toàn số tôn trọng và bảo vệ dữ liệu cá nhân của người truy cập. Website không cung cấp biểu mẫu đăng ký bản tin, không yêu cầu tạo tài khoản công khai và không thu thập địa chỉ email.</p>
       <h2>Dữ liệu kỹ thuật</h2>
       <p>Khi truy cập, hệ thống lưu trữ hoặc các dịch vụ kỹ thuật liên quan có thể tự động xử lý dữ liệu nhật ký tối thiểu như địa chỉ IP, thời điểm, loại trình duyệt, trang được truy cập và thông tin chẩn đoán lỗi nhằm vận hành, bảo vệ và thống kê mức sử dụng website.</p>
       <h2>Mục đích và phạm vi sử dụng</h2>
       <p>Dữ liệu kỹ thuật chỉ được dùng để cung cấp nội dung, phát hiện sự cố, phòng ngừa hành vi gây hại và cải thiện chất lượng trang. Website không bán dữ liệu cá nhân và không dùng dữ liệu để gửi quảng cáo hoặc bản tin qua email.</p>
       <h2>Dịch vụ và liên kết bên ngoài</h2>
-      <p>Website có thể tải dữ liệu thời tiết, thống kê lượt truy cập hoặc dẫn tới nguồn tin chính thống bên ngoài. Khi mở liên kết ngoài, chính sách của đơn vị cung cấp dịch vụ đó được áp dụng.</p>
+      <p>Website không sử dụng dịch vụ phân tích hoặc bộ đếm truy cập bên thứ ba. Khung video bên ngoài chỉ được tải ở bài có video do biên tập viên chủ động khai báo. Các nguồn chính thống khác chỉ được mở khi người dùng bấm liên kết; khi đó chính sách của đơn vị cung cấp dịch vụ được áp dụng.</p>
       <h2>Thời gian lưu trữ và quyền của người truy cập</h2>
       <p>Dữ liệu kỹ thuật được lưu trong thời gian cần thiết theo cấu hình vận hành, an toàn hệ thống và chính sách của nhà cung cấp hạ tầng. Người truy cập có thể gửi yêu cầu liên quan đến dữ liệu cá nhân qua đầu mối công vụ nêu tại trang Liên hệ.</p>`,
   },
   {
     slug: "terms",
     title: "Điều khoản sử dụng",
-    description: "Điều kiện truy cập và sử dụng nội dung của Trang thông tin điện tử Cẩm nang An toàn số.",
+    description: "Điều kiện truy cập và sử dụng nội dung của website chuyên đề Cẩm nang An toàn số.",
     body: `
       <p>Website phục vụ tuyên truyền, giáo dục kỹ năng an toàn trên không gian mạng và giới thiệu hoạt động phù hợp của Khoa Toán - Tin học và Ứng dụng KHCN trong PCTP, Học viện Cảnh sát nhân dân.</p>
       <h2>Phạm vi thông tin</h2>
@@ -182,25 +215,30 @@ const policyPages = [
   },
   {
     slug: "nguon-tin",
-    title: "Bản quyền và nguồn tin",
+    title: "Bản quyền và nguồn thông tin",
     description: "Quy định về nguồn, quyền sử dụng và trích dẫn nội dung trên Cẩm nang An toàn số.",
     body: `
-      <p>Nội dung trên website gồm sản phẩm do Khoa tự thực hiện và thông tin được tổng hợp, trích dẫn từ các nguồn chính thống như Học viện Cảnh sát nhân dân, Bộ Công an, ANTV, cơ quan báo chí và nguồn hợp pháp khác.</p>
+      <p>Nội dung trên website chủ yếu do Khoa Toán - Tin học và Ứng dụng KHCN trong PCTP biên soạn, thực hiện hoặc được giao quản lý, khai thác.</p>
       <h2>Nguyên tắc sử dụng nguồn ngoài</h2>
-      <p>Website ưu tiên tóm tắt, ghi nguồn và dẫn liên kết tới nội dung gốc; không sao chép toàn văn khi chưa xác định quyền sử dụng. Tên cơ quan, tác giả, chú thích và đường dẫn nguồn được giữ theo thông tin có thể xác minh tại thời điểm biên tập.</p>
+      <p>Một số bài viết có thể trích dẫn văn bản, tài liệu hoặc dẫn liên kết tới nguồn chính thức để tham khảo và kiểm chứng. Website không tự động lấy nội dung biên tập từ website bên ngoài để đăng lại.</p>
       <h2>Hình ảnh, video và tài liệu</h2>
-      <p>Media chỉ được công bố sau khi rà soát nguồn, quyền sử dụng và nguy cơ lộ dữ liệu cá nhân, thông tin nhạy cảm hoặc nội dung không được phép công khai. Việc trích dẫn lại phải giữ nguyên ngữ cảnh, ghi rõ nguồn và không làm phát sinh cách hiểu sai về cơ quan quản lý.</p>
+      <p>Quyền đối với văn bản, hình ảnh, video và tài liệu thuộc về chủ sở hữu tương ứng. Nội dung chỉ được công bố sau khi rà soát nguồn, quyền sử dụng, dữ liệu cá nhân và thông tin không được phép công khai.</p>
       <h2>Yêu cầu điều chỉnh</h2>
-      <p>Nếu phát hiện nội dung ghi nguồn chưa chính xác hoặc có vấn đề về quyền sử dụng, vui lòng liên hệ đơn vị quản lý qua kênh công vụ để được kiểm tra và xử lý.</p>`,
+      <p>Nếu phát hiện nội dung ghi nguồn chưa chính xác hoặc có vấn đề về quyền sử dụng, vui lòng liên hệ đơn vị quản lý qua kênh công vụ để được kiểm tra và xử lý.</p>
+      ${footerConfig.legalDisclaimerApproved === true && footerConfig.legalDisclaimer ? `<p><strong>${escapeHtml(footerConfig.legalDisclaimer)}</strong></p>` : ""}`,
   },
   {
     slug: "contact",
     title: "Liên hệ",
-    description: "Đầu mối quản lý nội dung và quản trị kỹ thuật của Trang thông tin điện tử Cẩm nang An toàn số.",
+    description: "Đầu mối quản lý nội dung và quản trị kỹ thuật của website chuyên đề Cẩm nang An toàn số.",
     body: `
-      <p><strong>Đơn vị quản lý:</strong> Khoa Toán - Tin học và Ứng dụng KHCN trong PCTP, Học viện Cảnh sát nhân dân.</p>
-      <p><strong>Chịu trách nhiệm quản lý nội dung:</strong> Thượng tá Phạm Thị Ngân.</p>
-      <p><strong>Quản trị kỹ thuật:</strong> Đại úy Nguyễn Quốc Vương.</p>
+      <p><strong>Cơ quan chủ quản:</strong> ${escapeHtml(academyName)}.</p>
+      <p><strong>Đơn vị quản lý:</strong> ${escapeHtml(unitName)}.</p>
+      <p><strong>Chịu trách nhiệm quản lý nội dung:</strong> ${escapeHtml(footerConfig.contentManager || "Chưa cập nhật")}.</p>
+      <p><strong>Quản trị kỹ thuật:</strong> ${escapeHtml(footerConfig.technicalManager || "Chưa cập nhật")}.</p>
+      ${footerConfig.address ? `<p><strong>Địa chỉ:</strong> ${escapeHtml(footerConfig.address)}.</p>` : ""}
+      ${footerConfig.email ? `<p><strong>Email công vụ:</strong> ${escapeHtml(footerConfig.email)}.</p>` : ""}
+      ${footerConfig.phone ? `<p><strong>Điện thoại:</strong> ${escapeHtml(footerConfig.phone)}.</p>` : ""}
       <p>Để góp ý, yêu cầu điều chỉnh nguồn tin, bản quyền hoặc dữ liệu cá nhân, vui lòng liên hệ trực tiếp qua kênh công vụ của Khoa. Website không sử dụng biểu mẫu thu thập họ tên hoặc địa chỉ email.</p>`,
   },
 ];
@@ -229,7 +267,7 @@ function renderPolicyPage(page) {
   </header>
   <main class="article-shell policy-shell">
     <nav class="article-breadcrumb" aria-label="Đường dẫn"><a href="/">Trang chủ</a><span aria-hidden="true">›</span><span>${escapeHtml(page.title)}</span></nav>
-    <article class="article-card policy-card"><div class="article-kicker">Thông tin chính thức</div><h1>${escapeHtml(page.title)}</h1><p class="article-lead">${escapeHtml(page.description)}</p><div class="article-content">${page.body}</div></article>
+    <article class="article-card policy-card"><div class="article-kicker">Thông tin website</div><h1>${escapeHtml(page.title)}</h1><p class="article-lead">${escapeHtml(page.description)}</p><div class="article-content">${page.body}</div></article>
   </main>
   ${renderOfficialFooter()}
 </body>
@@ -252,7 +290,7 @@ function writePage(prefix, item, navigation = "") {
 
 const eventsPayload = JSON.parse(fs.readFileSync(path.join(dist, "data", "events.json"), "utf8"));
 const skillsPayload = JSON.parse(fs.readFileSync(path.join(dist, "data", "skills.json"), "utf8"));
-const events = (eventsPayload.events || []).filter((item) => item.slug && !item.slug.startsWith("feed-") && !item.externalSource);
+const events = (eventsPayload.events || []).filter((item) => item.slug);
 const skills = (skillsPayload.skills || []).filter((item) => item.slug && item.pageUrl);
 
 events.forEach((item) => writePage("hoat-dong", item));

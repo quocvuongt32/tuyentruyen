@@ -1,4 +1,3 @@
-# Cloudflare Pages doc redirect. /admin khong con (da bo Decap CMS + Netlify
-# Identity khi chuyen sang Cloudflare Pages) - bookmark cu ve thang trang chu.
-/admin/*  /  302
-/admin    /  302
+# Cong quan tri truc tuyen. API duoc xu ly boi Cloudflare Pages Functions.
+/admin/login  /admin/login/index.html  200
+/admin        /admin/index.html        200

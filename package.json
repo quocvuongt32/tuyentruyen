@@ -5,6 +5,9 @@
   "scripts": {
     "build": "node scripts/build-public.js",
     "check": "node scripts/check-site.js",
+    "test:publisher": "node scripts/test-publisher.js",
+    "test:cloud-api": "node scripts/test-cloud-api.js",
+    "seed:cloud-admin": "node scripts/seed-cloud-admin.js",
     "backup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backup-content.ps1",
     "publisher": "node scripts/publisher-server.js"
   },

@@ -1,4 +1,13 @@
 name = "tuyentruyen"
 pages_build_output_dir = "./dist"
-compatibility_date = "2026-09-21"
+compatibility_date = "2026-09-30"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "tuyentruyen-admin"
+database_id = "579d1599-429a-4d54-a761-4a7c1748d5ab"
+migrations_dir = "migrations"
+
+[[kv_namespaces]]
+binding = "MEDIA"
+id = "f86e045b98344abc98b148a1b736a3a9"

@@ -5,10 +5,12 @@
 
 const fs = require("fs");
 const path = require("path");
+const { renderBlocks } = require("./lib/rich-content");
 
 const skillsDir = path.join(__dirname, "..", "content", "ky-nang");
 const outDir = path.join(__dirname, "..", "data");
 const outFile = path.join(outDir, "skills.json");
+const includeUnpublished = process.env.INCLUDE_UNPUBLISHED === "1";
 
 function isSafeUrl(url) {
   return typeof url === "string" && /^https?:\/\//i.test(url);
@@ -72,9 +74,13 @@ function markdownToHtml(md) {
 function normalizeImages(data) {
   const raw = Array.isArray(data.images) ? data.images : [];
   const images = raw
-    .map((item) => typeof item === "string" ? item : item && item.image)
-    .filter(isSafeImagePath);
-  if (isSafeImagePath(data.image) && !images.includes(data.image)) images.unshift(data.image);
+    .map((item) => {
+      if (typeof item === "string") return isSafeImagePath(item) ? { src: item, role: "gallery", caption: "" } : null;
+      if (!item || !isSafeImagePath(item.image)) return null;
+      return { src: item.image, role: item.role === "cover" ? "cover" : "gallery", caption: typeof item.caption === "string" ? item.caption.slice(0, 260) : "" };
+    })
+    .filter(Boolean);
+  if (isSafeImagePath(data.image) && !images.some((item) => item.src === data.image)) images.unshift({ src: data.image, role: "cover", caption: "" });
   return images;
 }
 
@@ -97,10 +103,14 @@ const skills = files
       console.warn(`[skills] Bỏ qua file lỗi định dạng: ${file}`);
       return null;
     }
+    const workflowStatus = ["DRAFT", "REVIEW", "APPROVED", "PUBLISHED"].includes(data.workflow?.status)
+      ? data.workflow.status
+      : "PUBLISHED";
+    if (!includeUnpublished && workflowStatus !== "PUBLISHED") return null;
     const images = normalizeImages(data);
-    const image = images[0] || "";
+    const image = (images.find((item) => item.role === "cover") || images[0] || {}).src || "";
     const link = isSafeUrl(data.link) ? data.link : "";
-    const bodyHtml = markdownToHtml(typeof data.body === "string" ? data.body : "");
+    const bodyHtml = Array.isArray(data.bodyBlocks) ? renderBlocks(data.bodyBlocks) : markdownToHtml(typeof data.body === "string" ? data.body : "");
     if (!image && !link && !bodyHtml) {
       console.warn(`[skills] Bỏ qua "${file}": cần có ảnh, nội dung hoặc link.`);
       return null;
@@ -112,12 +122,14 @@ const skills = files
       image,
       images,
       summary: typeof data.summary === "string" ? data.summary : "",
+      author: typeof data.author === "string" ? data.author : "",
       link,
       bodyHtml,
       date: typeof data.date === "string" ? data.date : "",
       category: typeof data.category === "string" ? data.category : "",
       series: typeof data.series === "string" ? data.series : "",
       order: data.order !== null && data.order !== "" && Number.isFinite(Number(data.order)) ? Number(data.order) : null,
+      workflowStatus,
       pageUrl: !link ? `/ky-nang/${slug}/` : "",
     };
   })

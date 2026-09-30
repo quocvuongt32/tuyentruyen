@@ -1,4 +1,4 @@
-/* ---------- Widget goc: tin tuc lien quan + hom thu gop y ---------- */
+/* ---------- Widget goc ---------- */
 
 .corner-widgets {
   position: fixed;
@@ -125,44 +125,6 @@
 .corner-stat-link:hover,
 .corner-stat-link:focus-visible {
   border-color: var(--gold);
-}
-
-.news-panel-item {
-  display: block;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--border);
-  text-decoration: none;
-  color: var(--text);
-}
-
-.news-panel-item:last-child { border-bottom: 0; }
-
-.news-panel-item:hover .news-panel-item-title,
-.news-panel-item:focus-visible .news-panel-item-title {
-  color: var(--accent);
-  text-decoration: underline;
-}
-
-.news-panel-item-source {
-  display: block;
-  font-size: 0.68rem;
-  color: var(--gold);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-bottom: 2px;
-}
-
-.news-panel-item-title {
-  display: block;
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-.news-panel-item-date {
-  display: block;
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  margin-top: 3px;
 }
 
 @media (max-width: 640px) {

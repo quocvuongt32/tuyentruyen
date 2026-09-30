@@ -6,6 +6,7 @@
   "nav": {
     "trangChu": "Trang chủ",
     "gioiThieu": "Giới thiệu",
+    "nguonChinhThong": "Nguồn chính thống",
     "tuyenTruyen": "Tuyên truyền",
     "hoatDongKhac": "Hoạt động khác",
     "lienHe": "Liên hệ"
@@ -20,14 +21,54 @@
     "hint": "Bấm vào từng mốc để xem/ẩn chi tiết, ảnh minh chứng và video."
   },
   "activitySection": {
-    "heading": "Tin chuyên đề và hoạt động",
-    "hint": "Các mục Chuyển đổi số, Đổi mới sáng tạo và Nghiên cứu khoa học hiển thị tối đa 6 bản tóm tắt, ghi rõ nguồn và liên kết tới bài gốc."
+    "heading": "Hoạt động của Khoa",
+    "hint": "Nội dung do Khoa Toán - Tin học và Ứng dụng KHCN trong PCTP biên soạn, quản lý hoặc được giao thực hiện."
   },
+  "officialSources": [
+    {
+      "name": "Cổng Thông tin điện tử Bộ Công an",
+      "description": "Thông tin chính thức, văn bản và hoạt động thuộc phạm vi quản lý của Bộ Công an.",
+      "url": "https://bocongan.gov.vn/",
+      "icon": "shield"
+    },
+    {
+      "name": "Cổng Thông tin điện tử Học viện CSND",
+      "description": "Thông tin chính thức về đào tạo, nghiên cứu khoa học và hoạt động của Học viện Cảnh sát nhân dân.",
+      "url": "https://hvcsnd.edu.vn/",
+      "icon": "academy"
+    },
+    {
+      "name": "Cục An ninh mạng và phòng, chống tội phạm sử dụng công nghệ cao (A05)",
+      "description": "Chuyên trang chính thức của Cục A05 trên Cổng Thông tin điện tử Bộ Công an.",
+      "url": "https://bocongan.gov.vn/tag/1259",
+      "icon": "cyber"
+    },
+    {
+      "name": "Truyền hình Công an nhân dân (ANTV)",
+      "description": "Kênh thông tin, tuyên truyền chính thức của lực lượng Công an nhân dân.",
+      "url": "https://antv.gov.vn/",
+      "icon": "broadcast"
+    },
+    {
+      "name": "Cổng Thông tin điện tử Chính phủ",
+      "description": "Thông tin chỉ đạo, điều hành và văn bản chính thức của Chính phủ.",
+      "url": "https://chinhphu.vn/",
+      "icon": "government"
+    }
+  ],
   "footer": {
-    "line1": "HỌC VIỆN CẢNH SÁT NHÂN DÂN",
-    "line2": "KHOA TOÁN - TIN HỌC VÀ ỨNG DỤNG KHCN TRONG PCTP",
+    "governingBody": "Học viện Cảnh sát nhân dân",
+    "managingUnit": "Khoa Toán - Tin học và Ứng dụng KHCN trong PCTP",
+    "siteName": "Website chuyên đề Cẩm nang An toàn số",
+    "contentManager": "Thượng tá Phạm Thị Ngân",
+    "technicalManager": "Đại úy Nguyễn Quốc Vương",
+    "address": "Phố Phạm Văn Nghị, phường Đông Ngạc, thành phố Hà Nội",
+    "email": "",
+    "phone": "",
     "notice": "Cẩm nang phục vụ tuyên truyền và giáo dục kỹ năng an toàn số trong và ngoài Học viện Cảnh sát nhân dân. Đây là sản phẩm dự thi Cuộc thi “Sáng tạo sản phẩm truyền thông số về ứng dụng khoa học công nghệ; chuyển đổi số và đổi mới sáng tạo” do Ban Thường vụ Đảng ủy Học viện Cảnh sát nhân dân phát động.",
     "statusNotice": "Website đang trong giai đoạn vận hành, hoàn thiện thủ tục công nhận; nội dung có tính chất tuyên truyền, tham khảo và không thay thế Cổng Thông tin điện tử, văn bản hoặc thông báo chính thức của Học viện Cảnh sát nhân dân.",
+    "legalDisclaimerApproved": false,
+    "legalDisclaimer": "Website không phải cơ quan báo chí và không thực hiện chức năng trang thông tin điện tử tổng hợp.",
     "decisionNumber": "",
     "decisionDate": ""
   }

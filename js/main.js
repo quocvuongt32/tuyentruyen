@@ -19,13 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadEvents();
   loadAbout();
   loadSkills();
-  loadVisitCounter();
-  setInterval(loadVisitCounter, 60 * 1000);
-  loadTicker();
-  loadQuickNews();
-  setupTickerClock();
-  loadTickerWeather();
-  setInterval(loadTickerWeather, 15 * 60 * 1000);
   setupNav();
   setupHeroCarousel();
   setupHeaderCategoryLinks();
@@ -37,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupScrollButtons();
   setupCornerWidgets();
   setupHomeLinks();
-  setupExtraTracking();
   setupQuiz();
   setupLightbox();
   const yearEl = document.getElementById("year");

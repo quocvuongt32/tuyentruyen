@@ -13,10 +13,15 @@ async function loadEvents() {
     // va nhan 304 (khong ton bang thong) khi noi dung khong doi. Moi lan deploy
     // ETag doi -> tu dong tai ban moi. Tiet kiem bang thong cho khach quay lai
     // va cho moi lan F5. Xem docs/DEPLOYMENT.md muc "Giam bang thong".
-    const res = await fetch("data/events.json");
+    const [res, cloudResult] = await Promise.all([
+      fetch("data/events.json"),
+      fetch("/api/public/posts?type=event", { cache: "no-store" }).then((response) => response.ok ? response.json() : { posts: [] }).catch(() => ({ posts: [] })),
+    ]);
     if (!res.ok) throw new Error("Không tải được dữ liệu sự kiện");
     const payload = await res.json();
-    const events = Array.isArray(payload.events) ? payload.events : [];
+    const cloudEvents = Array.isArray(cloudResult.posts) ? cloudResult.posts : [];
+    const staticEvents = Array.isArray(payload.events) ? payload.events : [];
+    const events = [...cloudEvents, ...staticEvents].filter((event, index, list) => event?.slug && list.findIndex((item) => item?.slug === event.slug) === index);
 
     eventsBySlug = {};
     events.forEach((ev) => {
@@ -24,14 +29,22 @@ async function loadEvents() {
     });
     allEvents = events;
 
-    const anmEvents = events.filter((ev) => ev.category === ANM_CATEGORY);
-    const otherEvents = events.filter((ev) => ev.category !== ANM_CATEGORY);
+    const isTimelineEvent = (ev) => ev.placement ? ev.placement === "timeline" : ev.category === ANM_CATEGORY;
+    const anmEvents = events.filter(isTimelineEvent);
+    const otherEvents = events.filter((ev) => !isTimelineEvent(ev));
     const otherCategories = (payload.categories || []).filter((c) => c.value !== ANM_CATEGORY);
 
     render(anmEvents);
     renderActivityGrid(otherEvents);
-    renderStats(payload.stats, payload.generatedAt);
-    setupBanner(payload.featured);
+    const stats = { ...(payload.stats || {}), eventCount: events.length, imageCount: events.reduce((total, event) => total + (Array.isArray(event.images) ? event.images.length : 0), 0) };
+    renderStats(stats, cloudEvents.length ? new Date().toISOString() : payload.generatedAt);
+    const cloudFeatured = cloudEvents.filter((event) => event.featured).map((event) => ({
+      src: event.images?.find((image) => image?.role === "cover")?.src || event.image,
+      eventSlug: event.slug,
+      eventTitle: event.title,
+      eventDate: event.date,
+    })).filter((item) => item.src);
+    setupBanner([...cloudFeatured, ...(Array.isArray(payload.featured) ? payload.featured : [])]);
     setupCategoryFilter(otherCategories);
   } catch (err) {
     container.innerHTML = '<p class="error">Chưa có dữ liệu hoặc lỗi tải dữ liệu.</p>';
@@ -39,31 +52,10 @@ async function loadEvents() {
   }
 }
 
-// Hien so luot truy cap thuc te (GoatCounter). O canh se hien san voi dau
-// "—", chi cap nhat so khi lay duoc du lieu. Can bat "Allow adding visitor
-// counts on your website" trong Settings cua GoatCounter de co so nay.
 function setAllText(className, value) {
   document.querySelectorAll(`.${className}`).forEach((el) => {
     el.textContent = value;
   });
-}
-
-// GoatCounter dem luot xem qua script rieng (count.js, tai async) - luot xem
-// CUA CHINH TRANG DANG MO co the chua kip cong vao TOTAL.json tai thoi diem
-// gong nay chay (race condition), nen +1 "lac quan" de tinh luot dang xem
-// hien tai, khong phai so gia. Goi lai dinh ky de con so "song" hon (van
-// mien phi, GoatCounter khong tinh phi theo so lan goi API dem cong khai).
-async function loadVisitCounter() {
-  try {
-    const res = await fetch("https://vuongnq.goatcounter.com/counter/TOTAL.json");
-    if (!res.ok) return;
-    const data = await res.json();
-    if (!data || !data.count) return;
-    const raw = Number(String(data.count).replace(/[^\d]/g, ""));
-    setAllText("js-stat-visits", Number.isFinite(raw) ? raw + 1 : data.count);
-  } catch (err) {
-    // Am lang bo qua - tile van hien dau "—", khong anh huong phan con lai cua trang.
-  }
 }
 
 function renderStats(stats, generatedAt) {
@@ -142,7 +134,6 @@ function buildCard(ev, openByDefault) {
     const willOpen = !article.classList.contains("open");
     article.classList.toggle("open", willOpen);
     summary.setAttribute("aria-expanded", String(willOpen));
-    if (willOpen) trackEvent(`/su-kien/${ev.slug || "khong-slug"}`, ev.title);
   });
 
   article.appendChild(summary);
@@ -210,7 +201,6 @@ function buildDetailFragment(ev) {
     a.textContent = "Xem video →";
     a.target = "_blank";
     a.rel = "noopener noreferrer";
-    a.addEventListener("click", () => trackEvent("/lien-ket-video", ev.videoUrl));
     frag.appendChild(a);
   }
 
@@ -218,12 +208,11 @@ function buildDetailFragment(ev) {
     const a = document.createElement("a");
     a.href = ev.link;
     a.className = "event-link";
-    a.textContent = ev.externalSource
-      ? `Nguồn: ${ev.source || "Bài viết gốc"} — Xem bài gốc ↗`
-      : "Xem bài viết tham khảo →";
+    a.textContent = /hvcsnd\.edu\.vn/i.test(ev.link)
+      ? "Xem thông tin trên Cổng TTĐT Học viện CSND →"
+      : "Xem nguồn tham khảo →";
     a.target = "_blank";
     a.rel = "noopener noreferrer";
-    a.addEventListener("click", () => trackEvent("/lien-ket-tham-khao", ev.link));
     frag.appendChild(a);
   }
 
@@ -235,12 +224,11 @@ function buildDetailFragment(ev) {
     frag.appendChild(bodyEl);
   }
 
-  if (ev.slug && !ev.slug.startsWith("feed-") && !ev.externalSource) {
+  if (ev.slug) {
     const pageLink = document.createElement("a");
     pageLink.href = `/hoat-dong/${encodeURIComponent(ev.slug)}/`;
     pageLink.className = "event-link event-page-link";
     pageLink.textContent = "Mở trang riêng để chia sẻ →";
-    pageLink.addEventListener("click", () => trackEvent(`/mo-bai/${ev.slug}`, ev.title));
     frag.appendChild(pageLink);
   }
 
@@ -319,18 +307,10 @@ function buildActivityCard(ev) {
   meta.textContent = [formatDate(ev.date), ev.location].filter(Boolean).join(" · ");
   body.appendChild(meta);
 
-  if (ev.externalSource && ev.link) {
-    const source = document.createElement("div");
-    source.className = "activity-source";
-    source.textContent = `Nguồn: ${ev.source || "Bài viết gốc"} · Xem bài gốc ↗`;
-    body.appendChild(source);
-  }
-
   card.appendChild(body);
 
   card.addEventListener("click", () => {
     openActivityModal(ev);
-    trackEvent(`/hoat-dong/${ev.slug || "khong-slug"}`, ev.title);
   });
 
   return card;
@@ -389,12 +369,7 @@ function setupActivityModal() {
 
 function collectMediaItems() {
   const items = [];
-  // Bo qua su kien tu dong lay tu feed hvcsnd.edu.vn (slug bat dau "feed-") -
-  // Thu vien anh & video chi hien anh/video that do don vi tu nhap, khong lan
-  // anh minh hoa tin tuc chung chung. allEvents da sap theo ngay giam dan tu
-  // build-events.js nen khong can sort lai o day.
   for (const ev of allEvents) {
-    if (ev.slug && ev.slug.startsWith("feed-")) continue;
     if (Array.isArray(ev.images)) {
       for (const img of ev.images) {
         if (img && img.src) items.push({ type: "image", src: img.src, ev });
@@ -469,7 +444,6 @@ function openMediaLibrary() {
   if (!overlay) return;
   buildMediaLibrary();
   overlay.classList.add("active");
-  trackEvent("/thu-vien-anh-video", "Thư viện ảnh & video");
 }
 
 function closeMediaLibrary() {
@@ -508,7 +482,6 @@ function applyActivityFilter(value, label) {
     const match = !value || card.dataset.category === value;
     card.classList.toggle("filtered-out", !match);
   });
-  trackEvent(`/loc/${value || "tat-ca"}`, label || value || "Tất cả");
 }
 
 function setupCategoryFilter(categories) {
@@ -550,10 +523,4 @@ function setupHeaderCategoryLinks() {
       setTimeout(() => applyActivityFilter(value, link.textContent), 50);
     });
   });
-}
-
-function trackEvent(path, title) {
-  if (window.goatcounter && typeof window.goatcounter.count === "function") {
-    window.goatcounter.count({ path, title, event: true });
-  }
 }

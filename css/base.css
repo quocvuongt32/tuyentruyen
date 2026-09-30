@@ -19,7 +19,6 @@
   --header-brand-h: 112px;
   --header-h: 56px;
 }
-
 /* Nen sang: trang anh vang, tinh than "co do sao vang" */
 :root[data-theme="light"] {
   --bg: #fdf8ec;
@@ -58,7 +57,7 @@ body {
 
 body, .site-header, .hero, .banner, .corner-stat, .stat-tile, .badge-icon, .partner-badges,
 .timeline-section, .activity-section, .activity-card, .site-footer,
-.admin-links, .activity-modal-box, .activity-modal-close, .news-ticker {
+.admin-links, .activity-modal-box, .activity-modal-close {
   transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
@@ -103,127 +102,4 @@ a { color: inherit; }
   .site-nav a:active {
     transform: scale(0.96);
   }
-}
-
-/* ---------- Dai tin chay (thoi su chinh thong) ---------- */
-
-.news-ticker {
-  background: transparent;
-  border-bottom: 1px solid var(--border);
-  padding: 7px 0;
-  overflow: hidden;
-}
-
-.news-ticker[hidden] { display: none; }
-
-.news-ticker-inner {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ticker-meta {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-right: 12px;
-  border-right: 1px solid var(--border);
-  color: var(--text-dim);
-  font-size: 0.78rem;
-  white-space: nowrap;
-}
-
-.ticker-weather {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.ticker-weather[hidden] { display: none; }
-
-.ticker-weather-icon { font-size: 0.95rem; line-height: 1; }
-
-.news-ticker-label {
-  flex-shrink: 0;
-  padding: 3px 10px;
-  background: var(--accent-soft);
-  border: 1px solid transparent;
-  color: var(--accent);
-  font-weight: 700;
-  font-size: 0.68rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.news-ticker-viewport {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-  mask-image: linear-gradient(to right, transparent, black 28px, black calc(100% - 12px), transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 28px, black calc(100% - 12px), transparent);
-}
-
-.news-ticker-track {
-  display: flex;
-  align-items: center;
-  gap: 44px;
-  width: max-content;
-  white-space: nowrap;
-  animation: news-ticker-scroll 220s linear infinite;
-}
-
-.news-ticker:hover .news-ticker-track,
-.news-ticker-track:focus-within {
-  animation-play-state: paused;
-}
-
-.news-ticker-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: var(--text);
-  font-size: 0.82rem;
-}
-
-.news-ticker-item:hover,
-.news-ticker-item:focus-visible {
-  text-decoration: underline;
-}
-
-.news-ticker-source {
-  flex-shrink: 0;
-  padding: 1px 8px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  white-space: nowrap;
-}
-
-@keyframes news-ticker-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .news-ticker-track {
-    animation: none;
-  }
-  .news-ticker-viewport {
-    overflow-x: auto;
-  }
-}
-
-@media (max-width: 640px) {
-  .news-ticker-inner { gap: 8px; }
-  .ticker-meta { gap: 8px; padding-right: 8px; }
-  .ticker-datetime { display: none; }
-  .news-ticker-item { font-size: 0.78rem; }
 }

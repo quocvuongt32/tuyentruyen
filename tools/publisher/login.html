@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng nhập cổng biên tập · Cẩm nang An toàn số</title>
+  <link rel="stylesheet" href="/admin/login.css">
+</head>
+<body>
+  <main class="login-shell">
+    <section class="identity-panel">
+      <div class="brand-mark">AT</div>
+      <p class="eyebrow">CỔNG QUẢN TRỊ · KHOA KTT</p>
+      <h1>Cẩm nang<br>An toàn số</h1>
+      <p>Soạn thảo, thẩm định và xuất bản bài viết theo đúng vai trò được phân công.</p>
+      <ul>
+        <li>Kết nối HTTPS và phiên đăng nhập bảo mật</li>
+        <li>Mật khẩu được lưu dưới dạng băm</li>
+        <li>Mọi bước duyệt được ghi lịch sử</li>
+      </ul>
+    </section>
+    <section class="login-panel">
+      <div>
+        <p class="eyebrow dark">/ADMIN</p>
+        <h2>Đăng nhập cổng biên tập</h2>
+        <p class="intro">Dùng tài khoản được phân quyền. Ở lần đăng nhập đầu, hãy dùng mật khẩu tạm do quản trị viên cung cấp rồi đổi ngay theo yêu cầu.</p>
+      </div>
+      <form id="login-form">
+        <label><span>Tên đăng nhập</span><input id="username" autocomplete="username" autocapitalize="none" required autofocus placeholder="admin, nganpt hoặc vuongnq"></label>
+        <label><span>Mật khẩu</span><input id="password" type="password" autocomplete="current-password" required></label>
+        <button id="login-button" type="submit">Đăng nhập</button>
+        <p id="login-error" class="error" role="alert" aria-live="polite"></p>
+      </form>
+      <p class="local-note">Không chia sẻ mật khẩu hoặc phiên đăng nhập. Đăng xuất sau khi hoàn thành công việc.</p>
+    </section>
+  </main>
+  <script src="/admin/login.js" defer></script>
+</body>
+</html>

@@ -5,14 +5,25 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { spawn, spawnSync } = require("child_process");
+const { createAuthStore } = require("./lib/publisher-auth");
+const { normalizeBlocks, plainTextFromBlocks } = require("./lib/rich-content");
 
 const root = path.join(__dirname, "..");
 const uiDir = path.join(root, "tools", "publisher");
 const distDir = path.join(root, "dist");
 const host = "127.0.0.1";
 const siteUrl = "https://tuyentruyen.khoaktt.vn";
-const token = crypto.randomBytes(24).toString("hex");
-const maxImages = 15;
+const maxImages = 30;
+const authStore = createAuthStore(root, process.env.PUBLISHER_STATE_DIR || "");
+const pendingPath = path.join(authStore.stateDir, "pending.json");
+const sessions = new Map();
+const loginAttempts = new Map();
+const sessionMaxAgeMs = 8 * 60 * 60 * 1000;
+const permissions = {
+  admin: new Set(["create", "submit", "approve", "publish", "discard", "manage-users"]),
+  author: new Set(["create", "submit", "discard"]),
+  approver: new Set(["approve", "publish"]),
+};
 
 function envNumber(name, fallback, min, max) {
   const value = Number(process.env[name]);
@@ -33,12 +44,82 @@ const maxRequestBytes = Math.max(45 * 1024 * 1024, Math.ceil(maxImages * maxImag
 const categories = new Set(["an-ninh-mang", "chuyen-doi-so", "doi-moi-sang-tao", "nghien-cuu-khoa-hoc", "khac"]);
 let pending = null;
 
-function sendJson(res, status, value) {
+class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+function loadPending() {
+  try {
+    const value = JSON.parse(fs.readFileSync(pendingPath, "utf8"));
+    if (!value || !Array.isArray(value.paths) || !value.paths.length) return null;
+    if (!fs.existsSync(path.join(root, value.paths[0]))) return null;
+    return value;
+  } catch (_) {
+    return null;
+  }
+}
+
+function savePending() {
+  fs.mkdirSync(authStore.stateDir, { recursive: true });
+  if (!pending) {
+    fs.rmSync(pendingPath, { force: true });
+    return;
+  }
+  fs.writeFileSync(pendingPath, `${JSON.stringify(pending, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+}
+
+function parseCookies(req) {
+  return Object.fromEntries(String(req.headers.cookie || "").split(";").map((item) => item.trim()).filter(Boolean).map((item) => {
+    const index = item.indexOf("=");
+    return index < 0 ? [item, ""] : [item.slice(0, index), decodeURIComponent(item.slice(index + 1))];
+  }));
+}
+
+function sessionFor(req) {
+  const id = parseCookies(req).publisher_session;
+  const session = id && sessions.get(id);
+  if (!session) return null;
+  if (Date.now() > session.expiresAt) {
+    sessions.delete(id);
+    return null;
+  }
+  session.expiresAt = Date.now() + sessionMaxAgeMs;
+  return session;
+}
+
+function requireSession(req) {
+  const session = sessionFor(req);
+  if (!session) throw new HttpError(401, "Bạn cần đăng nhập lại.");
+  return session;
+}
+
+function requirePermission(session, permission) {
+  if (!permissions[session.user.role]?.has(permission)) throw new HttpError(403, "Tài khoản không có quyền thực hiện thao tác này.");
+}
+
+function assertCsrf(req, session) {
+  if (req.headers["x-publisher-token"] !== session.csrfToken) throw new HttpError(403, "Phiên làm việc không hợp lệ. Hãy tải lại trang.");
+  const origin = req.headers.origin;
+  if (origin && !origin.startsWith(`http://${host}:`)) throw new HttpError(403, "Yêu cầu không đến từ giao diện cục bộ.");
+}
+
+function redirect(res, location) {
+  res.writeHead(302, { Location: location, "Cache-Control": "no-store" });
+  res.end();
+}
+
+function sendJson(res, status, value, extraHeaders = {}) {
   const body = JSON.stringify(value);
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Content-Length": Buffer.byteLength(body),
     "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    ...extraHeaders,
   });
   res.end(body);
 }
@@ -63,7 +144,15 @@ function sendFile(res, file) {
     res.end("Không tìm thấy tệp.");
     return;
   }
-  res.writeHead(200, { "Content-Type": types[ext] || "application/octet-stream", "Cache-Control": "no-store" });
+  res.writeHead(200, {
+    "Content-Type": types[ext] || "application/octet-stream",
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Content-Security-Policy": "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; frame-src https://www.youtube-nocookie.com; img-src 'self' data: blob:; media-src 'self'; object-src 'none'; script-src 'self'; style-src 'self'",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  });
   fs.createReadStream(file).pipe(res);
 }
 
@@ -98,12 +187,6 @@ function readJson(req) {
   });
 }
 
-function assertToken(req) {
-  if (req.headers["x-publisher-token"] !== token) throw new Error("Phiên đăng bài không hợp lệ. Hãy đóng và mở lại Dang-bai.bat.");
-  const origin = req.headers.origin;
-  if (origin && !origin.startsWith(`http://${host}:`)) throw new Error("Yêu cầu không đến từ giao diện cục bộ.");
-}
-
 function slugify(value) {
   return String(value || "")
     .normalize("NFD")
@@ -134,6 +217,68 @@ function cleanUrl(value, field) {
   } catch (error) {
     throw new Error(`${field} phải bắt đầu bằng http:// hoặc https://.`);
   }
+}
+
+function publicPending(value) {
+  if (!value) return null;
+  const { paths, ...safe } = value;
+  return safe;
+}
+
+function sessionPayload(session) {
+  const rolePermissions = permissions[session.user.role] || new Set();
+  return {
+    user: session.user,
+    csrfToken: session.csrfToken,
+    permissions: [...rolePermissions],
+  };
+}
+
+function invalidateUserSessions(username, exceptId = "") {
+  for (const [id, session] of sessions) {
+    if (id !== exceptId && session.user.username === username) sessions.delete(id);
+  }
+}
+
+function loginKey(req, username) {
+  return `${req.socket.remoteAddress || host}:${String(username || "").trim().toLowerCase()}`;
+}
+
+function checkLoginRate(req, username) {
+  const key = loginKey(req, username);
+  const cutoff = Date.now() - 15 * 60 * 1000;
+  const attempts = (loginAttempts.get(key) || []).filter((time) => time > cutoff);
+  loginAttempts.set(key, attempts);
+  if (attempts.length >= 5) throw new HttpError(429, "Đăng nhập sai quá nhiều lần. Hãy chờ 15 phút rồi thử lại.");
+  return key;
+}
+
+function login(req, res, input) {
+  const username = String(input.username || "").trim().toLowerCase();
+  const key = checkLoginRate(req, username);
+  const user = authStore.verify(username, input.password);
+  if (!user) {
+    loginAttempts.set(key, [...(loginAttempts.get(key) || []), Date.now()]);
+    throw new HttpError(401, "Tên đăng nhập hoặc mật khẩu không đúng.");
+  }
+  loginAttempts.delete(key);
+  const id = crypto.randomBytes(32).toString("hex");
+  const session = {
+    id,
+    user,
+    csrfToken: crypto.randomBytes(24).toString("hex"),
+    expiresAt: Date.now() + sessionMaxAgeMs,
+  };
+  sessions.set(id, session);
+  sendJson(res, 200, { ok: true, ...sessionPayload(session) }, {
+    "Set-Cookie": `publisher_session=${id}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${Math.floor(sessionMaxAgeMs / 1000)}`,
+  });
+}
+
+function logout(req, res) {
+  const id = parseCookies(req).publisher_session;
+  if (id) sessions.delete(id);
+  sendJson(res, 200, { ok: true }, { "Set-Cookie": "publisher_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0" });
 }
 
 function jpegDimensions(buffer) {
@@ -173,10 +318,13 @@ function run(command, args, options = {}) {
   return result;
 }
 
-function buildAndCheck() {
-  const build = run(process.execPath, [path.join(root, "scripts", "build-public.js")]);
+function buildAndCheck({ includeUnpublished = false } = {}) {
+  const env = { ...process.env };
+  if (includeUnpublished) env.INCLUDE_UNPUBLISHED = "1";
+  else delete env.INCLUDE_UNPUBLISHED;
+  const build = run(process.execPath, [path.join(root, "scripts", "build-public.js")], { env });
   if (build.status !== 0) throw new Error(`Build thất bại:\n${build.stderr || build.stdout}`);
-  const check = run(process.execPath, [path.join(root, "scripts", "check-site.js")]);
+  const check = run(process.execPath, [path.join(root, "scripts", "check-site.js")], { env });
   if (check.status !== 0) throw new Error(`Kiểm tra website thất bại:\n${check.stderr || check.stdout}`);
   return `${build.stdout}\n${check.stdout}`.trim();
 }
@@ -189,13 +337,15 @@ function uniqueSlug(type, preferred) {
   return slug;
 }
 
-function createPost(input) {
+function createPost(input, actor) {
   if (pending) throw new Error("Đang có một bài đã lưu chờ đăng. Hãy đăng hoặc hủy bài đó trước.");
   const type = input.type === "skill" ? "skill" : input.type === "event" ? "event" : "";
   if (!type) throw new Error("Loại bài không hợp lệ.");
   const title = cleanText(input.title, 180, "tiêu đề", true);
+  const author = cleanText(actor.fullName, 160, "người tạo bài", true);
   const summary = cleanText(input.summary, 320, "tóm tắt", true);
-  const body = cleanText(input.body, 30_000, "nội dung", true);
+  const rawBlocks = Array.isArray(input.bodyBlocks) ? input.bodyBlocks : [];
+  const body = cleanText(plainTextFromBlocks(rawBlocks), 30_000, "nội dung", true);
   if (body.length < 30) throw new Error("Nội dung cần ít nhất 30 ký tự.");
   const date = cleanText(input.date, 10, "ngày đăng", true);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Ngày đăng phải theo định dạng YYYY-MM-DD.");
@@ -208,7 +358,43 @@ function createPost(input) {
   const images = Array.isArray(input.images) ? input.images : [];
   if (!images.length) throw new Error("Cần chọn ít nhất một ảnh đại diện.");
   if (images.length > maxImages) throw new Error(`Mỗi bài tối đa ${maxImages} ảnh.`);
-  const decodedImages = images.map(decodeImage);
+  const imageIds = new Set();
+  const decodedImages = images.map((item, index) => {
+    const id = /^img-[a-zA-Z0-9-]{8,80}$/.test(String(item && item.id || "")) ? item.id : `img-legacy-${index + 1}`;
+    if (imageIds.has(id)) throw new Error("Danh sách ảnh có mã bị trùng.");
+    imageIds.add(id);
+    const kind = ["cover", "gallery", "inline"].includes(item && item.kind) ? item.kind : index === 0 ? "cover" : "gallery";
+    return { id, kind, caption: cleanText(item && item.caption, 260, "chú thích ảnh"), ...decodeImage(item, index) };
+  });
+  if (!decodedImages.some((item) => item.kind === "cover")) {
+    const fallbackCover = decodedImages.find((item) => item.kind !== "inline");
+    if (fallbackCover) fallbackCover.kind = "cover";
+  }
+  if (!decodedImages.some((item) => item.kind === "cover")) throw new Error("Cần chọn một ảnh đại diện cho bài.");
+  let coverSeen = false;
+  decodedImages.forEach((item) => {
+    if (item.kind !== "cover") return;
+    if (!coverSeen) coverSeen = true;
+    else item.kind = "gallery";
+  });
+  const referenceLink = type === "event" ? cleanUrl(input.link, "Link tham khảo") : "";
+  const videoLink = type === "event" ? cleanUrl(input.video, "Link video") : "";
+  const now = new Date().toISOString();
+  const workflow = {
+    status: "DRAFT",
+    createdBy: author,
+    createdUsername: actor.username,
+    reviewedBy: "",
+    updatedBy: author,
+    approvedBy: "",
+    publishedBy: "",
+    createdAt: now,
+    reviewedAt: "",
+    approvedAt: "",
+    publishedAt: "",
+    revisionHistory: [{ status: "DRAFT", actor: author, at: now, note: "Tạo bản nháp" }],
+    references: [...new Set([referenceLink, videoLink].filter(Boolean))],
+  };
   const created = [];
   const contentDir = type === "event" ? path.join(root, "content", "events") : path.join(root, "content", "ky-nang");
   fs.mkdirSync(contentDir, { recursive: true });
@@ -221,8 +407,12 @@ function createPost(input) {
       const absolute = path.join(root, rel);
       fs.writeFileSync(absolute, image.buffer, { flag: "wx" });
       created.push(absolute);
-      return `/${rel.replace(/\\/g, "/")}`;
+      return { id: image.id, kind: image.kind, caption: image.caption, path: `/${rel.replace(/\\/g, "/")}` };
     });
+    const imagePathById = new Map(imagePaths.map((item) => [item.id, item.path]));
+    const bodyBlocks = normalizeBlocks(rawBlocks, (id) => imagePathById.get(id) || "");
+    const publicImages = imagePaths.filter((item) => item.kind !== "inline");
+    const coverImage = publicImages.find((item) => item.kind === "cover");
 
     let data;
     if (type === "event") {
@@ -234,9 +424,12 @@ function createPost(input) {
         date,
         location: cleanText(input.location, 220, "địa điểm"),
         body,
-        images: imagePaths.map((image, index) => ({ image, featured: index === 0 && input.featuredBanner === true })),
-        link: cleanUrl(input.link, "Link tham khảo"),
-        video: cleanUrl(input.video, "Link video"),
+        bodyBlocks,
+        author,
+        images: publicImages.map((item) => ({ image: item.path, role: item.kind, caption: item.caption, featured: item.kind === "cover" && input.featuredBanner === true })),
+        link: referenceLink,
+        video: videoLink,
+        workflow,
       };
     } else {
       const orderRaw = Number(input.order);
@@ -248,9 +441,12 @@ function createPost(input) {
         series: cleanText(input.series, 160, "tên chuỗi"),
         order: Number.isInteger(orderRaw) && orderRaw > 0 ? orderRaw : null,
         body,
-        image: imagePaths[0],
-        images: imagePaths.map((image) => ({ image })),
+        bodyBlocks,
+        author,
+        image: coverImage.path,
+        images: publicImages.map((item) => ({ image: item.path, role: item.kind, caption: item.caption })),
         link: "",
+        workflow,
       };
     }
 
@@ -258,17 +454,24 @@ function createPost(input) {
     const contentAbs = path.join(root, contentRel);
     fs.writeFileSync(contentAbs, `${JSON.stringify(data, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
     created.push(contentAbs);
-    const log = buildAndCheck();
+    const log = buildAndCheck({ includeUnpublished: true });
     const prefix = type === "event" ? "hoat-dong" : "ky-nang";
     pending = {
       type,
       title,
       slug,
-      paths: [contentRel, ...imagePaths.map((value) => value.replace(/^\//, "").replace(/\//g, path.sep))],
+      paths: [contentRel, ...imagePaths.map((item) => item.path.replace(/^\//, "").replace(/\//g, path.sep))],
       url: `${siteUrl}/${prefix}/${slug}/`,
       previewUrl: `/preview/${prefix}/${slug}/`,
       committed: false,
+      workflowStatus: "DRAFT",
+      createdBy: author,
+      createdUsername: actor.username,
+      reviewedBy: "",
+      approvedBy: "",
+      publishedBy: "",
     };
+    savePending();
     return { ...pending, log };
   } catch (error) {
     created.reverse().forEach((file) => { try { fs.rmSync(file, { force: true }); } catch (_) {} });
@@ -283,31 +486,136 @@ function gitOutput(args) {
   return result.stdout.trim();
 }
 
-function publishPending() {
+function pendingContentPath() {
+  if (!pending) throw new Error("Chưa có bài nào đang xử lý.");
+  return path.join(root, pending.paths[0]);
+}
+
+function updatePendingWorkflow(nextStatus, actor, note) {
+  const contentPath = pendingContentPath();
+  const data = JSON.parse(fs.readFileSync(contentPath, "utf8"));
+  const workflow = data.workflow || {};
+  const current = workflow.status || "DRAFT";
+  const allowed = { DRAFT: "REVIEW", REVIEW: "APPROVED", APPROVED: "PUBLISHED" };
+  if (allowed[current] !== nextStatus) throw new Error(`Không thể chuyển trạng thái ${current} → ${nextStatus}.`);
+  const cleanActor = cleanText(actor && actor.fullName, 160, "người thực hiện", true);
+  const actorUsername = cleanText(actor && actor.username, 80, "tài khoản thực hiện", true).toLowerCase();
+  const sameCreator = actorUsername === String(workflow.createdUsername || pending.createdUsername || "").toLowerCase();
+  if (["APPROVED", "PUBLISHED"].includes(nextStatus) && sameCreator && actor.role !== "admin") {
+    throw new Error("Người tạo bài không được tự phê duyệt hoặc tự xuất bản bài.");
+  }
+
+  const now = new Date().toISOString();
+  workflow.status = nextStatus;
+  workflow.updatedBy = cleanActor;
+  workflow.revisionHistory = Array.isArray(workflow.revisionHistory) ? workflow.revisionHistory : [];
+  workflow.revisionHistory.push({ status: nextStatus, actor: cleanActor, username: actorUsername, at: now, note });
+  if (nextStatus === "REVIEW") {
+    workflow.reviewedBy = cleanActor;
+    workflow.reviewedUsername = actorUsername;
+    workflow.reviewedAt = now;
+  }
+  if (nextStatus === "APPROVED") {
+    workflow.approvedBy = cleanActor;
+    workflow.approvedUsername = actorUsername;
+    workflow.approvedAt = now;
+  }
+  if (nextStatus === "PUBLISHED") {
+    if (!workflow.approvedBy || !workflow.approvedAt) throw new Error("Bài chưa có thông tin phê duyệt hợp lệ.");
+    workflow.publishedBy = cleanActor;
+    workflow.publishedUsername = actorUsername;
+    workflow.publishedAt = now;
+  }
+  data.workflow = workflow;
+  fs.writeFileSync(contentPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+  pending.workflowStatus = nextStatus;
+  pending.updatedBy = cleanActor;
+  pending.reviewedBy = workflow.reviewedBy || "";
+  pending.approvedBy = workflow.approvedBy || "";
+  pending.publishedBy = workflow.publishedBy || "";
+  savePending();
+  return data;
+}
+
+function submitPendingReview(actor) {
+  if (!pending) throw new Error("Chưa có bản nháp để gửi duyệt.");
+  return transitionPendingWorkflow("REVIEW", actor, "Biên tập, rà soát và gửi bài để phê duyệt");
+}
+
+function approvePending(actor) {
+  if (!pending) throw new Error("Chưa có bài đang chờ duyệt.");
+  return transitionPendingWorkflow("APPROVED", actor, "Phê duyệt nội dung để xuất bản");
+}
+
+function transitionPendingWorkflow(nextStatus, actor, note) {
+  const contentPath = pendingContentPath();
+  const originalContent = fs.readFileSync(contentPath, "utf8");
+  const originalPending = { ...pending };
+  try {
+    updatePendingWorkflow(nextStatus, actor, note);
+    buildAndCheck({ includeUnpublished: true });
+    return pending;
+  } catch (error) {
+    fs.writeFileSync(contentPath, originalContent, "utf8");
+    pending = originalPending;
+    savePending();
+    try { buildAndCheck({ includeUnpublished: true }); } catch (_) {}
+    throw error;
+  }
+}
+
+function publishPending(actor) {
   if (!pending) throw new Error("Chưa có bài nào đã lưu và kiểm tra để đăng.");
   const branch = gitOutput(["branch", "--show-current"]);
   if (branch !== "main") throw new Error(`Đang ở nhánh ${branch || "không xác định"}; chỉ cho phép đăng từ nhánh main.`);
 
   if (!pending.committed) {
+    if (pending.workflowStatus !== "APPROVED") throw new Error("Bài phải được người khác phê duyệt trước khi xuất bản.");
     const ahead = Number(gitOutput(["rev-list", "--count", "@{upstream}..HEAD"]) || "0");
     if (ahead > 0) throw new Error(`Đang có ${ahead} commit cũ chưa đẩy lên GitHub. Hãy xử lý các commit đó trước để trình đăng bài không đẩy kèm thay đổi ngoài ý muốn.`);
     const stagedBefore = gitOutput(["diff", "--cached", "--name-only"]);
     if (stagedBefore) throw new Error("Git đang có tệp được stage từ trước. Hãy commit hoặc bỏ stage các tệp đó rồi thử lại để tránh đăng nhầm.");
-    gitOutput(["add", "--", ...pending.paths]);
-    const staged = gitOutput(["diff", "--cached", "--name-only"]).split(/\r?\n/).filter(Boolean);
-    const allowed = new Set(pending.paths.map((item) => item.replace(/\\/g, "/")));
-    const unexpected = staged.filter((item) => !allowed.has(item.replace(/\\/g, "/")));
-    if (unexpected.length) throw new Error(`Phát hiện tệp ngoài bài đăng trong vùng stage: ${unexpected.join(", ")}`);
-    const commit = run("git", ["commit", "-m", `Đăng bài: ${pending.title}`]);
-    if (commit.status !== 0) throw new Error((commit.stderr || commit.stdout || "Không tạo được commit.").trim());
-    pending.committed = true;
+
+    const contentPath = pendingContentPath();
+    const originalContent = fs.readFileSync(contentPath, "utf8");
+    const originalPending = { ...pending };
+    try {
+      updatePendingWorkflow("PUBLISHED", actor, "Xuất bản lên website");
+      buildAndCheck();
+      gitOutput(["add", "--", ...pending.paths]);
+      const staged = gitOutput(["diff", "--cached", "--name-only"]).split(/\r?\n/).filter(Boolean);
+      const allowed = new Set(pending.paths.map((item) => item.replace(/\\/g, "/")));
+      const unexpected = staged.filter((item) => !allowed.has(item.replace(/\\/g, "/")));
+      if (unexpected.length) throw new Error(`Phát hiện tệp ngoài bài đăng trong vùng stage: ${unexpected.join(", ")}`);
+      const commit = run("git", ["commit", "-m", `Đăng bài: ${pending.title}`]);
+      if (commit.status !== 0) throw new Error((commit.stderr || commit.stdout || "Không tạo được commit.").trim());
+      pending.committed = true;
+      savePending();
+    } catch (error) {
+      run("git", ["restore", "--staged", "--", ...originalPending.paths]);
+      fs.writeFileSync(contentPath, originalContent, "utf8");
+      pending = originalPending;
+      savePending();
+      try { buildAndCheck({ includeUnpublished: true }); } catch (_) {}
+      throw error;
+    }
+  } else if (pending.workflowStatus !== "PUBLISHED") {
+    throw new Error("Trạng thái bài đã commit không hợp lệ; cần kiểm tra thủ công trước khi đẩy.");
   }
 
   const push = run("git", ["push", "origin", "main"]);
   if (push.status !== 0) throw new Error(`Đã tạo commit nhưng chưa đẩy được lên GitHub:\n${push.stderr || push.stdout}\nBạn có thể bấm Đăng lại sau khi xử lý kết nối.`);
   const result = { url: pending.url, title: pending.title, slug: pending.slug };
   pending = null;
+  savePending();
   return result;
+}
+
+function approveAndPublish(actor) {
+  if (!pending) throw new Error("Chưa có bài đang chờ thẩm định.");
+  if (pending.workflowStatus === "REVIEW") approvePending(actor);
+  if (["APPROVED", "PUBLISHED"].includes(pending.workflowStatus)) return publishPending(actor);
+  throw new Error("Bài chưa được gửi tới bước thẩm định.");
 }
 
 function discardPending() {
@@ -315,29 +623,124 @@ function discardPending() {
   if (pending.committed) throw new Error("Bài đã được commit nên không thể hủy tự động. Hãy đẩy lại lên GitHub hoặc xử lý bằng Git.");
   pending.paths.forEach((rel) => fs.rmSync(path.join(root, rel), { force: true }));
   pending = null;
+  savePending();
   buildAndCheck();
 }
 
 async function route(req, res) {
   const requestUrl = new URL(req.url, `http://${host}`);
   try {
+    if (requestUrl.pathname === "/api/login" && req.method === "POST") {
+      login(req, res, await readJson(req));
+      return;
+    }
+    if (requestUrl.pathname === "/api/logout" && req.method === "POST") {
+      logout(req, res);
+      return;
+    }
+
+    if (requestUrl.pathname === "/admin/login" || requestUrl.pathname === "/admin/login/") {
+      if (sessionFor(req)) redirect(res, "/admin");
+      else sendFile(res, path.join(uiDir, "login.html"));
+      return;
+    }
+    if (["/admin/login.css", "/admin/login.js"].includes(requestUrl.pathname)) {
+      sendFile(res, path.join(uiDir, path.basename(requestUrl.pathname)));
+      return;
+    }
+
+    if (requestUrl.pathname === "/" || requestUrl.pathname === "/admin/") {
+      redirect(res, "/admin");
+      return;
+    }
+    if (requestUrl.pathname === "/admin" && !sessionFor(req)) {
+      redirect(res, "/admin/login");
+      return;
+    }
+
+    const session = requireSession(req);
     if (requestUrl.pathname === "/api/config" && req.method === "GET") {
-      sendJson(res, 200, { token, siteUrl, pending, maxImages, maxImageBytes, imageOptimization });
+      sendJson(res, 200, {
+        ok: true,
+        ...sessionPayload(session),
+        siteUrl,
+        pending: publicPending(pending),
+        maxImages,
+        maxImageBytes,
+        imageOptimization,
+      });
+      return;
+    }
+    if (requestUrl.pathname === "/api/change-password" && req.method === "POST") {
+      assertCsrf(req, session);
+      const input = await readJson(req);
+      session.user = authStore.changePassword(session.user.username, input.currentPassword, input.newPassword);
+      sendJson(res, 200, { ok: true, ...sessionPayload(session) });
+      return;
+    }
+    if (session.user.mustChangePassword) throw new HttpError(403, "Bạn phải đổi mật khẩu tạm trước khi sử dụng cổng biên tập.");
+    if (requestUrl.pathname === "/api/users" && req.method === "GET") {
+      requirePermission(session, "manage-users");
+      sendJson(res, 200, { ok: true, users: authStore.listUsers() });
+      return;
+    }
+    if (requestUrl.pathname === "/api/users/update" && req.method === "POST") {
+      requirePermission(session, "manage-users");
+      assertCsrf(req, session);
+      const input = await readJson(req);
+      const user = authStore.updateUser(input.username, input);
+      invalidateUserSessions(user.username, user.username === session.user.username ? session.id : "");
+      if (user.username === session.user.username) session.user = user;
+      sendJson(res, 200, { ok: true, user });
+      return;
+    }
+    if (requestUrl.pathname === "/api/users/reset-password" && req.method === "POST") {
+      requirePermission(session, "manage-users");
+      assertCsrf(req, session);
+      const input = await readJson(req);
+      if (String(input.username || "").toLowerCase() === session.user.username) throw new Error("Hãy dùng chức năng Đổi mật khẩu để đổi mật khẩu của chính bạn.");
+      const user = authStore.resetPassword(input.username, input.newPassword);
+      invalidateUserSessions(user.username);
+      sendJson(res, 200, { ok: true, user });
       return;
     }
     if (requestUrl.pathname === "/api/create" && req.method === "POST") {
-      assertToken(req);
+      requirePermission(session, "create");
+      assertCsrf(req, session);
       const input = await readJson(req);
-      sendJson(res, 200, { ok: true, post: createPost(input) });
+      sendJson(res, 200, { ok: true, post: publicPending(createPost(input, session.user)) });
       return;
     }
     if (requestUrl.pathname === "/api/publish" && req.method === "POST") {
-      assertToken(req);
-      sendJson(res, 200, { ok: true, post: publishPending() });
+      requirePermission(session, "publish");
+      assertCsrf(req, session);
+      sendJson(res, 200, { ok: true, post: publishPending(session.user) });
+      return;
+    }
+    if (requestUrl.pathname === "/api/review" && req.method === "POST") {
+      requirePermission(session, "submit");
+      assertCsrf(req, session);
+      if (session.user.role !== "admin" && pending?.createdUsername !== session.user.username) throw new HttpError(403, "Chỉ người tạo bài hoặc quản trị viên được gửi bài này đi duyệt.");
+      sendJson(res, 200, { ok: true, post: publicPending(submitPendingReview(session.user)) });
+      return;
+    }
+    if (requestUrl.pathname === "/api/approve" && req.method === "POST") {
+      requirePermission(session, "approve");
+      assertCsrf(req, session);
+      sendJson(res, 200, { ok: true, post: publicPending(approvePending(session.user)) });
+      return;
+    }
+    if (requestUrl.pathname === "/api/approve-publish" && req.method === "POST") {
+      requirePermission(session, "approve");
+      requirePermission(session, "publish");
+      assertCsrf(req, session);
+      sendJson(res, 200, { ok: true, post: approveAndPublish(session.user) });
       return;
     }
     if (requestUrl.pathname === "/api/discard" && req.method === "POST") {
-      assertToken(req);
+      requirePermission(session, "discard");
+      assertCsrf(req, session);
+      if (session.user.role !== "admin" && pending?.createdUsername !== session.user.username) throw new HttpError(403, "Bạn không thể hủy bài của tài khoản khác.");
       discardPending();
       sendJson(res, 200, { ok: true });
       return;
@@ -369,12 +772,16 @@ async function route(req, res) {
       return;
     }
 
-    const uiPath = requestUrl.pathname === "/" ? "index.html" : requestUrl.pathname;
+    if (requestUrl.pathname === "/admin") {
+      sendFile(res, path.join(uiDir, "index.html"));
+      return;
+    }
+    const uiPath = requestUrl.pathname.replace(/^\/admin\//, "/");
     const file = safeJoin(uiDir, uiPath);
     if (!file) throw new Error("Đường dẫn giao diện không hợp lệ.");
     sendFile(res, file);
   } catch (error) {
-    sendJson(res, 400, { ok: false, error: error.message || "Có lỗi không xác định." });
+    sendJson(res, error.status || 400, { ok: false, error: error.message || "Có lỗi không xác định." });
   }
 }
 
@@ -382,16 +789,25 @@ function openBrowser(url) {
   if (process.platform === "win32") spawn("cmd.exe", ["/c", "start", "", url], { detached: true, stdio: "ignore", windowsHide: true }).unref();
 }
 
+const initialCredentials = authStore.initialize();
+pending = loadPending();
 const server = http.createServer(route);
-server.listen(0, host, () => {
+const requestedPort = Math.round(envNumber("PUBLISHER_PORT", 0, 0, 65_535));
+server.listen(requestedPort, host, () => {
   const address = server.address();
-  const url = `http://${host}:${address.port}/`;
+  const url = `http://${host}:${address.port}/admin`;
   console.log("============================================================");
-  console.log("  TRÌNH ĐĂNG BÀI — CẨM NANG AN TOÀN SỐ");
+  console.log("  CỔNG BIÊN TẬP NỘI BỘ — CẨM NANG AN TOÀN SỐ");
   console.log("============================================================");
   console.log(`Đang chạy tại: ${url}`);
   console.log("Chỉ truy cập từ máy này. Đóng cửa sổ này để tắt trình đăng bài.");
-  openBrowser(url);
+  if (initialCredentials.length) {
+    console.log("");
+    console.log("MẬT KHẨU TẠM — CHỈ HIỂN THỊ LẦN ĐẦU:");
+    initialCredentials.forEach((item) => console.log(`  ${item.username.padEnd(8)} : ${item.password}`));
+    console.log("Đăng nhập và đổi mật khẩu ngay. Hệ thống chỉ lưu bản băm, không lưu các mật khẩu trên.");
+  }
+  if (process.env.PUBLISHER_NO_BROWSER !== "1") openBrowser(url);
 });
 
 server.on("error", (error) => {

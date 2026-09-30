@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Đăng bài · Cẩm nang An toàn số</title>
-  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/admin/app.css">
 </head>
 <body>
   <div class="app-shell">
@@ -12,22 +12,28 @@
       <div class="brand-mark" aria-hidden="true">AT</div>
       <div class="brand-copy">
         <strong>TRÌNH ĐĂNG BÀI</strong>
-        <span>Cẩm nang An toàn số · Chỉ chạy trên máy này</span>
+        <span>Cẩm nang An toàn số · Khu vực quản trị bảo mật</span>
       </div>
-      <div class="secure-chip"><span></span> Kết nối cục bộ an toàn</div>
+      <div class="session-tools">
+        <div class="secure-chip"><span></span> <b id="session-user">Đang xác thực…</b></div>
+        <button id="change-password-open" class="topbar-button" type="button">Đổi mật khẩu</button>
+        <button id="manage-users-open" class="topbar-button" type="button" hidden>Quản lý tài khoản</button>
+        <button id="logout-button" class="topbar-button danger-text" type="button">Đăng xuất</button>
+      </div>
     </header>
 
     <main>
       <section class="hero-panel">
         <div>
-          <p class="eyebrow">MỘT LẦN NHẬP · TỰ ĐỘNG KIỂM TRA · CÓ LINK RIÊNG</p>
-          <h1>Tạo bài mới thật nhanh</h1>
-          <p>Chọn ảnh, xem trước, kiểm tra toàn bộ website rồi đăng lên Cloudflare Pages.</p>
+          <p class="eyebrow">SOẠN THẢO · XEM TRƯỚC · THẨM ĐỊNH · XUẤT BẢN</p>
+          <h1>Cổng biên tập nội bộ</h1>
+          <p>Soạn bài như Word, chèn ảnh đúng vị trí và chuyển người có thẩm quyền duyệt trước khi đăng.</p>
         </div>
         <ol class="progress" aria-label="Các bước đăng bài">
           <li class="active" data-step="1"><b>1</b><span>Soạn bài</span></li>
-          <li data-step="2"><b>2</b><span>Ảnh & xem trước</span></li>
-          <li data-step="3"><b>3</b><span>Kiểm tra & đăng</span></li>
+          <li data-step="2"><b>2</b><span>Ảnh & trình bày</span></li>
+          <li data-step="3"><b>3</b><span>Gửi thẩm định</span></li>
+          <li data-step="4"><b>4</b><span>Duyệt & đăng</span></li>
         </ol>
       </section>
 
@@ -35,7 +41,7 @@
         <div><strong>Đang có một bài chờ đăng</strong><span id="pending-title"></span></div>
         <div class="pending-actions">
           <a id="pending-preview" class="button ghost" target="_blank">Xem trước</a>
-          <button id="pending-publish" class="button primary" type="button">Đăng ngay</button>
+          <button id="pending-publish" class="button primary" type="button">Tiếp tục quy trình</button>
           <button id="pending-discard" class="button danger" type="button">Hủy bản này</button>
         </div>
       </div>
@@ -69,6 +75,7 @@
               </div>
               <div class="form-grid">
                 <label class="field full"><span>Tiêu đề *</span><input id="title" name="title" maxlength="180" required placeholder="Ví dụ: Tuyên truyền kỹ năng sử dụng dịch vụ công trực tuyến an toàn"></label>
+                <label class="field"><span>Tác giả *</span><input id="author" name="author" readonly aria-readonly="true"></label>
                 <label class="field"><span>Ngày đăng *</span><input id="date" name="date" type="date" required></label>
                 <label id="placement-field" class="field"><span>Vị trí hiển thị *</span><select id="placement" name="placement" required>
                   <option value="timeline">Dòng thời gian Tuyên truyền</option>
@@ -85,7 +92,36 @@
                 <label id="series-field" class="field" hidden><span>Tên chuỗi kỹ năng</span><input id="series" name="series" maxlength="160" placeholder="Ví dụ: Kỹ năng chuyển đổi số cho công dân"></label>
                 <label id="order-field" class="field" hidden><span>Thứ tự trong chuỗi</span><input id="order" name="order" type="number" min="1" max="999" placeholder="1"></label>
                 <label class="field full"><span>Tóm tắt *</span><textarea id="summary" name="summary" maxlength="320" rows="3" required placeholder="Hai đến ba câu ngắn giúp người đọc hiểu ngay bài viết nói về điều gì."></textarea><small><b id="summary-count">0</b>/320 ký tự</small></label>
-                <label class="field full"><span>Nội dung chi tiết *</span><textarea id="body" name="body" maxlength="30000" rows="13" required placeholder="Viết nội dung bài tại đây. Có thể dùng **chữ đậm**, *chữ nghiêng*, dòng bắt đầu bằng - để tạo danh sách, và ## để tạo tiêu đề phụ."></textarea><small>Hỗ trợ Markdown cơ bản: <code>**đậm**</code>, <code>*nghiêng*</code>, <code>- danh sách</code>, <code>## tiêu đề</code>.</small></label>
+                <div class="field full">
+                  <span>Nội dung chi tiết *</span>
+                  <div class="rich-editor-shell">
+                    <div class="editor-toolbar" role="toolbar" aria-label="Công cụ định dạng bài viết">
+                      <label class="toolbar-select"><span class="sr-only">Kiểu đoạn</span><select id="block-format" aria-label="Kiểu đoạn"><option value="p">Đoạn thường</option><option value="h2">Tiêu đề mục</option><option value="h3">Tiêu đề nhỏ</option><option value="blockquote">Trích dẫn</option></select></label>
+                      <span class="toolbar-separator"></span>
+                      <button type="button" data-command="bold" title="In đậm"><b>B</b></button>
+                      <button type="button" data-command="italic" title="In nghiêng"><i>I</i></button>
+                      <button type="button" data-command="underline" title="Gạch chân"><u>U</u></button>
+                      <span class="toolbar-separator"></span>
+                      <button type="button" data-command="insertUnorderedList" title="Danh sách dấu đầu dòng">• Danh sách</button>
+                      <button type="button" data-command="insertOrderedList" title="Danh sách đánh số">1. Danh sách</button>
+                      <button type="button" data-action="link" title="Chèn liên kết">🔗 Liên kết</button>
+                      <span class="toolbar-separator"></span>
+                      <button type="button" data-command="justifyLeft" title="Căn trái">≡</button>
+                      <button type="button" data-command="justifyCenter" title="Căn giữa">≡</button>
+                      <button type="button" data-command="justifyRight" title="Căn phải">≡</button>
+                      <button type="button" data-command="justifyFull" title="Căn đều">☰</button>
+                      <span class="toolbar-separator"></span>
+                      <button type="button" data-action="image" class="insert-image-button">＋ Ảnh trong bài</button>
+                      <button type="button" data-action="separator" title="Chèn đường phân cách">―</button>
+                      <button type="button" data-command="undo" title="Hoàn tác">↶</button>
+                      <button type="button" data-command="redo" title="Làm lại">↷</button>
+                      <button type="button" data-command="removeFormat" title="Xóa định dạng">Tx</button>
+                      <input id="inline-image-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+                    </div>
+                    <div id="body-editor" class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Nhập nội dung bài. Dùng thanh công cụ để định dạng và đặt con trỏ tại vị trí muốn chèn ảnh."><p><br></p></div>
+                  </div>
+                  <small>Ảnh chèn giữa bài có thể sửa chú thích trực tiếp. Chú thích khi xuất bản sẽ in nghiêng màu xanh lá.</small>
+                </div>
                 <details id="event-extra" class="advanced full">
                   <summary>Liên kết bổ sung (không bắt buộc)</summary>
                   <div class="form-grid nested">
@@ -99,13 +135,13 @@
             <article class="panel">
               <div class="panel-heading">
                 <span class="step-number">03</span>
-                <div><h2>Ảnh của bài</h2><p>Ảnh được tự xoay, tối ưu và kiểm tra trước khi đăng.</p></div>
+                <div><h2>Ảnh đại diện &amp; ảnh tư liệu cuối bài</h2><p>Ảnh đầu tiên là ảnh đại diện; các ảnh sau được đặt thành thư viện tư liệu ở cuối bài.</p></div>
               </div>
               <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Chọn ảnh">
                 <input id="image-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
                 <div class="upload-symbol">＋</div>
-                <strong>Kéo ảnh vào đây hoặc bấm để chọn</strong>
-                <span>JPG, PNG, WebP · Ảnh gốc tới 250 MB · Tối đa 15 ảnh · Ảnh đầu tiên là ảnh đại diện</span>
+                <strong>Kéo ảnh đại diện và ảnh tư liệu vào đây hoặc bấm để chọn</strong>
+                <span>JPG, PNG, WebP · Ảnh gốc tới 250 MB · Tổng tối đa 30 ảnh kể cả ảnh chèn giữa bài</span>
               </div>
               <div class="image-quality"><span>✓ Tự nén ảnh dung lượng lớn</span><span>✓ Tự xoay đúng chiều</span><span>✓ Thu nhỏ tối đa 1.920 px</span><span>✓ Giữ chất lượng nét</span><span>✓ Chuẩn hóa JPEG</span></div>
               <div id="image-list" class="image-list"></div>
@@ -122,11 +158,13 @@
                   <div id="preview-meta" class="preview-meta"></div>
                   <h2 id="preview-title">Tiêu đề bài viết sẽ hiện ở đây</h2>
                   <p id="preview-summary">Tóm tắt bài viết sẽ giúp người đọc quyết định mở bài.</p>
+                  <div id="preview-rich-body" class="preview-rich-body"><p>Nội dung được định dạng sẽ hiện tại đây.</p></div>
+                  <div id="preview-author" class="preview-author">Tác giả: —</div>
                   <span class="preview-link">Mở trang riêng để chia sẻ →</span>
                 </div>
               </article>
               <div class="url-preview"><span>Đường dẫn dự kiến</span><code id="slug-preview">/hoat-dong/ten-bai-viet/</code></div>
-              <div class="publish-note"><b>Không đăng ngay.</b> Nút bên dưới chỉ lưu và chạy kiểm tra. Bạn vẫn được xem trước lần cuối trước khi đẩy lên website.</div>
+              <div class="publish-note"><b>Không đăng ngay.</b> Bài được lưu ở trạng thái bản nháp, sau đó phải gửi duyệt và được một người khác phê duyệt trước khi xuất bản.</div>
               <button id="save-button" class="button primary large" type="submit"><span>Lưu & kiểm tra toàn bộ</span><small>Chưa đưa lên Internet</small></button>
             </div>
           </aside>
@@ -138,17 +176,35 @@
         <div class="result-copy"><h2 id="result-title">Bài đã sẵn sàng</h2><p id="result-message"></p><code id="result-url"></code></div>
         <div class="result-actions">
           <a id="result-preview" class="button ghost" target="_blank">Xem trước đầy đủ</a>
-          <button id="publish-button" class="button primary" type="button">Đăng lên website</button>
+          <button id="review-button" class="button primary" type="button">Gửi thẩm định</button>
+          <button id="approve-publish-button" class="button primary" type="button" hidden>Duyệt và đăng bài</button>
+          <button id="publish-button" class="button primary" type="button" hidden>Đẩy lại lên website</button>
           <button id="copy-button" class="button ghost" type="button" hidden>Sao chép liên kết</button>
         </div>
       </section>
+
+      <section id="user-management" class="panel user-management" hidden>
+        <div class="panel-heading"><span class="step-number">ADMIN</span><div><h2>Quản lý tài khoản</h2><p>Phân quyền, khóa tài khoản và đặt lại mật khẩu tạm.</p></div></div>
+        <div id="user-list" class="user-list"></div>
+      </section>
     </main>
+  </div>
+
+  <div id="password-modal" class="admin-modal" hidden>
+    <form id="password-form" class="admin-dialog">
+      <h2 id="password-modal-title">Đổi mật khẩu</h2>
+      <p id="password-modal-note">Mật khẩu mới cần ít nhất 12 ký tự, có chữ hoa, chữ thường và chữ số.</p>
+      <label id="current-password-field" class="field"><span>Mật khẩu hiện tại</span><input id="current-password" type="password" autocomplete="current-password"></label>
+      <label class="field"><span>Mật khẩu mới</span><input id="new-password" type="password" autocomplete="new-password" minlength="12" required></label>
+      <label class="field"><span>Nhập lại mật khẩu mới</span><input id="confirm-password" type="password" autocomplete="new-password" minlength="12" required></label>
+      <div class="dialog-actions"><button id="password-cancel" type="button" class="button ghost">Hủy</button><button type="submit" class="button primary">Lưu mật khẩu</button></div>
+    </form>
   </div>
 
   <div id="busy-overlay" class="busy-overlay" hidden>
     <div class="busy-box"><div class="spinner"></div><h2 id="busy-title">Đang xử lý ảnh…</h2><p id="busy-message">Vui lòng không đóng cửa sổ.</p></div>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="/app.js" defer></script>
+  <script src="/admin/app.js" defer></script>
 </body>
 </html>

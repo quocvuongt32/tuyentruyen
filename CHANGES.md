@@ -1,46 +1,52 @@
-# Các thay đổi chuẩn hóa website
+# Báo cáo rà soát website
 
-Ngày thực hiện: 24/9/2026
+Ngày thực hiện: 30/9/2026
 
-## Tin tức và nội dung nguồn ngoài
+## 1. Chức năng tổng hợp tin đã gỡ
 
-- Khối trang chủ dùng nhãn “Tổng hợp tin tức hàng ngày” và hiển thị đúng 4 tin từ Cục A05 - Bộ Công an và Học viện CSND.
-- Các chuyên mục Chuyển đổi số, Đổi mới sáng tạo, Nghiên cứu khoa học chỉ giữ 4–6 bản tóm tắt có tên nguồn và liên kết bài gốc.
-- Tin nguồn ngoài không còn tạo hoặc dẫn tới trang bài riêng của website.
-- Chân trang nêu rõ phạm vi phục vụ trong và ngoài Học viện, tư cách sản phẩm dự thi và trạng thái đang hoàn thiện thủ tục công nhận.
+- Gỡ khối “Tổng hợp tin tức hàng ngày”, dải tin thời sự và bảng tin góc màn hình.
+- Gỡ 12 bản tóm tắt bài ngoài ở các mục Chuyển đổi số, Đổi mới sáng tạo và Nghiên cứu khoa học.
+- Gỡ 5 thẻ bài tham khảo ngoài khỏi Bộ kỹ năng.
+- Thay bằng khu vực **Nguồn thông tin chính thống** gồm liên kết tĩnh cấp cơ quan.
+- Không hiển thị tiêu đề bài, ảnh đại diện, đoạn dẫn, ngày đăng hoặc tác giả từ nguồn ngoài.
 
-## Nhận diện chính thức
+## 2. API, RSS, crawler và job đã gỡ
 
-- Dùng thống nhất tên: “Trang thông tin điện tử Cẩm nang An toàn số - Khoa Toán - Tin học và Ứng dụng KHCN trong PCTP, Học viện Cảnh sát nhân dân”.
-- Trang bài riêng sử dụng `img/badge.png`, ghi “Của Khoa KTT, Học viện CSND”.
-- Footer công bố đúng đơn vị quản lý, Thượng tá Phạm Thị Ngân phụ trách quản lý nội dung và Đại úy Nguyễn Quốc Vương quản trị kỹ thuật.
-- `content/site.json` có hai trường `decisionNumber`, `decisionDate`. Khi chưa có số quyết định thật, nội dung này để trống và không hiển thị.
+- Xóa Pages Function `/api/quick-news`.
+- Xóa script `scripts/build-ticker.js` và dữ liệu dự phòng đi kèm.
+- Xóa toàn bộ bộ đọc/phân tích trang chuyên mục Học viện trong `scripts/build-events.js`.
+- Loại bước tạo dữ liệu tin ngoài khỏi `scripts/build-public.js`.
+- Thu hẹp CSP, bỏ quyền tải ảnh từ CDN Học viện và bỏ kết nối thời tiết ngoài.
+- Build công khai chỉ sao chép bốn tệp dữ liệu nội bộ đã xác định, không sao chép tệp dữ liệu cũ còn sót.
 
-## Bảo vệ dữ liệu cá nhân
+## 3. Cụm từ và định danh đã chỉnh
 
-- Xóa form đăng ký bản tin, form góp ý có trường email, endpoint `/api/newsletter/subscribe` và toàn bộ mã gửi bản tin Resend cũ.
-- Xóa khóa Web3Forms từng được nhúng công khai trong HTML.
-- Trang Liên hệ chỉ công bố đầu mối; không còn biểu mẫu thu thập họ tên hoặc email.
-- Thêm các trang Chính sách bảo vệ dữ liệu cá nhân, Điều khoản sử dụng, Bản quyền và nguồn tin, Liên hệ.
+- Dùng định danh “Website chuyên đề Cẩm nang An toàn số”.
+- “Tin chuyên đề và hoạt động” đổi thành “Hoạt động của Khoa”.
+- “Bản quyền và nguồn tin” đổi thành “Bản quyền và nguồn thông tin”.
+- Chân trang cấu hình rõ cơ quan chủ quản, đơn vị quản lý, tên website, người phụ trách nội dung,
+  quản trị kỹ thuật, địa chỉ, email và điện thoại công vụ.
+- Câu định danh pháp lý cuối chân trang chỉ hiển thị khi `legalDisclaimerApproved` được bật sau phê duyệt.
 
-## An toàn hệ thống
+## 4. Miền ngoài còn liên kết hoặc kết nối
 
-- CSP không còn cho phép kết nối Web3Forms; bổ sung `base-uri`, `object-src`, `form-action` và `upgrade-insecure-requests`.
-- Bổ sung `Cross-Origin-Opener-Policy`, `Cross-Origin-Resource-Policy`, `X-Permitted-Cross-Domain-Policies` và chặn lập chỉ mục khu vực quản trị/xem trước.
-- Build check xác nhận không còn form/endpoint thu thập email và kiểm tra nhận diện trên trang bài riêng.
+- Không có miền phân tích, bộ đếm truy cập hoặc nguồn tin nào được tự động kết nối.
+- Chỉ tải khi bài có video được biên tập viên khai báo: `youtube-nocookie.com`.
+- Chỉ mở khi người dùng bấm: các cổng chính thống và liên kết tham khảo cuối bài.
+- Không còn miền ngoài nào được máy chủ hoặc trình duyệt gọi để lấy nội dung biên tập rồi đăng lại.
 
-## Ảnh hưởng dữ liệu, route và biến môi trường
+## Quy trình biên tập
 
-- Không migration và không xóa nội dung bài viết/media.
-- Route mới: `/privacy/`, `/terms/`, `/nguon-tin/`, `/contact/`.
-- Các biến `RESEND_API_KEY`, `RESEND_SEGMENT_ID`, `NEWSLETTER_FROM` không còn được mã nguồn sử dụng và nên xóa khỏi cấu hình Cloudflare sau khi xác nhận không còn hệ thống khác dùng chung.
-
-## Rollback
-
-- Có thể hoàn tác bằng Git về commit trước thay đổi này.
-- Nếu chỉ cần khôi phục giao diện nhận diện, hoàn tác `index.html`, `scripts/build-pages.js`, `css/article.css`, `css/forms.css` và `content/site.json`.
-- Không khôi phục chức năng thu thập email nếu chưa có phê duyệt, thông báo quyền riêng tư, thời hạn lưu trữ, cơ chế xóa dữ liệu và biện pháp chống lạm dụng phù hợp.
-
-## Hạng mục cần quyết định riêng
-
-Repository hiện là website tĩnh, không có cơ sở dữ liệu hoặc hệ thống định danh người dùng. Workflow nhiều vai trò, trạng thái duyệt, audit log và metadata kiểm tra media theo tài liệu yêu cầu cần một thiết kế CMS có xác thực/ủy quyền riêng; không được giả lập bằng trường ẩn phía trình duyệt.
+- Bài mới đi qua `DRAFT → REVIEW → APPROVED → PUBLISHED`.
+- Thêm cổng cục bộ `/admin` với ba tài khoản `admin`, `nganpt`, `vuongnq`; mật khẩu
+  tạm chỉ hiện ở lần khởi tạo đầu và bắt buộc đổi khi đăng nhập.
+- `nganpt` được gắn tên Thượng tá Phạm Thị Ngân và có quyền thẩm định, duyệt và đăng;
+  `vuongnq` có quyền soạn và gửi duyệt; `admin` có toàn quyền theo yêu cầu vận hành.
+- Người tạo bài thông thường không thể tự phê duyệt hoặc tự xuất bản; admin là ngoại lệ.
+- Bổ sung giao diện soạn thảo gần giống Word, ảnh chen giữa các khối, chú thích ảnh,
+  ảnh tư liệu cuối bài và tên tác giả ở cuối trang.
+- Chuyển `/admin` sang cổng trực tuyến dùng Cloudflare Pages Functions, D1 và KV;
+  mật khẩu được băm, ảnh bản thảo không công khai trước khi duyệt.
+- Bản chưa xuất bản bị loại khỏi build công khai nhưng vẫn có thể xem trước tại máy.
+- Metadata lưu người tạo, người biên tập/rà soát, người cập nhật, người phê duyệt,
+  người xuất bản, các mốc thời gian, lịch sử phiên bản và tài liệu tham khảo.

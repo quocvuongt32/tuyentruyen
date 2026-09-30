@@ -176,7 +176,6 @@ function setupBanner(featured) {
       if (item.eventSlug) {
         e.preventDefault();
         openEventCard(item.eventSlug);
-        trackEvent(`/banner/${item.eventSlug}`, item.eventTitle);
       }
     });
 
