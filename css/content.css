@@ -244,6 +244,74 @@
 
 /* ---------- Timeline section ---------- */
 
+.timeline-section .section-inner {
+  max-width: 1180px;
+}
+
+.timeline-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 34px;
+  align-items: start;
+}
+
+.timeline-main { min-width: 0; }
+
+.popular-sidebar {
+  position: sticky;
+  top: calc(var(--header-brand-h) + var(--header-h) + 20px);
+  padding: 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--gold);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+.popular-kicker {
+  margin: 0 0 5px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.popular-sidebar h2 {
+  margin-bottom: 16px;
+  font-size: 1.25rem;
+}
+
+.popular-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.popular-list li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  padding: 13px 0;
+  border-top: 1px solid var(--border);
+}
+
+.popular-list li:first-child { border-top: 0; padding-top: 0; }
+
+.popular-rank {
+  color: var(--gold);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.popular-copy { display: grid; gap: 4px; }
+.popular-copy a { font-size: 0.84rem; font-weight: 700; line-height: 1.4; text-decoration: none; }
+.popular-copy a:hover, .popular-copy a:focus-visible { color: var(--accent); text-decoration: underline; }
+.popular-copy small { color: var(--text-dim); font-size: 0.7rem; }
+.popular-list .popular-empty { display: block; color: var(--text-dim); font-size: 0.8rem; }
+
 .timeline-section h2 {
   margin: 0 0 6px;
   font-size: 1.5rem;
@@ -677,6 +745,11 @@
 @media (max-width: 640px) {
   .activity-modal { padding: 0; }
   .activity-modal-box { max-width: none; max-height: 100vh; height: 100vh; border-radius: 0; }
+}
+
+@media (max-width: 900px) {
+  .timeline-layout { grid-template-columns: 1fr; }
+  .popular-sidebar { position: static; order: -1; }
 }
 
 .activity-summary {

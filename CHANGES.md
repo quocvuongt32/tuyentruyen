@@ -7,7 +7,8 @@ Ngày thực hiện: 30/9/2026
 - Gỡ khối “Tổng hợp tin tức hàng ngày”, dải tin thời sự và bảng tin góc màn hình.
 - Gỡ 12 bản tóm tắt bài ngoài ở các mục Chuyển đổi số, Đổi mới sáng tạo và Nghiên cứu khoa học.
 - Gỡ 5 thẻ bài tham khảo ngoài khỏi Bộ kỹ năng.
-- Thay bằng khu vực **Nguồn thông tin chính thống** gồm liên kết tĩnh cấp cơ quan.
+- Thay bằng khu vực **Cổng thông tin và nguồn tham khảo** gồm đúng ba liên kết tĩnh:
+  Bộ Công an, Cục A05 và Học viện CSND.
 - Không hiển thị tiêu đề bài, ảnh đại diện, đoạn dẫn, ngày đăng hoặc tác giả từ nguồn ngoài.
 
 ## 2. API, RSS, crawler và job đã gỡ
@@ -30,7 +31,9 @@ Ngày thực hiện: 30/9/2026
 
 ## 4. Miền ngoài còn liên kết hoặc kết nối
 
-- Không có miền phân tích, bộ đếm truy cập hoặc nguồn tin nào được tự động kết nối.
+- Không có miền phân tích, bộ đếm truy cập hoặc nguồn tin ngoài nào được tự động kết nối.
+- Lượt truy cập và lượt xem bài được thống kê nội bộ bằng Cloudflare D1, không gửi
+  dữ liệu sang dịch vụ phân tích bên thứ ba.
 - Chỉ tải khi bài có video được biên tập viên khai báo: `youtube-nocookie.com`.
 - Chỉ mở khi người dùng bấm: các cổng chính thống và liên kết tham khảo cuối bài.
 - Không còn miền ngoài nào được máy chủ hoặc trình duyệt gọi để lấy nội dung biên tập rồi đăng lại.
@@ -47,6 +50,8 @@ Ngày thực hiện: 30/9/2026
   ảnh tư liệu cuối bài và tên tác giả ở cuối trang.
 - Chuyển `/admin` sang cổng trực tuyến dùng Cloudflare Pages Functions, D1 và KV;
   mật khẩu được băm, ảnh bản thảo không công khai trước khi duyệt.
+- Bổ sung thống kê truy cập ẩn danh, cột bài xem nhiều và biểu mẫu gửi tin nhắn không
+  thu thập email; admin có quyền đọc, đánh dấu đã đọc và xóa tin nhắn.
 - Bản chưa xuất bản bị loại khỏi build công khai nhưng vẫn có thể xem trước tại máy.
 - Metadata lưu người tạo, người biên tập/rà soát, người cập nhật, người phê duyệt,
   người xuất bản, các mốc thời gian, lịch sử phiên bản và tài liệu tham khảo.

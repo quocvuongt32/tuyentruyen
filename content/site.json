@@ -6,7 +6,7 @@
   "nav": {
     "trangChu": "Trang chủ",
     "gioiThieu": "Giới thiệu",
-    "nguonChinhThong": "Nguồn chính thống",
+    "nguonChinhThong": "Nguồn tham khảo",
     "tuyenTruyen": "Tuyên truyền",
     "hoatDongKhac": "Hoạt động khác",
     "lienHe": "Liên hệ"
@@ -32,28 +32,16 @@
       "icon": "shield"
     },
     {
-      "name": "Cổng Thông tin điện tử Học viện CSND",
-      "description": "Thông tin chính thức về đào tạo, nghiên cứu khoa học và hoạt động của Học viện Cảnh sát nhân dân.",
-      "url": "https://hvcsnd.edu.vn/",
-      "icon": "academy"
-    },
-    {
       "name": "Cục An ninh mạng và phòng, chống tội phạm sử dụng công nghệ cao (A05)",
       "description": "Chuyên trang chính thức của Cục A05 trên Cổng Thông tin điện tử Bộ Công an.",
       "url": "https://bocongan.gov.vn/tag/1259",
       "icon": "cyber"
     },
     {
-      "name": "Truyền hình Công an nhân dân (ANTV)",
-      "description": "Kênh thông tin, tuyên truyền chính thức của lực lượng Công an nhân dân.",
-      "url": "https://antv.gov.vn/",
-      "icon": "broadcast"
-    },
-    {
-      "name": "Cổng Thông tin điện tử Chính phủ",
-      "description": "Thông tin chỉ đạo, điều hành và văn bản chính thức của Chính phủ.",
-      "url": "https://chinhphu.vn/",
-      "icon": "government"
+      "name": "Cổng Thông tin điện tử Học viện CSND",
+      "description": "Thông tin chính thức về đào tạo, nghiên cứu khoa học và hoạt động của Học viện Cảnh sát nhân dân.",
+      "url": "https://hvcsnd.edu.vn/",
+      "icon": "academy"
     }
   ],
   "footer": {

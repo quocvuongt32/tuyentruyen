@@ -5,7 +5,7 @@
 1. Truy cập `https://tuyentruyen.khoaktt.vn/admin` hoặc bấm đúp `Dang-bai.bat`.
 2. Trình duyệt mở cổng quản trị trực tuyến qua HTTPS.
 3. Đăng nhập bằng tài khoản được phân công.
-4. Ở lần chạy đầu, dùng mật khẩu tạm in trong cửa sổ BAT rồi đổi ngay khi hệ thống yêu cầu.
+4. Ở lần đăng nhập đầu, dùng mật khẩu tạm trong tệp quản trị cục bộ rồi đổi ngay khi hệ thống yêu cầu.
 
 Dữ liệu tài khoản và bài đang xử lý được lưu trên Cloudflare D1; ảnh được lưu ở kho
 KV riêng. Tệp mật khẩu tạm ban đầu chỉ lưu trong `.publisher/` tại máy quản trị,
@@ -19,9 +19,18 @@ không đưa lên Git và không xuất hiện trong `dist/`.
 | `nganpt` | Thượng tá Phạm Thị Ngân | Đọc bản chờ thẩm định, bấm **Duyệt và đăng bài** |
 | `vuongnq` | Đại úy Nguyễn Quốc Vương | Soạn bài, lưu bản nháp và gửi thẩm định |
 
-Admin có thể đổi họ tên, vai trò, trạng thái hoạt động và đặt mật khẩu tạm mới cho
-tài khoản khác trong mục **Quản lý tài khoản**. Hệ thống không cho tài khoản đang
+Admin có thể đổi họ tên, vai trò, trạng thái hoạt động, đặt mật khẩu tạm mới cho
+tài khoản khác và xử lý góp ý trong mục **Tin nhắn**. Hệ thống không cho tài khoản đang
 đăng nhập tự khóa hoặc tự đổi vai trò tại màn hình này.
+
+## Xử lý tin nhắn người đọc
+
+- Biểu mẫu cuối trang chủ chỉ nhận nội dung, không yêu cầu họ tên hoặc email.
+- Tin mới hiển thị huy hiệu số lượng ở nút **Tin nhắn** trong `/admin`.
+- Admin có thể đánh dấu đã đọc hoặc xóa vĩnh viễn; tin nhắn không tự xuất hiện trên
+  website công khai.
+- Không yêu cầu người đọc gửi bí mật nhà nước, dữ liệu nghiệp vụ hoặc dữ liệu cá nhân
+  qua biểu mẫu này.
 
 ## Soạn bài như Word
 

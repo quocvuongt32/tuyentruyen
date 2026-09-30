@@ -7,8 +7,9 @@ trong PCTP, Học viện Cảnh sát nhân dân. Phạm vi chính là cẩm nang
 hoạt động tuyên truyền, tài liệu giáo dục, infographic và nội dung chuyên môn do
 Khoa quản lý.
 
-Website không tự động nạp nội dung biên tập từ website ngoài. Danh mục nguồn chính
-thống trong `content/site.json` chỉ được dựng thành thẻ liên kết cấp cơ quan.
+Website không tự động nạp nội dung biên tập từ website ngoài. Danh mục nguồn tham
+khảo trong `content/site.json` chỉ gồm liên kết tĩnh tới Bộ Công an, Cục A05 và Học
+viện CSND.
 
 ## Luồng build
 
@@ -27,7 +28,7 @@ Không có bước nào gọi website bên ngoài để tạo nội dung công k
 
 - `content/events/`: hoạt động do Khoa quản lý.
 - `content/ky-nang/`: cẩm nang, kỹ năng và infographic.
-- `content/site.json`: nhận diện, menu, nguồn chính thống tĩnh và chân trang.
+- `content/site.json`: nhận diện, menu, ba nguồn tham khảo tĩnh và chân trang.
 - `content/gioi-thieu.json`: nội dung giới thiệu và căn cứ thực hiện.
 - `uploads/`, `img/`: ảnh nội bộ.
 
@@ -39,6 +40,10 @@ nội dung ở liên kết đó.
 `/admin` là cổng quản trị trực tuyến trên Cloudflare Pages Functions. Cổng dùng D1
 cho tài khoản/bài viết, KV cho ảnh, phiên đăng nhập, CSRF token và phân quyền phía
 máy chủ. Ba vai trò là `author`, `approver` và `admin`.
+
+D1 đồng thời lưu thống kê truy cập ẩn danh, tổng lượt xem theo bài và tin nhắn góp ý.
+Mã phiên do trình duyệt tạo và mã chống lạm dụng được băm một chiều trước khi lưu;
+hệ thống không đưa họ tên, email hoặc địa chỉ IP rõ vào các bảng thống kê và góp ý.
 
 Bài mới có đối tượng `workflow` gồm trạng thái, tên và tài khoản người tạo, người
 phê duyệt, người xuất bản, các mốc thời gian, lịch sử phiên bản và danh sách tài liệu
@@ -61,10 +66,13 @@ Máy chủ chỉ giữ một tập thẻ nội tuyến tối thiểu và chỉ c
 - Trang chủ và trang riêng của bài.
 - Cẩm nang/infographic và thư viện ảnh, video do Khoa nhập.
 - Kiểm tra kiến thức nhanh.
-- Liên kết nguồn chính thống cấp cơ quan.
+- Liên kết tham khảo tới Bộ Công an, Cục A05 và Học viện CSND.
+- Thống kê đang truy cập, hôm nay, tháng hiện tại và tổng lượt truy cập.
+- Danh sách bài xem nhiều nhất và biểu mẫu tin nhắn không yêu cầu email.
 - Trang giới thiệu, liên hệ, điều khoản, bảo vệ dữ liệu cá nhân, bản quyền và nguồn.
 
-Không có đăng ký thành viên, đăng bài cộng đồng, bình luận hoặc diễn đàn. `/admin`
+Không có đăng ký thành viên, đăng bài cộng đồng, bình luận hoặc diễn đàn. Tin nhắn
+góp ý không tự hiển thị công khai. `/admin`
 chỉ dành cho ba tài khoản được phân quyền; ảnh bản thảo không phục vụ cho người chưa
 đăng nhập và nội dung chỉ chuyển sang công khai sau bước duyệt.
 
@@ -74,4 +82,4 @@ chỉ dành cho ba tài khoản được phân quyền; ảnh bản thảo khôn
   trong bài.
 - Các miền trong `officialSources` và liên kết tham khảo: chỉ mở khi người dùng bấm.
 
-Website không dùng dịch vụ phân tích hoặc bộ đếm truy cập bên thứ ba.
+Website tự thống kê bằng D1 và không dùng dịch vụ phân tích hoặc bộ đếm truy cập bên thứ ba.

@@ -44,13 +44,26 @@ async function main() {
   assert.strictEqual(rejected.status, 401);
   const authorPassword = process.env.TEST_AUTHOR_PASSWORD || initialPassword("vuongnq");
   const approverPassword = process.env.TEST_APPROVER_PASSWORD || initialPassword("nganpt");
+  const adminPassword = process.env.TEST_ADMIN_PASSWORD || initialPassword("admin");
   const authorNext = process.env.TEST_AUTHOR_NEXT_PASSWORD || "AuthorCloudTest2026!";
   const approverNext = process.env.TEST_APPROVER_NEXT_PASSWORD || "ApproverCloudTest2026!";
+  const adminNext = process.env.TEST_ADMIN_NEXT_PASSWORD || "AdminCloudTest2026!";
   const author = await changeTemporaryPassword("vuongnq", authorPassword, authorNext);
   const approver = await changeTemporaryPassword("nganpt", approverPassword, approverNext);
+  const admin = await changeTemporaryPassword("admin", adminPassword, adminNext);
   const imagePath = process.env.TEST_IMAGE_PATH || path.join(root, "uploads", "banner-12.jpg");
   const dataUrl = `data:image/jpeg;base64,${fs.readFileSync(imagePath).toString("base64")}`;
   const idSuffix = Date.now().toString(36);
+  const visitorToken = `cloud-test-${idSuffix}-anonymous-visitor`;
+  const visit = await request("/api/analytics/visit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ visitorToken }) });
+  assert.strictEqual(visit.data.ok, true);
+  const feedbackContent = `Tin nhắn kiểm thử hệ thống ${idSuffix}`;
+  await request("/api/messages/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ visitorToken, content: feedbackContent, website: "" }) });
+  const adminHeaders = { "Content-Type": "application/json", Cookie: admin.cookie, "X-Publisher-Token": admin.csrfToken };
+  const messages = (await request("/api/messages", { headers: { Cookie: admin.cookie } })).data.messages;
+  const feedback = messages.find((item) => item.content === feedbackContent);
+  assert(feedback, "Tin nhắn góp ý chưa xuất hiện trong trang quản trị.");
+  await request("/api/messages/read", { method: "POST", headers: adminHeaders, body: JSON.stringify({ id: feedback.id }) });
   const payload = {
     type: "event",
     title: `Bài kiểm thử cổng quản trị trực tuyến ${idSuffix}`,
@@ -102,7 +115,15 @@ async function main() {
   const mediaResponse = await fetch(`${base}${post.images[0].src}`);
   assert.strictEqual(mediaResponse.status, 200);
   assert.strictEqual(mediaResponse.headers.get("content-type"), "image/jpeg");
-  console.log(JSON.stringify({ wrongPassword: rejected.status, created: created.workflowStatus, reviewed: reviewed.workflowStatus, draftMediaAnonymous: 404, published: published.workflowStatus, url: published.url, publicPosts: publicPosts.length, media: mediaResponse.status }, null, 2));
+  const firstView = await request("/api/analytics/view", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ visitorToken, path: new URL(published.url).pathname, title: post.title }) });
+  const duplicateView = await request("/api/analytics/view", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ visitorToken, path: new URL(published.url).pathname, title: post.title }) });
+  assert.strictEqual(firstView.data.counted, true);
+  assert.strictEqual(duplicateView.data.counted, false);
+  const analytics = (await request("/api/analytics/summary")).data;
+  assert(analytics.stats.total >= 1 && analytics.stats.today >= 1 && analytics.stats.month >= 1);
+  assert(analytics.popular.some((item) => item.path === new URL(published.url).pathname));
+  await request("/api/messages/delete", { method: "POST", headers: adminHeaders, body: JSON.stringify({ id: feedback.id }) });
+  console.log(JSON.stringify({ wrongPassword: rejected.status, created: created.workflowStatus, reviewed: reviewed.workflowStatus, draftMediaAnonymous: 404, published: published.workflowStatus, url: published.url, publicPosts: publicPosts.length, media: mediaResponse.status, traffic: analytics.stats, popularTracked: true, messageWorkflow: "NEW → READ → DELETED" }, null, 2));
 }
 
 main().catch((error) => {

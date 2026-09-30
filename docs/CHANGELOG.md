@@ -1,5 +1,16 @@
 # Nhật ký thay đổi
 
+## 30/9/2026 — Thống kê truy cập, bài xem nhiều và tin nhắn góp ý
+
+- Bổ sung bộ đếm đang truy cập, hôm nay, tháng hiện tại và tổng lượt truy cập bằng D1.
+- Ghi lượt xem bài theo mã phiên ẩn danh, chống tính lặp trong ngày và hiển thị sáu bài
+  xem nhiều nhất ở cột bên phải.
+- Thêm biểu mẫu gửi tin nhắn không yêu cầu họ tên/email; admin có thể đọc, đánh dấu
+  đã xử lý và xóa tại `/admin`.
+- Đổi tên khu vực thành **Nguồn tham khảo / Cổng thông tin và nguồn tham khảo**, chỉ
+  giữ liên kết tới Bộ Công an, Cục A05 và Học viện CSND.
+- Cập nhật chính sách bảo vệ dữ liệu cá nhân cho thống kê ẩn danh và tin nhắn góp ý.
+
 ## 30/9/2026 — Cổng biên tập có tài khoản và trình soạn thảo trực quan
 
 - Đưa cổng biên tập cục bộ về `/admin`, bổ sung đăng nhập, phiên bảo mật, CSRF token,

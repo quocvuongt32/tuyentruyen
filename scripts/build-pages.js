@@ -180,6 +180,7 @@ function renderPage(item, kind, navigation = "") {
   </main>
   ${renderOfficialFooter()}
   <script src="/js/article.js" defer></script>
+  <script src="/js/engagement.js" defer></script>
 </body>
 </html>`;
 }
@@ -192,13 +193,15 @@ const policyPages = [
     body: `
       <p>Website chuyên đề Cẩm nang An toàn số tôn trọng và bảo vệ dữ liệu cá nhân của người truy cập. Website không cung cấp biểu mẫu đăng ký bản tin, không yêu cầu tạo tài khoản công khai và không thu thập địa chỉ email.</p>
       <h2>Dữ liệu kỹ thuật</h2>
-      <p>Khi truy cập, hệ thống lưu trữ hoặc các dịch vụ kỹ thuật liên quan có thể tự động xử lý dữ liệu nhật ký tối thiểu như địa chỉ IP, thời điểm, loại trình duyệt, trang được truy cập và thông tin chẩn đoán lỗi nhằm vận hành, bảo vệ và thống kê mức sử dụng website.</p>
+      <p>Website tạo một mã ngẫu nhiên ẩn danh trong trình duyệt để đếm phiên truy cập, ước tính số người đang trực tuyến và tránh tính lặp lượt xem bài trong cùng ngày. Cơ sở dữ liệu thống kê của website không lưu họ tên, email hoặc địa chỉ IP trong mã phiên này. Hạ tầng Cloudflare vẫn có thể xử lý nhật ký kỹ thuật tối thiểu để vận hành và bảo vệ hệ thống.</p>
       <h2>Mục đích và phạm vi sử dụng</h2>
-      <p>Dữ liệu kỹ thuật chỉ được dùng để cung cấp nội dung, phát hiện sự cố, phòng ngừa hành vi gây hại và cải thiện chất lượng trang. Website không bán dữ liệu cá nhân và không dùng dữ liệu để gửi quảng cáo hoặc bản tin qua email.</p>
+      <p>Dữ liệu kỹ thuật chỉ được dùng để cung cấp nội dung, thống kê lượt truy cập, xếp hạng bài được xem nhiều, phát hiện sự cố, phòng ngừa hành vi gây hại và cải thiện chất lượng trang. Website không bán dữ liệu cá nhân và không dùng dữ liệu để gửi quảng cáo hoặc bản tin qua email.</p>
+      <h2>Tin nhắn góp ý</h2>
+      <p>Biểu mẫu góp ý chỉ yêu cầu nội dung tin nhắn, không yêu cầu họ tên hay email. Nội dung được lưu để quản trị viên đọc và xử lý; hệ thống dùng mã băm một chiều phục vụ giới hạn gửi tin chống lạm dụng và không lưu địa chỉ IP rõ trong bảng tin nhắn. Người gửi không nên ghi thông tin cá nhân, bí mật nhà nước hoặc dữ liệu nghiệp vụ vào biểu mẫu.</p>
       <h2>Dịch vụ và liên kết bên ngoài</h2>
       <p>Website không sử dụng dịch vụ phân tích hoặc bộ đếm truy cập bên thứ ba. Khung video bên ngoài chỉ được tải ở bài có video do biên tập viên chủ động khai báo. Các nguồn chính thống khác chỉ được mở khi người dùng bấm liên kết; khi đó chính sách của đơn vị cung cấp dịch vụ được áp dụng.</p>
       <h2>Thời gian lưu trữ và quyền của người truy cập</h2>
-      <p>Dữ liệu kỹ thuật được lưu trong thời gian cần thiết theo cấu hình vận hành, an toàn hệ thống và chính sách của nhà cung cấp hạ tầng. Người truy cập có thể gửi yêu cầu liên quan đến dữ liệu cá nhân qua đầu mối công vụ nêu tại trang Liên hệ.</p>`,
+      <p>Dữ liệu thống kê tổng hợp được lưu để theo dõi mức sử dụng website; mã chống tính lặp lượt xem được tự động dọn theo thời hạn kỹ thuật. Tin nhắn góp ý được lưu cho tới khi quản trị viên xử lý hoặc xóa. Người truy cập có thể gửi yêu cầu liên quan đến dữ liệu cá nhân qua đầu mối công vụ nêu tại trang Liên hệ.</p>`,
   },
   {
     slug: "terms",
@@ -239,7 +242,7 @@ const policyPages = [
       ${footerConfig.address ? `<p><strong>Địa chỉ:</strong> ${escapeHtml(footerConfig.address)}.</p>` : ""}
       ${footerConfig.email ? `<p><strong>Email công vụ:</strong> ${escapeHtml(footerConfig.email)}.</p>` : ""}
       ${footerConfig.phone ? `<p><strong>Điện thoại:</strong> ${escapeHtml(footerConfig.phone)}.</p>` : ""}
-      <p>Để góp ý, yêu cầu điều chỉnh nguồn tin, bản quyền hoặc dữ liệu cá nhân, vui lòng liên hệ trực tiếp qua kênh công vụ của Khoa. Website không sử dụng biểu mẫu thu thập họ tên hoặc địa chỉ email.</p>`,
+      <p>Để góp ý, yêu cầu điều chỉnh nguồn tin, bản quyền hoặc dữ liệu cá nhân, người đọc có thể dùng biểu mẫu “Gửi tin nhắn” ở cuối trang chủ. Biểu mẫu không thu thập họ tên hoặc địa chỉ email; không gửi thông tin mật hoặc dữ liệu nghiệp vụ qua biểu mẫu này.</p>`,
   },
 ];
 
@@ -270,6 +273,7 @@ function renderPolicyPage(page) {
     <article class="article-card policy-card"><div class="article-kicker">Thông tin website</div><h1>${escapeHtml(page.title)}</h1><p class="article-lead">${escapeHtml(page.description)}</p><div class="article-content">${page.body}</div></article>
   </main>
   ${renderOfficialFooter()}
+  <script src="/js/engagement.js" defer></script>
 </body>
 </html>`;
 }

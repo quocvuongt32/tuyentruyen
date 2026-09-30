@@ -41,6 +41,34 @@ function origin(context) {
   return new URL(context.request.url).origin;
 }
 
+const VISIT_SESSION_MS = 30 * 60 * 1000;
+const ONLINE_WINDOW_MS = 5 * 60 * 1000;
+const MESSAGE_COOLDOWN_MS = 60 * 1000;
+
+function dateKey(timestamp = Date.now()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(timestamp));
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function assertSameOrigin(context) {
+  const requestOrigin = context.request.headers.get("Origin");
+  if (requestOrigin && requestOrigin !== origin(context)) {
+    throw new HttpError(403, "Yêu cầu không đến từ website này.");
+  }
+}
+
+async function visitorHash(input) {
+  const token = String(input?.visitorToken || "").trim();
+  if (!/^[a-zA-Z0-9_-]{20,160}$/.test(token)) throw new HttpError(400, "Mã phiên truy cập không hợp lệ.");
+  return sha256(`visitor|${token}`);
+}
+
 async function userByName(env, username) {
   return env.DB.prepare("SELECT * FROM users WHERE username = ? LIMIT 1").bind(String(username || "").trim().toLowerCase()).first();
 }
@@ -99,6 +127,9 @@ async function logout(context) {
 }
 
 async function config(context, session) {
+  const unreadMessages = permissionsFor(session.user).includes("manage-messages")
+    ? Number((await context.env.DB.prepare("SELECT COUNT(*) AS total FROM feedback_messages WHERE status='NEW'").first())?.total || 0)
+    : 0;
   return json({
     ok: true,
     user: session.user,
@@ -110,6 +141,7 @@ async function config(context, session) {
     maxImageBytes: MAX_IMAGE_BYTES,
     imageOptimization: { maxEdge: 1920, targetBytes: 1_250_000, maxBytes: MAX_IMAGE_BYTES, minQuality: 0.74, maxQuality: 0.92, maxSourceBytes: 250 * 1024 * 1024 },
     deploymentMode: "cloud",
+    unreadMessages,
   });
 }
 
@@ -342,6 +374,141 @@ async function publicPosts(context) {
   return json({ ok: true, posts: (result.results || []).map(publicPostFromRow) }, 200, { "Cache-Control": "public, max-age=30, stale-while-revalidate=120" });
 }
 
+async function touchVisitor(context, input) {
+  assertSameOrigin(context);
+  const hash = await visitorHash(input);
+  const now = Date.now();
+  const existing = await context.env.DB.prepare("SELECT last_seen FROM active_visitors WHERE visitor_hash=?").bind(hash).first();
+  const isNewVisit = !existing || Number(existing.last_seen) < now - VISIT_SESSION_MS;
+  if (isNewVisit) {
+    const day = dateKey(now);
+    await context.env.DB.batch([
+      context.env.DB.prepare(`INSERT INTO active_visitors(visitor_hash,started_at,last_seen) VALUES(?,?,?)
+        ON CONFLICT(visitor_hash) DO UPDATE SET started_at=excluded.started_at,last_seen=excluded.last_seen`).bind(hash, now, now),
+      context.env.DB.prepare(`INSERT INTO traffic_daily(day,visits,updated_at) VALUES(?,1,?)
+        ON CONFLICT(day) DO UPDATE SET visits=traffic_daily.visits+1,updated_at=excluded.updated_at`).bind(day, now),
+      context.env.DB.prepare("UPDATE traffic_totals SET total_visits=total_visits+1,updated_at=? WHERE id=1").bind(now),
+    ]);
+  } else {
+    await context.env.DB.prepare("UPDATE active_visitors SET last_seen=? WHERE visitor_hash=?").bind(now, hash).run();
+  }
+  context.waitUntil(context.env.DB.prepare("DELETE FROM active_visitors WHERE last_seen<?").bind(now - 24 * 60 * 60 * 1000).run());
+  return { hash, now, isNewVisit };
+}
+
+async function recordVisit(context, input) {
+  const visit = await touchVisitor(context, input);
+  return json({ ok: true, counted: visit.isNewVisit });
+}
+
+async function recordArticleView(context, input) {
+  const visit = await touchVisitor(context, input);
+  const path = String(input?.path || "").trim();
+  const match = path.match(/^\/(hoat-dong|ky-nang)\/([a-z0-9-]{1,110})\/?$/);
+  if (!match) throw new HttpError(400, "Đường dẫn bài viết không hợp lệ.");
+  const normalizedPath = `/${match[1]}/${match[2]}/`;
+  const contentType = match[1] === "hoat-dong" ? "event" : "skill";
+  let title = "";
+  const dynamic = await context.env.DB.prepare("SELECT title FROM posts WHERE type=? AND slug=? AND status='PUBLISHED' LIMIT 1")
+    .bind(contentType, match[2]).first();
+  if (dynamic?.title) {
+    title = dynamic.title;
+  } else {
+    const staticResponse = await context.env.ASSETS.fetch(new Request(new URL(normalizedPath, context.request.url)));
+    if (!staticResponse.ok) throw new HttpError(404, "Không tìm thấy bài viết công khai.");
+    const html = await staticResponse.text();
+    const heading = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "";
+    title = heading.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  }
+  title = cleanText(title || input?.title, 180, "tiêu đề bài viết", true).replace(/\s+/g, " ");
+  const key = await sha256(`article|${normalizedPath}`);
+  const day = dateKey(visit.now);
+  const dedup = await context.env.DB.prepare("INSERT OR IGNORE INTO article_view_dedup(article_key,visitor_hash,view_day,viewed_at) VALUES(?,?,?,?)")
+    .bind(key, visit.hash, day, visit.now).run();
+  if (Number(dedup.meta?.changes) === 1) {
+    await context.env.DB.prepare(`INSERT INTO article_views(article_key,title,path,content_type,view_count,last_viewed_at) VALUES(?,?,?,?,1,?)
+      ON CONFLICT(article_key) DO UPDATE SET title=excluded.title,path=excluded.path,content_type=excluded.content_type,
+      view_count=article_views.view_count+1,last_viewed_at=excluded.last_viewed_at`)
+      .bind(key, title, normalizedPath, contentType, visit.now).run();
+  }
+  context.waitUntil(context.env.DB.prepare("DELETE FROM article_view_dedup WHERE viewed_at<?").bind(visit.now - 45 * 24 * 60 * 60 * 1000).run());
+  const row = await context.env.DB.prepare("SELECT view_count FROM article_views WHERE article_key=?").bind(key).first();
+  return json({ ok: true, counted: Number(dedup.meta?.changes) === 1, views: Number(row?.view_count || 0) });
+}
+
+async function analyticsSummary(context) {
+  const now = Date.now();
+  const day = dateKey(now);
+  const month = `${day.slice(0, 7)}-%`;
+  const [total, today, currentMonth, online, popular] = await Promise.all([
+    context.env.DB.prepare("SELECT total_visits AS total FROM traffic_totals WHERE id=1").first(),
+    context.env.DB.prepare("SELECT visits AS total FROM traffic_daily WHERE day=?").bind(day).first(),
+    context.env.DB.prepare("SELECT COALESCE(SUM(visits),0) AS total FROM traffic_daily WHERE day LIKE ?").bind(month).first(),
+    context.env.DB.prepare("SELECT COUNT(*) AS total FROM active_visitors WHERE last_seen>=?").bind(now - ONLINE_WINDOW_MS).first(),
+    context.env.DB.prepare("SELECT title,path,content_type,view_count FROM article_views ORDER BY view_count DESC,last_viewed_at DESC LIMIT 6").all(),
+  ]);
+  return json({
+    ok: true,
+    stats: {
+      online: Number(online?.total || 0),
+      today: Number(today?.total || 0),
+      month: Number(currentMonth?.total || 0),
+      total: Number(total?.total || 0),
+    },
+    popular: (popular.results || []).map((item) => ({
+      title: item.title,
+      path: item.path,
+      type: item.content_type,
+      views: Number(item.view_count || 0),
+    })),
+  }, 200, { "Cache-Control": "no-store" });
+}
+
+async function submitMessage(context, input) {
+  assertSameOrigin(context);
+  if (String(input?.website || "").trim()) return json({ ok: true });
+  const hash = await visitorHash(input);
+  const clientAddress = context.request.headers.get("CF-Connecting-IP") || hash;
+  const rateHash = await sha256(`feedback-rate|${clientAddress}`);
+  const content = cleanText(input?.content, 1500, "nội dung tin nhắn", true);
+  if (content.length < 10) throw new Error("Tin nhắn cần ít nhất 10 ký tự.");
+  const now = Date.now();
+  const latest = await context.env.DB.prepare("SELECT created_at FROM feedback_messages WHERE visitor_hash=? ORDER BY created_at DESC LIMIT 1").bind(rateHash).first();
+  if (latest && Number(latest.created_at) > now - MESSAGE_COOLDOWN_MS) {
+    throw new HttpError(429, "Bạn vừa gửi tin nhắn. Vui lòng chờ một phút rồi thử lại.");
+  }
+  const daily = await context.env.DB.prepare("SELECT COUNT(*) AS total FROM feedback_messages WHERE visitor_hash=? AND created_at>=?")
+    .bind(rateHash, now - 24 * 60 * 60 * 1000).first();
+  if (Number(daily?.total || 0) >= 5) throw new HttpError(429, "Bạn đã gửi đủ số tin nhắn trong hôm nay.");
+  await context.env.DB.prepare("INSERT INTO feedback_messages(id,content,visitor_hash,status,created_at,updated_at) VALUES(?,?,?,'NEW',?,?)")
+    .bind(crypto.randomUUID(), content, rateHash, now, now).run();
+  return json({ ok: true, message: "Tin nhắn đã được gửi tới quản trị viên." }, 201);
+}
+
+async function listMessages(context, session) {
+  requirePermission(session, "manage-messages");
+  const result = await context.env.DB.prepare("SELECT id,content,status,created_at,updated_at FROM feedback_messages ORDER BY CASE status WHEN 'NEW' THEN 0 ELSE 1 END,created_at DESC LIMIT 100").all();
+  return json({ ok: true, messages: (result.results || []).map((item) => ({
+    id: item.id,
+    content: item.content,
+    status: item.status,
+    createdAt: new Date(Number(item.created_at)).toISOString(),
+    updatedAt: new Date(Number(item.updated_at)).toISOString(),
+  })) });
+}
+
+async function updateMessage(context, session, input, remove = false) {
+  requirePermission(session, "manage-messages");
+  assertCsrf(context, session);
+  const id = String(input?.id || "").trim();
+  if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error("Mã tin nhắn không hợp lệ.");
+  const result = remove
+    ? await context.env.DB.prepare("DELETE FROM feedback_messages WHERE id=?").bind(id).run()
+    : await context.env.DB.prepare("UPDATE feedback_messages SET status='READ',updated_at=? WHERE id=?").bind(Date.now(), id).run();
+  if (Number(result.meta?.changes) !== 1) throw new HttpError(404, "Không tìm thấy tin nhắn.");
+  return json({ ok: true });
+}
+
 async function checkLive(context) {
   const session = await requireSession(context);
   if (session.user.mustChangePassword) throw new HttpError(403, "Bạn phải đổi mật khẩu tạm trước khi sử dụng cổng quản trị.");
@@ -360,6 +527,10 @@ export async function onRequest(context) {
     if (path === "login" && method === "POST") return await login(context, await readJson(context.request));
     if (path === "logout" && method === "POST") return await logout(context);
     if (path === "public/posts" && method === "GET") return await publicPosts(context);
+    if (path === "analytics/summary" && method === "GET") return await analyticsSummary(context);
+    if (path === "analytics/visit" && method === "POST") return await recordVisit(context, await readJson(context.request));
+    if (path === "analytics/view" && method === "POST") return await recordArticleView(context, await readJson(context.request));
+    if (path === "messages/submit" && method === "POST") return await submitMessage(context, await readJson(context.request));
     if (path === "check-live" && method === "GET") return await checkLive(context);
 
     const session = await requireSession(context);
@@ -369,6 +540,9 @@ export async function onRequest(context) {
     if (path === "users" && method === "GET") return await listUsers(context, session);
     if (path === "users/update" && method === "POST") return await updateUser(context, session, await readJson(context.request));
     if (path === "users/reset-password" && method === "POST") return await resetPassword(context, session, await readJson(context.request));
+    if (path === "messages" && method === "GET") return await listMessages(context, session);
+    if (path === "messages/read" && method === "POST") return await updateMessage(context, session, await readJson(context.request));
+    if (path === "messages/delete" && method === "POST") return await updateMessage(context, session, await readJson(context.request), true);
     if (path === "create" && method === "POST") return await createPost(context, session, await readJson(context.request));
     if (path === "review" && method === "POST") return await submitReview(context, session);
     if (path === "approve-publish" && method === "POST") return await approveAndPublish(context, session);

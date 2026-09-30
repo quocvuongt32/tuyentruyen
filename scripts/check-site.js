@@ -24,7 +24,7 @@ function validateJson(rel) {
   }
 }
 
-["index.html", "_headers", "_redirects", "sitemap.xml", "css/article.css", "js/article.js", "privacy/index.html", "terms/index.html", "nguon-tin/index.html", "contact/index.html", "admin/index.html", "admin/login/index.html", "admin/app.css", "admin/app.js", "admin/login.css", "admin/login.js"].forEach(requireFile);
+["index.html", "_headers", "_redirects", "sitemap.xml", "css/article.css", "js/article.js", "js/engagement.js", "privacy/index.html", "terms/index.html", "nguon-tin/index.html", "contact/index.html", "admin/index.html", "admin/login/index.html", "admin/app.css", "admin/app.js", "admin/login.css", "admin/login.js"].forEach(requireFile);
 ["data/events.json", "data/about.json", "data/site.json", "data/skills.json", "data/static-slugs.json"].forEach(validateJson);
 ["README.md", "CHANGES.md", "DEPLOY_CHECKLIST.md", "docs", "content", "scripts", "netlify.toml", "package.json", "wrangler.toml", ".publisher"].forEach(forbid);
 
@@ -37,7 +37,9 @@ const html = fs.readFileSync(path.join(dist, "index.html"), "utf8");
 for (const match of html.matchAll(/(?:src|href)="((?:css|js|img)\/[^"?#]+)"/g)) requireFile(match[1]);
 if (/newsletter|api\/newsletter|web3forms|type="email"/i.test(html)) errors.push("Trang chủ vẫn còn chức năng hoặc trường thu thập email.");
 if (!html.includes("KHOA TOÁN - TIN HỌC VÀ ỨNG DỤNG KHCN TRONG PCTP")) errors.push("Footer trang chủ chưa đúng tên đơn vị.");
-if (!html.includes("Nguồn thông tin chính thống")) errors.push("Trang chủ chưa có khu vực liên kết nguồn chính thống.");
+if (!html.includes("Cổng thông tin và nguồn tham khảo")) errors.push("Trang chủ chưa có khu vực cổng thông tin và nguồn tham khảo.");
+if (!html.includes('id="popular-articles"')) errors.push("Trang chủ chưa có khu vực bài xem nhiều nhất.");
+if (!html.includes('id="feedback-form"') || !html.includes("Thống kê truy cập")) errors.push("Trang chủ chưa có biểu mẫu tin nhắn hoặc thống kê truy cập.");
 if (/quick-news|news-ticker|tin-nhanh|Tổng hợp tin tức|Tin mới từ Bộ Công an|Làm mới tin/i.test(html)) errors.push("Trang chủ vẫn còn dấu vết khối tổng hợp tin cũ.");
 if (!html.includes("sản phẩm dự thi Cuộc thi")) errors.push("Footer chưa nêu trạng thái sản phẩm dự thi.");
 
@@ -71,9 +73,13 @@ if (samplePage) {
 }
 
 const site = JSON.parse(fs.readFileSync(path.join(dist, "data/site.json"), "utf8"));
-if (!Array.isArray(site.officialSources) || site.officialSources.length < 4) errors.push("Danh mục nguồn chính thống chưa đủ liên kết tĩnh.");
+if (!Array.isArray(site.officialSources) || site.officialSources.length !== 3) errors.push("Danh mục nguồn tham khảo phải có đúng Bộ Công an, A05 và Học viện CSND.");
+const allowedSourceHosts = new Set(["bocongan.gov.vn", "hvcsnd.edu.vn"]);
 for (const source of site.officialSources || []) {
   if (!source.name || !/^https:\/\//i.test(source.url || "")) errors.push("Liên kết nguồn chính thống không hợp lệ.");
+  try {
+    if (!allowedSourceHosts.has(new URL(source.url).hostname)) errors.push(`Nguồn tham khảo ngoài phạm vi được phép: ${source.url}`);
+  } catch (_) {}
   for (const forbiddenField of ["articles", "items", "feed", "lastUpdated"]) {
     if (Object.hasOwn(source, forbiddenField)) errors.push(`Nguồn chính thống chứa trường dữ liệu tin bài không được phép: ${forbiddenField}`);
   }

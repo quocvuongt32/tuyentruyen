@@ -9,10 +9,12 @@ Website chính: **https://tuyentruyen.khoaktt.vn/**.
 
 - Nội dung công khai do Khoa biên soạn, quản lý hoặc được giao thực hiện.
 - Không tự động tải nội dung biên tập từ website bên ngoài để đăng lại.
-- Khu vực nguồn chính thống chỉ chứa liên kết tĩnh tới cơ quan; liên kết tham khảo
-  cuối bài phục vụ đối chiếu với nội dung gốc.
+- Khu vực nguồn tham khảo chỉ chứa liên kết tĩnh tới Bộ Công an, Cục A05 và Học
+  viện CSND; liên kết cuối bài phục vụ đối chiếu với nội dung gốc.
 - Không có tài khoản công khai, bình luận, diễn đàn, đăng bài cộng đồng hoặc biểu mẫu
   thu thập email.
+- Có bộ đếm truy cập ẩn danh, danh sách bài xem nhiều và biểu mẫu góp ý không yêu
+  cầu họ tên, email.
 
 ## Kiến trúc
 
@@ -40,7 +42,7 @@ tối ưu được lưu trong kho KV riêng, không nhúng mật khẩu hoặc �
 
 Ba tài khoản khởi tạo:
 
-- `admin`: quản trị toàn quyền, có thể soạn, gửi duyệt, thẩm định, đăng và quản lý tài khoản.
+- `admin`: quản trị toàn quyền, có thể soạn, gửi duyệt, thẩm định, đăng, quản lý tài khoản và xử lý tin nhắn góp ý.
 - `nganpt`: Thượng tá Phạm Thị Ngân, có quyền thẩm định và đăng bài.
 - `vuongnq`: Đại úy Nguyễn Quốc Vương, có quyền soạn và gửi bài đi duyệt.
 
@@ -81,7 +83,12 @@ npm run check
 - Không có biểu mẫu đăng ký bản tin hoặc trường nhập email trên website công khai.
 - Cổng biên tập dùng HTTPS, phiên ngẫu nhiên, cookie `HttpOnly`, CSRF token, giới hạn
   lần đăng nhập sai và phân quyền phía máy chủ.
+- Thống kê truy cập dùng mã phiên ngẫu nhiên ẩn danh do trình duyệt tạo; website
+  không đưa IP, họ tên hoặc email vào cơ sở dữ liệu thống kê.
+- Tin nhắn góp ý chỉ lưu nội dung và mã chống lạm dụng đã băm; quản trị viên có thể đánh dấu
+  đã đọc hoặc xóa tại `/admin`.
 - Nội dung giàu định dạng được chuẩn hóa thành các khối an toàn; liên kết chỉ nhận
   `http/https`, ảnh chỉ nhận tệp trong `uploads/`.
 - Liên kết ngoài mở tab mới với `noopener noreferrer`.
-- Website không dùng dịch vụ phân tích hoặc bộ đếm truy cập bên thứ ba.
+- Website tự thống kê trên Cloudflare D1, không dùng dịch vụ phân tích hoặc bộ đếm
+  truy cập bên thứ ba.

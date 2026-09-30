@@ -18,6 +18,7 @@
         <div class="secure-chip"><span></span> <b id="session-user">Đang xác thực…</b></div>
         <button id="change-password-open" class="topbar-button" type="button">Đổi mật khẩu</button>
         <button id="manage-users-open" class="topbar-button" type="button" hidden>Quản lý tài khoản</button>
+        <button id="messages-open" class="topbar-button" type="button" hidden>Tin nhắn <span id="messages-badge" class="message-badge" hidden>0</span></button>
         <button id="logout-button" class="topbar-button danger-text" type="button">Đăng xuất</button>
       </div>
     </header>
@@ -186,6 +187,11 @@
       <section id="user-management" class="panel user-management" hidden>
         <div class="panel-heading"><span class="step-number">ADMIN</span><div><h2>Quản lý tài khoản</h2><p>Phân quyền, khóa tài khoản và đặt lại mật khẩu tạm.</p></div></div>
         <div id="user-list" class="user-list"></div>
+      </section>
+
+      <section id="message-management" class="panel message-management" hidden>
+        <div class="panel-heading"><span class="step-number">GÓP Ý</span><div><h2>Tin nhắn từ người đọc</h2><p>Đọc, đánh dấu đã xử lý hoặc xóa các góp ý được gửi từ trang chủ.</p></div></div>
+        <div id="message-list" class="message-list"><p class="empty-admin">Đang tải tin nhắn…</p></div>
       </section>
     </main>
   </div>

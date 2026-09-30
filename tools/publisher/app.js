@@ -755,11 +755,85 @@ async function loadUsers() {
   });
 }
 
+function updateMessageBadge(count) {
+  const badge = $("#messages-badge");
+  const total = Number(count || 0);
+  badge.textContent = String(total);
+  badge.hidden = total < 1;
+}
+
+function formatMessageTime(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(date);
+}
+
+async function loadMessages() {
+  if (!hasPermission("manage-messages")) return;
+  const result = await api("/api/messages");
+  const list = $("#message-list");
+  list.innerHTML = "";
+  const messages = Array.isArray(result.messages) ? result.messages : [];
+  updateMessageBadge(messages.filter((item) => item.status === "NEW").length);
+  if (!messages.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-admin";
+    empty.textContent = "Chưa có tin nhắn góp ý nào.";
+    list.appendChild(empty);
+    return;
+  }
+  messages.forEach((message) => {
+    const row = document.createElement("article");
+    row.className = `message-row${message.status === "NEW" ? " is-new" : ""}`;
+    const copy = document.createElement("div");
+    copy.className = "message-copy";
+    const status = document.createElement("span");
+    status.className = "message-status";
+    status.textContent = message.status === "NEW" ? "CHƯA ĐỌC" : "ĐÃ ĐỌC";
+    const content = document.createElement("p");
+    content.textContent = message.content;
+    const time = document.createElement("time");
+    time.dateTime = message.createdAt;
+    time.textContent = `Gửi lúc ${formatMessageTime(message.createdAt)}`;
+    copy.append(status, content, time);
+    const actions = document.createElement("div");
+    actions.className = "message-actions";
+    if (message.status === "NEW") {
+      const read = document.createElement("button");
+      read.type = "button";
+      read.className = "button primary";
+      read.textContent = "Đánh dấu đã đọc";
+      read.addEventListener("click", async () => {
+        try {
+          await api("/api/messages/read", { method: "POST", body: JSON.stringify({ id: message.id }) });
+          await loadMessages();
+        } catch (error) { showToast(error.message, true); }
+      });
+      actions.appendChild(read);
+    }
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "button danger";
+    remove.textContent = "Xóa";
+    remove.addEventListener("click", async () => {
+      if (!window.confirm("Xóa vĩnh viễn tin nhắn này?")) return;
+      try {
+        await api("/api/messages/delete", { method: "POST", body: JSON.stringify({ id: message.id }) });
+        showToast("Đã xóa tin nhắn.");
+        await loadMessages();
+      } catch (error) { showToast(error.message, true); }
+    });
+    actions.appendChild(remove);
+    row.append(copy, actions);
+    list.appendChild(row);
+  });
+}
+
 function applyAccess() {
   if (!state.user) return;
   $("#session-user").textContent = `${state.user.fullName} · ${roleLabel(state.user.role)}`;
   $("#author").value = state.user.fullName;
   $("#manage-users-open").hidden = !hasPermission("manage-users");
+  $("#messages-open").hidden = !hasPermission("manage-messages");
   form.hidden = !hasPermission("create") || Boolean(state.pending);
   if (!hasPermission("create")) {
     $(".hero-panel h1").textContent = "Khu vực thẩm định bài viết";
@@ -781,6 +855,7 @@ async function initialize() {
     state.permissions = new Set(config.permissions || []);
     state.maxImages = config.maxImages;
     state.maxImageBytes = config.maxImageBytes;
+    updateMessageBadge(config.unreadMessages);
     if (config.imageOptimization) state.imageOptimization = { ...state.imageOptimization, ...config.imageOptimization };
     state.pending = config.pending;
     applyAccess();
@@ -864,6 +939,14 @@ $("#manage-users-open").addEventListener("click", async () => {
   section.hidden = false;
   await loadUsers();
   section.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+$("#messages-open").addEventListener("click", async () => {
+  const section = $("#message-management");
+  section.hidden = false;
+  try {
+    await loadMessages();
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) { showToast(error.message, true); }
 });
 
 initialize();
