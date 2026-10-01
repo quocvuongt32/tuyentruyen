@@ -132,16 +132,21 @@
   color: #edf4fa;
 }
 
+.engagement-section .section-inner {
+  padding-top: 36px;
+  padding-bottom: 36px;
+}
+
 .engagement-grid {
   max-width: 1120px;
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr);
-  gap: 28px;
+  gap: 20px;
 }
 
 .feedback-card,
 .traffic-card {
-  padding: 28px;
+  padding: 22px;
   background: #101d32;
   border: 1px solid rgba(185, 214, 232, 0.22);
 }
@@ -169,7 +174,7 @@
 .feedback-form > label { color: #f3f7fb; font-size: 0.82rem; font-weight: 700; }
 .feedback-form textarea {
   width: 100%;
-  min-height: 145px;
+  min-height: 105px;
   resize: vertical;
   padding: 14px;
   color: #13233a;
@@ -199,20 +204,20 @@
 #feedback-status.success { color: #7ef0b5; }
 #feedback-status.error { color: #ff9b9b; }
 
-.traffic-list { display: grid; gap: 8px; margin-top: 20px; }
+.traffic-list { display: grid; gap: 6px; margin-top: 12px; }
 .traffic-list > div {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) auto;
   align-items: center;
   gap: 9px;
-  padding: 11px 12px;
+  padding: 9px 12px;
   color: #13233a;
   background: #fff;
 }
 .traffic-icon { color: #08a85b; font-weight: 900; text-align: center; }
 .traffic-list span:nth-child(2) { font-size: 0.87rem; }
 .traffic-list strong { color: #08734a; font-size: 1rem; }
-.traffic-note { margin: 16px 0 0; color: #9db3c3; font-size: 0.72rem; line-height: 1.55; }
+.traffic-note { margin: 10px 0 0; color: #9db3c3; font-size: 0.72rem; line-height: 1.45; }
 
 @media (max-width: 780px) {
   .engagement-grid { grid-template-columns: 1fr; }

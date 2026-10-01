@@ -20,7 +20,7 @@ không đưa lên Git và không xuất hiện trong `dist/`.
 | `vuongnq` | Đại úy Nguyễn Quốc Vương | Soạn bài, lưu bản nháp và gửi thẩm định |
 
 Admin có thể đổi họ tên, vai trò, trạng thái hoạt động, đặt mật khẩu tạm mới cho
-tài khoản khác và xử lý góp ý trong mục **Tin nhắn**. Hệ thống không cho tài khoản đang
+tài khoản khác và xử lý góp ý trong mục **Hộp thư góp ý**. Hệ thống không cho tài khoản đang
 đăng nhập tự khóa hoặc tự đổi vai trò tại màn hình này.
 
 ## Quản lý banner Trang chủ
@@ -38,7 +38,7 @@ hiển thị huy hiệu của Cẩm nang và không phát sinh khung ảnh lỗi
 ## Xử lý tin nhắn người đọc
 
 - Biểu mẫu cuối trang chủ chỉ nhận nội dung, không yêu cầu họ tên hoặc email.
-- Tin mới hiển thị huy hiệu số lượng ở nút **Tin nhắn** trong `/admin`.
+- Tin mới hiển thị huy hiệu số lượng ở nút **Hộp thư góp ý** trong `/admin`.
 - Admin có thể đánh dấu đã đọc hoặc xóa vĩnh viễn; tin nhắn không tự xuất hiện trên
   website công khai.
 - Không yêu cầu người đọc gửi bí mật nhà nước, dữ liệu nghiệp vụ hoặc dữ liệu cá nhân

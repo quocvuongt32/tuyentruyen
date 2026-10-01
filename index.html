@@ -195,18 +195,6 @@
       </div>
     </div>
 
-    <aside class="home-popular" aria-labelledby="popular-heading">
-      <div class="home-popular-heading">
-        <div>
-          <p class="popular-kicker">Góc được quan tâm</p>
-          <h2 id="popular-heading">Bài được xem nhiều nhất</h2>
-        </div>
-        <p>Cập nhật tự động theo lượt đọc thực tế</p>
-      </div>
-      <ol id="popular-articles" class="popular-list home-popular-list">
-        <li class="popular-empty">Đang cập nhật dữ liệu lượt xem…</li>
-      </ol>
-    </aside>
   </section>
 
   <section id="gioi-thieu" class="about">
@@ -240,10 +228,21 @@
 
   <section id="timeline-section" class="timeline-section">
     <div class="section-inner">
-      <h2 id="timeline-heading">Tuyên truyền An ninh mạng</h2>
-      <p class="section-hint" id="timeline-hint">Bấm vào từng mốc để xem/ẩn chi tiết, ảnh minh chứng và video.</p>
-      <div id="timeline" class="timeline">
-        <p class="loading">Đang tải dữ liệu…</p>
+      <div class="timeline-layout">
+        <div class="timeline-main">
+          <h2 id="timeline-heading">Tuyên truyền An ninh mạng</h2>
+          <p class="section-hint" id="timeline-hint">Bấm vào từng mốc để xem/ẩn chi tiết, ảnh minh chứng và video.</p>
+          <div id="timeline" class="timeline">
+            <p class="loading">Đang tải dữ liệu…</p>
+          </div>
+        </div>
+        <aside class="popular-sidebar" aria-labelledby="popular-heading">
+          <p class="popular-kicker">Góc được quan tâm</p>
+          <h2 id="popular-heading">Bài được xem nhiều nhất</h2>
+          <ol id="popular-articles" class="popular-list">
+            <li class="popular-empty">Đang cập nhật dữ liệu lượt xem…</li>
+          </ol>
+        </aside>
       </div>
     </div>
   </section>
@@ -348,7 +347,6 @@
       <div class="feedback-card">
         <p class="engagement-kicker">Kết nối với Cẩm nang</p>
         <h2 id="feedback-heading">Gửi tin nhắn</h2>
-        <p class="section-hint">Gửi góp ý về nội dung, nguồn tham khảo hoặc lỗi hiển thị. Không cần cung cấp họ tên hay địa chỉ email.</p>
         <form id="feedback-form" class="feedback-form">
           <label for="feedback-content">Nội dung</label>
           <textarea id="feedback-content" name="content" minlength="10" maxlength="1500" required placeholder="Nhập nội dung góp ý…"></textarea>

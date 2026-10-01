@@ -89,8 +89,8 @@ npm run check
   lần đăng nhập sai và phân quyền phía máy chủ.
 - Thống kê truy cập dùng mã phiên ngẫu nhiên ẩn danh do trình duyệt tạo; website
   không đưa IP, họ tên hoặc email vào cơ sở dữ liệu thống kê.
-- Tin nhắn góp ý chỉ lưu nội dung và mã chống lạm dụng đã băm; quản trị viên có thể đánh dấu
-  đã đọc hoặc xóa tại `/admin`.
+- Tin nhắn góp ý chỉ lưu nội dung và mã chống lạm dụng đã băm; quản trị viên kiểm tra
+  trong mục **Hộp thư góp ý**, có thể đánh dấu đã đọc hoặc xóa tại `/admin`.
 - Nội dung giàu định dạng được chuẩn hóa thành các khối an toàn; liên kết chỉ nhận
   `http/https`, ảnh chỉ nhận tệp trong `uploads/`.
 - Liên kết ngoài mở tab mới với `noopener noreferrer`.

@@ -4,11 +4,13 @@
 
 - Khôi phục 4.155 lượt truy cập lịch sử từ bộ đếm GoatCounter cũ và giữ nguyên toàn
   bộ lượt D1 đã phát sinh, không ghi đè số mới.
-- Chuyển khối **Bài được xem nhiều nhất** lên ngay dưới hàng số liệu đầu Trang chủ để
-  người đọc nhìn thấy mà không cần cuộn tới dòng thời gian.
+- Bố trí **Bài được xem nhiều nhất** cạnh Dòng thời gian Tuyên truyền An ninh mạng
+  theo tỷ lệ 70:30; giao diện di động xếp khối quan tâm lên trước dòng thời gian.
 - Bổ sung mục **Banner trang chủ** cho admin: xem danh sách, thêm/xóa ảnh và đặt tốc độ
   chuyển ảnh từ 2 đến 20 giây.
 - Khởi tạo 15 ảnh banner hiện có vào D1; ảnh mới được tối ưu rồi lưu trong KV.
+- Rút gọn khu gửi tin nhắn, bỏ đoạn mô tả dài; tin gửi tiếp tục vào **Hộp thư góp ý**
+  có huy hiệu tin chưa đọc trong `/admin`.
 
 ## 30/9/2026 — Thống kê truy cập, bài xem nhiều và tin nhắn góp ý
 

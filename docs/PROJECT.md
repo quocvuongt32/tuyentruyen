@@ -70,8 +70,9 @@ Máy chủ chỉ giữ một tập thẻ nội tuyến tối thiểu và chỉ c
 - Kiểm tra kiến thức nhanh.
 - Liên kết tham khảo tới Bộ Công an, Cục A05 và Học viện CSND.
 - Thống kê đang truy cập, hôm nay, tháng hiện tại và tổng lượt truy cập.
-- Danh sách bài xem nhiều nhất đặt ngay dưới hàng số liệu đầu Trang chủ và biểu mẫu
-  tin nhắn không yêu cầu email.
+- Danh sách bài xem nhiều nhất đặt cạnh Dòng thời gian Tuyên truyền An ninh mạng theo
+  bố cục 70:30 trên máy tính; trên điện thoại xếp thành một cột. Biểu mẫu tin nhắn
+  không yêu cầu email.
 - Trang giới thiệu, liên hệ, điều khoản, bảo vệ dữ liệu cá nhân, bản quyền và nguồn.
 
 Không có đăng ký thành viên, đăng bài cộng đồng, bình luận hoặc diễn đàn. Tin nhắn
