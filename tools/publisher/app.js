@@ -11,6 +11,8 @@ const state = {
   passwordChangeForced: false,
   maxImages: 30,
   maxImageBytes: 2_500_000,
+  bannerMaxImages: 30,
+  bannerMaxUploadBatch: 8,
   imageOptimization: {
     maxEdge: 1920,
     targetBytes: 1_400_000,
@@ -828,11 +830,96 @@ async function loadMessages() {
   });
 }
 
+function renderBannerImages(images) {
+  const list = $("#banner-image-list");
+  list.innerHTML = "";
+  if (!images.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-admin";
+    empty.textContent = "Banner hiện chưa có ảnh. Trang chủ sẽ chỉ hiển thị huy hiệu.";
+    list.appendChild(empty);
+    return;
+  }
+  images.forEach((image, index) => {
+    const item = document.createElement("figure");
+    item.className = "banner-admin-item";
+    const preview = document.createElement("img");
+    preview.src = image.src;
+    preview.alt = image.caption || `Ảnh banner ${index + 1}`;
+    preview.loading = "lazy";
+    const footer = document.createElement("figcaption");
+    const label = document.createElement("span");
+    label.textContent = image.caption || `Ảnh ${index + 1}${image.uploaded ? " · đã tải lên" : " · ảnh hiện có"}`;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Xóa";
+    remove.addEventListener("click", async () => {
+      if (!window.confirm(`Xóa ảnh số ${index + 1} khỏi banner Trang chủ?`)) return;
+      try {
+        await api("/api/banner/delete", { method: "POST", body: JSON.stringify({ id: image.id }) });
+        showToast("Đã xóa ảnh khỏi banner.");
+        await loadBannerManager();
+      } catch (error) { showToast(error.message, true); }
+    });
+    footer.append(label, remove);
+    item.append(preview, footer);
+    list.appendChild(item);
+  });
+}
+
+async function loadBannerManager() {
+  if (!hasPermission("manage-banner")) return;
+  const result = await api("/api/banner");
+  state.bannerMaxImages = Number(result.maxImages || 30);
+  state.bannerMaxUploadBatch = Number(result.maxUploadBatch || 8);
+  $("#banner-interval-seconds").value = String(Math.round(Number(result.intervalMs || 4000) / 1000));
+  renderBannerImages(Array.isArray(result.images) ? result.images : []);
+}
+
+async function saveBannerSpeed() {
+  const seconds = Number($("#banner-interval-seconds").value);
+  if (!Number.isInteger(seconds) || seconds < 2 || seconds > 20) {
+    showToast("Thời gian mỗi ảnh phải từ 2 đến 20 giây.", true);
+    return;
+  }
+  try {
+    await api("/api/banner/settings", { method: "POST", body: JSON.stringify({ intervalMs: seconds * 1000 }) });
+    showToast(`Đã đặt tốc độ banner: ${seconds} giây/ảnh.`);
+  } catch (error) { showToast(error.message, true); }
+}
+
+async function uploadBannerFiles(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  if (files.length > state.bannerMaxUploadBatch) {
+    showToast(`Mỗi lần chỉ chọn tối đa ${state.bannerMaxUploadBatch} ảnh banner.`, true);
+    return;
+  }
+  setBusy(true, "Đang tối ưu ảnh banner…", "Ảnh sẽ được thu nhỏ hợp lý trước khi tải lên.");
+  try {
+    const images = [];
+    for (let index = 0; index < files.length; index++) {
+      $("#busy-message").textContent = `Đang xử lý ảnh ${index + 1}/${files.length}: ${files[index].name}`;
+      const optimized = await optimizeImage(files[index]);
+      images.push({ dataUrl: optimized.dataUrl, caption: "" });
+    }
+    await api("/api/banner/upload", { method: "POST", body: JSON.stringify({ images }) });
+    showToast(`Đã thêm ${images.length} ảnh vào banner Trang chủ.`);
+    await loadBannerManager();
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    $("#banner-image-input").value = "";
+    setBusy(false);
+  }
+}
+
 function applyAccess() {
   if (!state.user) return;
   $("#session-user").textContent = `${state.user.fullName} · ${roleLabel(state.user.role)}`;
   $("#author").value = state.user.fullName;
   $("#manage-users-open").hidden = !hasPermission("manage-users");
+  $("#banner-open").hidden = !hasPermission("manage-banner");
   $("#messages-open").hidden = !hasPermission("manage-messages");
   form.hidden = !hasPermission("create") || Boolean(state.pending);
   if (!hasPermission("create")) {
@@ -940,6 +1027,17 @@ $("#manage-users-open").addEventListener("click", async () => {
   await loadUsers();
   section.scrollIntoView({ behavior: "smooth", block: "start" });
 });
+$("#banner-open").addEventListener("click", async () => {
+  const section = $("#banner-management");
+  section.hidden = false;
+  try {
+    await loadBannerManager();
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) { showToast(error.message, true); }
+});
+$("#banner-speed-save").addEventListener("click", saveBannerSpeed);
+$("#banner-add-button").addEventListener("click", () => $("#banner-image-input").click());
+$("#banner-image-input").addEventListener("change", (event) => uploadBannerFiles(event.target.files));
 $("#messages-open").addEventListener("click", async () => {
   const section = $("#message-management");
   section.hidden = false;

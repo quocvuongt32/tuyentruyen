@@ -9,7 +9,7 @@ export const MAX_IMAGE_BYTES = 2_500_000;
 export const MAX_REQUEST_BYTES = 58 * 1024 * 1024;
 
 export const ROLE_PERMISSIONS = Object.freeze({
-  admin: ["create", "submit", "approve", "publish", "discard", "manage-users", "manage-messages"],
+  admin: ["create", "submit", "approve", "publish", "discard", "manage-users", "manage-messages", "manage-banner"],
   author: ["create", "submit", "discard"],
   approver: ["approve", "publish"],
 });

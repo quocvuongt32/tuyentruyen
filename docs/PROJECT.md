@@ -41,7 +41,9 @@ nội dung ở liên kết đó.
 cho tài khoản/bài viết, KV cho ảnh, phiên đăng nhập, CSRF token và phân quyền phía
 máy chủ. Ba vai trò là `author`, `approver` và `admin`.
 
-D1 đồng thời lưu thống kê truy cập ẩn danh, tổng lượt xem theo bài và tin nhắn góp ý.
+D1 đồng thời lưu thống kê truy cập ẩn danh, tổng lượt xem theo bài, tin nhắn góp ý và
+cấu hình banner Trang chủ. Ảnh banner tải mới được tối ưu ở trình duyệt rồi lưu trong
+KV; các ảnh banner kế thừa được quản lý bằng danh sách cấu hình trong D1.
 Mã phiên do trình duyệt tạo và mã chống lạm dụng được băm một chiều trước khi lưu;
 hệ thống không đưa họ tên, email hoặc địa chỉ IP rõ vào các bảng thống kê và góp ý.
 
@@ -68,7 +70,8 @@ Máy chủ chỉ giữ một tập thẻ nội tuyến tối thiểu và chỉ c
 - Kiểm tra kiến thức nhanh.
 - Liên kết tham khảo tới Bộ Công an, Cục A05 và Học viện CSND.
 - Thống kê đang truy cập, hôm nay, tháng hiện tại và tổng lượt truy cập.
-- Danh sách bài xem nhiều nhất và biểu mẫu tin nhắn không yêu cầu email.
+- Danh sách bài xem nhiều nhất đặt ngay dưới hàng số liệu đầu Trang chủ và biểu mẫu
+  tin nhắn không yêu cầu email.
 - Trang giới thiệu, liên hệ, điều khoản, bảo vệ dữ liệu cá nhân, bản quyền và nguồn.
 
 Không có đăng ký thành viên, đăng bài cộng đồng, bình luận hoặc diễn đàn. Tin nhắn
@@ -83,3 +86,4 @@ chỉ dành cho ba tài khoản được phân quyền; ảnh bản thảo khôn
 - Các miền trong `officialSources` và liên kết tham khảo: chỉ mở khi người dùng bấm.
 
 Website tự thống kê bằng D1 và không dùng dịch vụ phân tích hoặc bộ đếm truy cập bên thứ ba.
+Migration một lần đã đưa 4.155 lượt lịch sử từ bộ đếm cũ vào tổng D1 để không mất số liệu.

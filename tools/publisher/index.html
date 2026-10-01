@@ -18,6 +18,7 @@
         <div class="secure-chip"><span></span> <b id="session-user">Đang xác thực…</b></div>
         <button id="change-password-open" class="topbar-button" type="button">Đổi mật khẩu</button>
         <button id="manage-users-open" class="topbar-button" type="button" hidden>Quản lý tài khoản</button>
+        <button id="banner-open" class="topbar-button" type="button" hidden>Banner trang chủ</button>
         <button id="messages-open" class="topbar-button" type="button" hidden>Tin nhắn <span id="messages-badge" class="message-badge" hidden>0</span></button>
         <button id="logout-button" class="topbar-button danger-text" type="button">Đăng xuất</button>
       </div>
@@ -182,6 +183,18 @@
           <button id="publish-button" class="button primary" type="button" hidden>Đẩy lại lên website</button>
           <button id="copy-button" class="button ghost" type="button" hidden>Sao chép liên kết</button>
         </div>
+      </section>
+
+      <section id="banner-management" class="panel banner-management" hidden>
+        <div class="panel-heading"><span class="step-number">BANNER</span><div><h2>Banner chính của Trang chủ</h2><p>Thêm hoặc xóa ảnh đang chạy và điều chỉnh thời gian chuyển giữa hai ảnh.</p></div></div>
+        <div class="banner-admin-toolbar">
+          <label class="field banner-speed-field"><span>Thời gian hiển thị mỗi ảnh</span><span class="banner-speed-control"><input id="banner-interval-seconds" type="number" min="2" max="20" step="1" value="4"><b>giây</b></span></label>
+          <button id="banner-speed-save" class="button ghost" type="button">Lưu tốc độ</button>
+          <button id="banner-add-button" class="button primary" type="button">＋ Thêm ảnh banner</button>
+          <input id="banner-image-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+        </div>
+        <p class="banner-admin-note">Ảnh được tự tối ưu về JPEG, cạnh dài tối đa 1.920 px. Có thể tải tối đa 8 ảnh mỗi lần và lưu tối đa 30 ảnh.</p>
+        <div id="banner-image-list" class="banner-image-list"><p class="empty-admin">Đang tải danh sách banner…</p></div>
       </section>
 
       <section id="user-management" class="panel user-management" hidden>

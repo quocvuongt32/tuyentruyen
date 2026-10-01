@@ -23,6 +23,18 @@ Admin có thể đổi họ tên, vai trò, trạng thái hoạt động, đặt
 tài khoản khác và xử lý góp ý trong mục **Tin nhắn**. Hệ thống không cho tài khoản đang
 đăng nhập tự khóa hoặc tự đổi vai trò tại màn hình này.
 
+## Quản lý banner Trang chủ
+
+1. Đăng nhập bằng tài khoản `admin`, chọn **Banner trang chủ** trên thanh công cụ.
+2. Chọn **Thêm ảnh banner** để tải JPG, PNG hoặc WebP. Ảnh được tự xoay, tối ưu thành
+   JPEG và giới hạn cạnh dài 1.920 px trước khi gửi lên kho ảnh.
+3. Bấm **Xóa** dưới ảnh không còn dùng. Ảnh biến mất khỏi vòng chạy sau khi Trang chủ
+   được tải lại.
+4. Nhập thời gian từ 2 đến 20 giây và chọn **Lưu tốc độ**. Giá trị mặc định là 4 giây/ảnh.
+
+Mỗi lần tải tối đa 8 ảnh, toàn bộ banner tối đa 30 ảnh. Nếu xóa hết ảnh, Trang chủ vẫn
+hiển thị huy hiệu của Cẩm nang và không phát sinh khung ảnh lỗi.
+
 ## Xử lý tin nhắn người đọc
 
 - Biểu mẫu cuối trang chủ chỉ nhận nội dung, không yêu cầu họ tên hoặc email.

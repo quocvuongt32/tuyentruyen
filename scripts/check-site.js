@@ -32,13 +32,14 @@ const adminHtml = fs.readFileSync(path.join(dist, "admin", "index.html"), "utf8"
 const loginHtml = fs.readFileSync(path.join(dist, "admin", "login", "index.html"), "utf8");
 if (!adminHtml.includes('/admin/app.js') || !loginHtml.includes('/admin/login.js')) errors.push("Tài sản cổng /admin chưa dùng đường dẫn public cố định.");
 if (/Dang-bai\.bat|127\.0\.0\.1|localhost/i.test(`${adminHtml}\n${loginHtml}`)) errors.push("Giao diện /admin public còn hướng dẫn dành riêng cho cổng cục bộ.");
+if (!adminHtml.includes('id="banner-management"') || !adminHtml.includes('id="banner-interval-seconds"')) errors.push("Cổng /admin chưa có chức năng quản lý ảnh và tốc độ banner.");
 
 const html = fs.readFileSync(path.join(dist, "index.html"), "utf8");
 for (const match of html.matchAll(/(?:src|href)="((?:css|js|img)\/[^"?#]+)"/g)) requireFile(match[1]);
 if (/newsletter|api\/newsletter|web3forms|type="email"/i.test(html)) errors.push("Trang chủ vẫn còn chức năng hoặc trường thu thập email.");
 if (!html.includes("KHOA TOÁN - TIN HỌC VÀ ỨNG DỤNG KHCN TRONG PCTP")) errors.push("Footer trang chủ chưa đúng tên đơn vị.");
 if (!html.includes("Cổng thông tin và nguồn tham khảo")) errors.push("Trang chủ chưa có khu vực cổng thông tin và nguồn tham khảo.");
-if (!html.includes('id="popular-articles"')) errors.push("Trang chủ chưa có khu vực bài xem nhiều nhất.");
+if (!html.includes('id="popular-articles"') || !html.includes('class="home-popular"')) errors.push("Đầu Trang chủ chưa có khu vực bài xem nhiều nhất.");
 if (!html.includes('id="feedback-form"') || !html.includes("Thống kê truy cập")) errors.push("Trang chủ chưa có biểu mẫu tin nhắn hoặc thống kê truy cập.");
 if (/quick-news|news-ticker|tin-nhanh|Tổng hợp tin tức|Tin mới từ Bộ Công an|Làm mới tin/i.test(html)) errors.push("Trang chủ vẫn còn dấu vết khối tổng hợp tin cũ.");
 if (!html.includes("sản phẩm dự thi Cuộc thi")) errors.push("Footer chưa nêu trạng thái sản phẩm dự thi.");

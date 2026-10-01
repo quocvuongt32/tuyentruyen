@@ -23,7 +23,7 @@ Cloudflare Pages:
 - Không có `.publisher/`, dữ liệu tài khoản, bản băm mật khẩu hoặc phiên đăng nhập trong `dist/`.
 - Khu vực nguồn tham khảo có đúng ba thẻ: Bộ Công an, A05 và Học viện CSND.
 - Trang chủ có bộ đếm truy cập, danh sách bài xem nhiều và biểu mẫu gửi tin nhắn;
-  `/admin` có khu vực xử lý tin nhắn cho tài khoản quản trị.
+  `/admin` có khu vực xử lý tin nhắn và quản lý banner cho tài khoản quản trị.
 - Chân trang hiển thị đúng cơ quan chủ quản, đơn vị quản lý và người chịu trách nhiệm.
 - Trường email/điện thoại để trống sẽ tự ẩn; chỉ điền thông tin công vụ đã xác nhận.
 - Câu định danh pháp lý cuối chân trang chỉ hiện khi đặt
@@ -51,6 +51,9 @@ Không mở quyền camera, microphone hoặc định vị; không cho website k
 Trước lần triển khai đầu phải chạy toàn bộ migration trong `migrations/` và seed ba tài khoản.
 Migration `0002_engagement.sql` tạo bảng thống kê truy cập, lượt xem bài, phiên đang
 hoạt động và tin nhắn góp ý. Phải áp dụng migration này trước khi triển khai mã mới.
+Migration `0003_banner_and_legacy_traffic.sql` cộng một lần 4.155 lượt lịch sử vào
+tổng D1, tạo cấu hình tốc độ banner và khởi tạo danh sách 15 ảnh banner hiện có.
+Phải áp dụng migration này trước khi triển khai API quản lý banner.
 Không đưa `.publisher/`, `.wrangler/`, mật khẩu tạm hoặc trạng thái cơ sở dữ liệu cục
 bộ vào Git. Mỗi tài khoản phải đổi mật khẩu ở lần đăng nhập đầu.
 

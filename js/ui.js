@@ -88,17 +88,43 @@ function setupHomeLinks() {
   });
 }
 
-// Carousel o vi tri logo lon trong Hero: bat dau bang huy hieu, roi chay qua
-// het anh Banner, lap lai vo han - moi anh hien 4 giay, truot ngang cham vua
-// du de khong hoa mat.
+// Carousel ở vị trí logo lớn trong Hero: bắt đầu bằng huy hiệu, rồi chạy qua
+// danh sách ảnh do quản trị viên cấu hình. HTML giữ sẵn danh sách cũ làm
+// phương án dự phòng nếu API tạm thời không truy cập được.
 //
 // Cac anh Banner trong HTML dung data-src (khong phai src) - xem chu thich o
 // index.html. primeSlide() gan src that khi sap toi luot anh do, nen khach chi
 // luot qua trang chu chi tai 2-3 anh thay vi ca 15 anh (~1,8MB). Anh da gan
 // src roi thi thoi, khong gan lai.
-function setupHeroCarousel() {
+async function setupHeroCarousel() {
   const track = document.getElementById("hero-icon");
   if (!track) return;
+  let intervalMs = 4000;
+  try {
+    const response = await fetch("/api/public/banner", { cache: "no-store" });
+    if (response.ok) {
+      const data = await response.json();
+      const logo = track.querySelector('img[data-logo="true"]');
+      if (logo && Array.isArray(data.images)) {
+        logo.classList.remove("is-prev");
+        logo.classList.add("is-active");
+        track.replaceChildren(logo);
+        data.images.forEach((item) => {
+          if (!item?.src) return;
+          const image = document.createElement("img");
+          image.dataset.src = item.src;
+          image.alt = item.caption || "";
+          track.appendChild(image);
+        });
+      }
+      const configuredInterval = Number(data.intervalMs);
+      if (Number.isInteger(configuredInterval) && configuredInterval >= 2000 && configuredInterval <= 20000) {
+        intervalMs = configuredInterval;
+      }
+    }
+  } catch (_) {
+    // Giữ danh sách ảnh có sẵn trong HTML nếu API tạm thời không phản hồi.
+  }
   const slides = Array.from(track.querySelectorAll("img"));
   if (slides.length < 2) return;
 
@@ -124,7 +150,7 @@ function setupHeroCarousel() {
     slides[prev].classList.add("is-prev");
     slides[idx].classList.add("is-active");
     setTimeout(() => slides[prev].classList.remove("is-prev"), 950);
-  }, 4000);
+  }, intervalMs);
 }
 
 function setupAdminMenu() {

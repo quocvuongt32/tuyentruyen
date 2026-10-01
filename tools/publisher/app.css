@@ -148,7 +148,19 @@ main { width: min(1400px, calc(100% - 32px)); margin: 28px auto 70px; }
 .result-copy h2, .result-copy p { margin: 0 0 6px; }
 .result-copy p { color: var(--muted); }
 .result-copy code { color: #17617a; overflow-wrap: anywhere; }
-.user-management { margin-top: 24px; }
+.banner-management, .user-management { margin-top: 24px; }
+.banner-admin-toolbar { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
+.banner-speed-field { min-width: 220px; }
+.banner-speed-control { display: flex; align-items: center; gap: 8px; }
+.banner-speed-control input { width: 110px; }
+.banner-speed-control b { color: var(--muted); font-size: .8rem; }
+.banner-admin-note { margin: 14px 0 18px; color: var(--muted); font-size: .78rem; }
+.banner-image-list { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+.banner-admin-item { position: relative; margin: 0; border: 1px solid var(--line); background: #f8fafc; }
+.banner-admin-item img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #dce5eb; }
+.banner-admin-item figcaption { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px; }
+.banner-admin-item figcaption span { min-width: 0; overflow: hidden; color: var(--muted); font-size: .7rem; text-overflow: ellipsis; white-space: nowrap; }
+.banner-admin-item button { flex: 0 0 auto; border: 1px solid #ddaab0; color: var(--danger); background: white; padding: 6px 9px; cursor: pointer; font-weight: 800; }
 .user-list { display: grid; gap: 12px; }
 .user-row { display: grid; grid-template-columns: minmax(190px,1.2fr) minmax(180px,1fr) minmax(165px,.8fr) auto; gap: 12px; align-items: center; padding: 14px; border: 1px solid var(--line); background: #f8fafc; }
 .user-identity { display: grid; gap: 3px; }
@@ -183,6 +195,7 @@ main { width: min(1400px, calc(100% - 32px)); margin: 28px auto 70px; }
 .toast.show { transform: translateY(0); }
 .toast.error { border-left-color: #f26a74; }
 [hidden] { display: none !important; }
-@media (max-width: 1120px) { .session-tools .secure-chip { display: none; } .user-row { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 1120px) { .session-tools .secure-chip { display: none; } .user-row { grid-template-columns: 1fr 1fr; } .banner-image-list { grid-template-columns: repeat(3,minmax(0,1fr)); } }
 @media (max-width: 1050px) { .workspace { grid-template-columns: 1fr; } .preview-sticky { position: static; } .preview-column { max-width: 720px; } }
-@media (max-width: 760px) { main { width: min(100% - 18px,1400px); } .topbar { height:auto; min-height:76px; padding:10px 12px; flex-wrap:wrap; } .brand-copy span, .secure-chip { display: none; } .session-tools { width:100%; margin-left:0; justify-content:flex-end; } .hero-panel { padding: 27px 22px; display: block; } .progress { margin-top: 28px; justify-content: center; } .progress li { min-width: 75px; } .progress li:not(:last-child)::after { width: 42px; } .progress span { font-size:.66rem; text-align:center; } .type-picker, .form-grid { grid-template-columns: 1fr; } .panel { padding: 20px 15px; } .rich-editor { min-height:360px; padding:20px 16px; } .image-list { grid-template-columns: repeat(2,1fr); } .pending-banner, .result-panel { align-items: stretch; flex-direction: column; } .user-row, .message-row { grid-template-columns:1fr; } .user-actions, .message-actions { justify-content:flex-start; } }
+@media (max-width: 760px) { main { width: min(100% - 18px,1400px); } .topbar { height:auto; min-height:76px; padding:10px 12px; flex-wrap:wrap; } .brand-copy span, .secure-chip { display: none; } .session-tools { width:100%; margin-left:0; justify-content:flex-end; flex-wrap:wrap; } .hero-panel { padding: 27px 22px; display: block; } .progress { margin-top: 28px; justify-content: center; } .progress li { min-width: 75px; } .progress li:not(:last-child)::after { width: 42px; } .progress span { font-size:.66rem; text-align:center; } .type-picker, .form-grid { grid-template-columns: 1fr; } .panel { padding: 20px 15px; } .rich-editor { min-height:360px; padding:20px 16px; } .image-list, .banner-image-list { grid-template-columns: repeat(2,1fr); } .pending-banner, .result-panel { align-items: stretch; flex-direction: column; } .user-row, .message-row { grid-template-columns:1fr; } .user-actions, .message-actions { justify-content:flex-start; } }
+@media (max-width: 460px) { .banner-image-list { grid-template-columns: 1fr; } .banner-admin-toolbar > .button { width: 100%; } }

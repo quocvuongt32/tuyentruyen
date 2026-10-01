@@ -60,6 +60,26 @@ async function main() {
   const feedbackContent = `Tin nhắn kiểm thử hệ thống ${idSuffix}`;
   await request("/api/messages/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ visitorToken, content: feedbackContent, website: "" }) });
   const adminHeaders = { "Content-Type": "application/json", Cookie: admin.cookie, "X-Publisher-Token": admin.csrfToken };
+  const publicBannerBefore = (await request("/api/public/banner")).data;
+  assert(publicBannerBefore.images.length >= 1, "Banner công khai chưa có danh sách ảnh ban đầu.");
+  const adminBanner = (await request("/api/banner", { headers: { Cookie: admin.cookie } })).data;
+  assert.strictEqual(adminBanner.images.length, publicBannerBefore.images.length);
+  assert(adminBanner.maxImages >= adminBanner.images.length);
+  const existingBannerIds = new Set(adminBanner.images.map((item) => item.id));
+  const uploadedBanner = (await request("/api/banner/upload", { method: "POST", headers: adminHeaders, body: JSON.stringify({ images: [{ dataUrl, caption: "Ảnh kiểm thử banner" }] }) })).data;
+  const addedBanner = uploadedBanner.images.find((item) => !existingBannerIds.has(item.id));
+  assert(addedBanner?.uploaded, "Ảnh banner tải lên chưa xuất hiện trong cấu hình.");
+  const bannerMedia = await fetch(`${base}${addedBanner.src}`);
+  assert.strictEqual(bannerMedia.status, 200);
+  assert.strictEqual(bannerMedia.headers.get("content-type"), "image/jpeg");
+  await request("/api/banner/settings", { method: "POST", headers: adminHeaders, body: JSON.stringify({ intervalMs: 5000 }) });
+  const publicBannerChanged = (await request("/api/public/banner")).data;
+  assert.strictEqual(publicBannerChanged.intervalMs, 5000);
+  assert(publicBannerChanged.images.some((item) => item.id === addedBanner.id));
+  await request("/api/banner/delete", { method: "POST", headers: adminHeaders, body: JSON.stringify({ id: addedBanner.id }) });
+  await request("/api/banner/settings", { method: "POST", headers: adminHeaders, body: JSON.stringify({ intervalMs: 4000 }) });
+  const publicBannerAfter = (await request("/api/public/banner")).data;
+  assert(!publicBannerAfter.images.some((item) => item.id === addedBanner.id));
   const messages = (await request("/api/messages", { headers: { Cookie: admin.cookie } })).data.messages;
   const feedback = messages.find((item) => item.content === feedbackContent);
   assert(feedback, "Tin nhắn góp ý chưa xuất hiện trong trang quản trị.");
@@ -123,7 +143,7 @@ async function main() {
   assert(analytics.stats.total >= 1 && analytics.stats.today >= 1 && analytics.stats.month >= 1);
   assert(analytics.popular.some((item) => item.path === new URL(published.url).pathname));
   await request("/api/messages/delete", { method: "POST", headers: adminHeaders, body: JSON.stringify({ id: feedback.id }) });
-  console.log(JSON.stringify({ wrongPassword: rejected.status, created: created.workflowStatus, reviewed: reviewed.workflowStatus, draftMediaAnonymous: 404, published: published.workflowStatus, url: published.url, publicPosts: publicPosts.length, media: mediaResponse.status, traffic: analytics.stats, popularTracked: true, messageWorkflow: "NEW → READ → DELETED" }, null, 2));
+  console.log(JSON.stringify({ wrongPassword: rejected.status, created: created.workflowStatus, reviewed: reviewed.workflowStatus, draftMediaAnonymous: 404, published: published.workflowStatus, url: published.url, publicPosts: publicPosts.length, media: mediaResponse.status, traffic: analytics.stats, popularTracked: true, messageWorkflow: "NEW → READ → DELETED", bannerWorkflow: "LIST → UPLOAD → SPEED → DELETE" }, null, 2));
 }
 
 main().catch((error) => {

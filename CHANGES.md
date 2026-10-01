@@ -1,6 +1,6 @@
 # Báo cáo rà soát website
 
-Ngày thực hiện: 30/9/2026
+Ngày cập nhật: 1/10/2026
 
 ## 1. Chức năng tổng hợp tin đã gỡ
 
@@ -52,6 +52,8 @@ Ngày thực hiện: 30/9/2026
   mật khẩu được băm, ảnh bản thảo không công khai trước khi duyệt.
 - Bổ sung thống kê truy cập ẩn danh, cột bài xem nhiều và biểu mẫu gửi tin nhắn không
   thu thập email; admin có quyền đọc, đánh dấu đã đọc và xóa tin nhắn.
+- Khôi phục 4.155 lượt truy cập lịch sử vào D1, đưa bài xem nhiều lên ngay đầu Trang
+  chủ và thêm quyền quản lý ảnh/tốc độ banner cho admin.
 - Bản chưa xuất bản bị loại khỏi build công khai nhưng vẫn có thể xem trước tại máy.
 - Metadata lưu người tạo, người biên tập/rà soát, người cập nhật, người phê duyệt,
   người xuất bản, các mốc thời gian, lịch sử phiên bản và tài liệu tham khảo.

@@ -44,6 +44,8 @@ function origin(context) {
 const VISIT_SESSION_MS = 30 * 60 * 1000;
 const ONLINE_WINDOW_MS = 5 * 60 * 1000;
 const MESSAGE_COOLDOWN_MS = 60 * 1000;
+const MAX_BANNER_IMAGES = 30;
+const MAX_BANNER_UPLOAD_BATCH = 8;
 
 function dateKey(timestamp = Date.now()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -374,6 +376,104 @@ async function publicPosts(context) {
   return json({ ok: true, posts: (result.results || []).map(publicPostFromRow) }, 200, { "Cache-Control": "public, max-age=30, stale-while-revalidate=120" });
 }
 
+function normalizeBannerInterval(value) {
+  const interval = Number(value);
+  if (!Number.isInteger(interval) || interval < 2000 || interval > 20000) {
+    throw new Error("Tốc độ banner phải từ 2 đến 20 giây.");
+  }
+  return interval;
+}
+
+async function bannerData(context) {
+  const [settings, images] = await Promise.all([
+    context.env.DB.prepare("SELECT interval_ms FROM site_banner_settings WHERE id=1").first(),
+    context.env.DB.prepare("SELECT id,path,caption,sort_order,storage_key FROM site_banner_images ORDER BY sort_order,created_at,id").all(),
+  ]);
+  return {
+    intervalMs: Number(settings?.interval_ms || 4000),
+    images: (images.results || []).map((item) => ({
+      id: item.id,
+      src: item.path,
+      caption: item.caption || "",
+      sortOrder: Number(item.sort_order || 0),
+      uploaded: Boolean(item.storage_key),
+    })),
+  };
+}
+
+async function publicBanner(context) {
+  const data = await bannerData(context);
+  return json({ ok: true, ...data }, 200, { "Cache-Control": "no-store" });
+}
+
+async function adminBanner(context, session) {
+  requirePermission(session, "manage-banner");
+  return json({ ok: true, ...(await bannerData(context)), maxImages: MAX_BANNER_IMAGES, maxUploadBatch: MAX_BANNER_UPLOAD_BATCH });
+}
+
+async function uploadBannerImages(context, session, input) {
+  requirePermission(session, "manage-banner");
+  assertCsrf(context, session);
+  const inputImages = Array.isArray(input?.images) ? input.images : [];
+  if (!inputImages.length) throw new Error("Hãy chọn ít nhất một ảnh banner.");
+  if (inputImages.length > MAX_BANNER_UPLOAD_BATCH) throw new Error(`Mỗi lần chỉ tải tối đa ${MAX_BANNER_UPLOAD_BATCH} ảnh banner.`);
+  const count = await context.env.DB.prepare("SELECT COUNT(*) AS total FROM site_banner_images").first();
+  if (Number(count?.total || 0) + inputImages.length > MAX_BANNER_IMAGES) {
+    throw new Error(`Banner chỉ lưu tối đa ${MAX_BANNER_IMAGES} ảnh. Hãy xóa bớt ảnh cũ trước.`);
+  }
+  const order = await context.env.DB.prepare("SELECT COALESCE(MAX(sort_order),0) AS maximum FROM site_banner_images").first();
+  const baseOrder = Number(order?.maximum || 0);
+  const now = Date.now();
+  const uploaded = [];
+  try {
+    for (let index = 0; index < inputImages.length; index++) {
+      const id = crypto.randomUUID();
+      const key = `banner/${id}.jpg`;
+      const bytes = base64Jpeg(inputImages[index]?.dataUrl, index);
+      const caption = cleanText(inputImages[index]?.caption, 180, "chú thích banner");
+      await context.env.MEDIA.put(key, bytes, { metadata: { contentType: "image/jpeg" } });
+      uploaded.push({
+        id,
+        key,
+        path: `/media/banner/${id}.jpg`,
+        caption,
+        sortOrder: baseOrder + ((index + 1) * 10),
+      });
+    }
+    await context.env.DB.batch(uploaded.map((item) => context.env.DB.prepare(`
+      INSERT INTO site_banner_images(id,path,storage_key,caption,sort_order,uploaded_by,created_at,updated_at)
+      VALUES(?,?,?,?,?,?,?,?)
+    `).bind(item.id, item.path, item.key, item.caption, item.sortOrder, session.user.username, now, now)));
+  } catch (error) {
+    await Promise.all(uploaded.map((item) => context.env.MEDIA.delete(item.key).catch(() => {})));
+    throw error;
+  }
+  return json({ ok: true, ...(await bannerData(context)) }, 201);
+}
+
+async function updateBannerSettings(context, session, input) {
+  requirePermission(session, "manage-banner");
+  assertCsrf(context, session);
+  const intervalMs = normalizeBannerInterval(input?.intervalMs);
+  await context.env.DB.prepare(`INSERT INTO site_banner_settings(id,interval_ms,updated_by,updated_at) VALUES(1,?,?,?)
+    ON CONFLICT(id) DO UPDATE SET interval_ms=excluded.interval_ms,updated_by=excluded.updated_by,updated_at=excluded.updated_at`)
+    .bind(intervalMs, session.user.username, Date.now()).run();
+  return json({ ok: true, intervalMs });
+}
+
+async function deleteBannerImage(context, session, input) {
+  requirePermission(session, "manage-banner");
+  assertCsrf(context, session);
+  const id = String(input?.id || "").trim();
+  if (!/^[a-z0-9-]{8,80}$/i.test(id)) throw new Error("Mã ảnh banner không hợp lệ.");
+  const row = await context.env.DB.prepare("SELECT storage_key FROM site_banner_images WHERE id=? LIMIT 1").bind(id).first();
+  if (!row) throw new HttpError(404, "Không tìm thấy ảnh banner.");
+  const result = await context.env.DB.prepare("DELETE FROM site_banner_images WHERE id=?").bind(id).run();
+  if (Number(result.meta?.changes) !== 1) throw new HttpError(409, "Danh sách banner vừa thay đổi. Hãy tải lại trang.");
+  if (row.storage_key) await context.env.MEDIA.delete(row.storage_key).catch(() => {});
+  return json({ ok: true });
+}
+
 async function touchVisitor(context, input) {
   assertSameOrigin(context);
   const hash = await visitorHash(input);
@@ -527,6 +627,7 @@ export async function onRequest(context) {
     if (path === "login" && method === "POST") return await login(context, await readJson(context.request));
     if (path === "logout" && method === "POST") return await logout(context);
     if (path === "public/posts" && method === "GET") return await publicPosts(context);
+    if (path === "public/banner" && method === "GET") return await publicBanner(context);
     if (path === "analytics/summary" && method === "GET") return await analyticsSummary(context);
     if (path === "analytics/visit" && method === "POST") return await recordVisit(context, await readJson(context.request));
     if (path === "analytics/view" && method === "POST") return await recordArticleView(context, await readJson(context.request));
@@ -543,6 +644,10 @@ export async function onRequest(context) {
     if (path === "messages" && method === "GET") return await listMessages(context, session);
     if (path === "messages/read" && method === "POST") return await updateMessage(context, session, await readJson(context.request));
     if (path === "messages/delete" && method === "POST") return await updateMessage(context, session, await readJson(context.request), true);
+    if (path === "banner" && method === "GET") return await adminBanner(context, session);
+    if (path === "banner/upload" && method === "POST") return await uploadBannerImages(context, session, await readJson(context.request));
+    if (path === "banner/settings" && method === "POST") return await updateBannerSettings(context, session, await readJson(context.request));
+    if (path === "banner/delete" && method === "POST") return await deleteBannerImage(context, session, await readJson(context.request));
     if (path === "create" && method === "POST") return await createPost(context, session, await readJson(context.request));
     if (path === "review" && method === "POST") return await submitReview(context, session);
     if (path === "approve-publish" && method === "POST") return await approveAndPublish(context, session);

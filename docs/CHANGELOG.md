@@ -1,5 +1,15 @@
 # Nhật ký thay đổi
 
+## 1/10/2026 — Khôi phục lượt truy cập và quản lý banner
+
+- Khôi phục 4.155 lượt truy cập lịch sử từ bộ đếm GoatCounter cũ và giữ nguyên toàn
+  bộ lượt D1 đã phát sinh, không ghi đè số mới.
+- Chuyển khối **Bài được xem nhiều nhất** lên ngay dưới hàng số liệu đầu Trang chủ để
+  người đọc nhìn thấy mà không cần cuộn tới dòng thời gian.
+- Bổ sung mục **Banner trang chủ** cho admin: xem danh sách, thêm/xóa ảnh và đặt tốc độ
+  chuyển ảnh từ 2 đến 20 giây.
+- Khởi tạo 15 ảnh banner hiện có vào D1; ảnh mới được tối ưu rồi lưu trong KV.
+
 ## 30/9/2026 — Thống kê truy cập, bài xem nhiều và tin nhắn góp ý
 
 - Bổ sung bộ đếm đang truy cập, hôm nay, tháng hiện tại và tổng lượt truy cập bằng D1.

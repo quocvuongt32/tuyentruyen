@@ -42,7 +42,7 @@ tối ưu được lưu trong kho KV riêng, không nhúng mật khẩu hoặc �
 
 Ba tài khoản khởi tạo:
 
-- `admin`: quản trị toàn quyền, có thể soạn, gửi duyệt, thẩm định, đăng, quản lý tài khoản và xử lý tin nhắn góp ý.
+- `admin`: quản trị toàn quyền, có thể soạn, gửi duyệt, thẩm định, đăng, quản lý tài khoản, xử lý tin nhắn góp ý và quản lý banner Trang chủ.
 - `nganpt`: Thượng tá Phạm Thị Ngân, có quyền thẩm định và đăng bài.
 - `vuongnq`: Đại úy Nguyễn Quốc Vương, có quyền soạn và gửi bài đi duyệt.
 
@@ -66,6 +66,10 @@ Tài khoản soạn bài thông thường không thể tự duyệt. Theo yêu c
 
 Ảnh JPG/PNG/WebP gốc tới 250 MB được chuẩn hóa thành JPEG, cạnh dài tối đa 1.920 px
 và điều chỉnh chất lượng theo dung lượng mục tiêu mà vẫn ưu tiên độ nét.
+
+Trong mục **Banner trang chủ**, admin có thể thêm hoặc xóa ảnh đang chạy và đặt thời
+gian hiển thị mỗi ảnh từ 2 đến 20 giây. Danh sách banner và tốc độ được lưu trong D1;
+ảnh tải mới được tối ưu rồi lưu trong KV.
 
 ## Kiểm tra
 
@@ -92,3 +96,5 @@ npm run check
 - Liên kết ngoài mở tab mới với `noopener noreferrer`.
 - Website tự thống kê trên Cloudflare D1, không dùng dịch vụ phân tích hoặc bộ đếm
   truy cập bên thứ ba.
+- Tổng truy cập D1 đã kế thừa 4.155 lượt lịch sử do bộ đếm cũ ghi nhận; các lượt mới
+  tiếp tục tăng trên cùng tổng này mà không gọi lại dịch vụ cũ.
