@@ -21,7 +21,7 @@ async function loadEvents() {
     const payload = await res.json();
     const cloudEvents = Array.isArray(cloudResult.posts) ? cloudResult.posts : [];
     const staticEvents = Array.isArray(payload.events) ? payload.events : [];
-    const events = [...cloudEvents, ...staticEvents].filter((event, index, list) => event?.slug && list.findIndex((item) => item?.slug === event.slug) === index);
+    const events = mergeManagedPosts(cloudEvents, staticEvents, cloudResult.controls, "event");
 
     eventsBySlug = {};
     events.forEach((ev) => {

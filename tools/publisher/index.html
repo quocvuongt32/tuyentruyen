@@ -18,6 +18,8 @@
         <div class="secure-chip"><span></span> <b id="session-user">Đang xác thực…</b></div>
         <button id="change-password-open" class="topbar-button" type="button">Đổi mật khẩu</button>
         <button id="manage-users-open" class="topbar-button" type="button" hidden>Quản lý tài khoản</button>
+        <button id="published-posts-open" class="topbar-button" type="button" hidden>Quản lý bài đã đăng</button>
+        <button id="site-texts-open" class="topbar-button" type="button" hidden>Chỉnh chữ Trang chủ</button>
         <button id="banner-open" class="topbar-button" type="button" hidden>Banner trang chủ</button>
         <button id="messages-open" class="topbar-button" type="button" hidden>Hộp thư góp ý <span id="messages-badge" class="message-badge" hidden>0</span></button>
         <button id="logout-button" class="topbar-button danger-text" type="button">Đăng xuất</button>
@@ -76,7 +78,7 @@
                 <div><h2>Nội dung bài</h2><p>Các ô có dấu * là bắt buộc.</p></div>
               </div>
               <div class="form-grid">
-                <label class="field full"><span>Tiêu đề *</span><input id="title" name="title" maxlength="180" required placeholder="Ví dụ: Tuyên truyền kỹ năng sử dụng dịch vụ công trực tuyến an toàn"></label>
+                <div class="field full"><span>Tiêu đề *</span><input id="title" name="title" maxlength="180" required placeholder="Ví dụ: Tuyên truyền kỹ năng sử dụng dịch vụ công trực tuyến an toàn"><label class="alignment-control"><span>Căn tiêu đề</span><select id="title-align"><option value="justify" selected>Căn đều hai bên (mặc định)</option><option value="left">Căn trái</option><option value="center">Căn giữa</option><option value="right">Căn phải</option></select></label></div>
                 <label class="field"><span>Tác giả *</span><input id="author" name="author" readonly aria-readonly="true"></label>
                 <label class="field"><span>Ngày đăng *</span><input id="date" name="date" type="date" required></label>
                 <label id="placement-field" class="field"><span>Vị trí hiển thị *</span><select id="placement" name="placement" required>
@@ -93,7 +95,7 @@
                 <label id="location-field" class="field full"><span>Địa điểm</span><input id="location" name="location" maxlength="220" placeholder="Ví dụ: Trường THPT..., TP Hà Nội"></label>
                 <label id="series-field" class="field" hidden><span>Tên chuỗi kỹ năng</span><input id="series" name="series" maxlength="160" placeholder="Ví dụ: Kỹ năng chuyển đổi số cho công dân"></label>
                 <label id="order-field" class="field" hidden><span>Thứ tự trong chuỗi</span><input id="order" name="order" type="number" min="1" max="999" placeholder="1"></label>
-                <label class="field full"><span>Tóm tắt *</span><textarea id="summary" name="summary" maxlength="320" rows="3" required placeholder="Hai đến ba câu ngắn giúp người đọc hiểu ngay bài viết nói về điều gì."></textarea><small><b id="summary-count">0</b>/320 ký tự</small></label>
+                <div class="field full"><span>Tóm tắt *</span><textarea id="summary" name="summary" maxlength="320" rows="3" required placeholder="Hai đến ba câu ngắn giúp người đọc hiểu ngay bài viết nói về điều gì."></textarea><div class="field-foot"><small><b id="summary-count">0</b>/320 ký tự</small><label class="alignment-control"><span>Căn tóm tắt</span><select id="summary-align"><option value="justify" selected>Căn đều hai bên (mặc định)</option><option value="left">Căn trái</option><option value="center">Căn giữa</option><option value="right">Căn phải</option></select></label></div></div>
                 <div class="field full">
                   <span>Nội dung chi tiết *</span>
                   <div class="rich-editor-shell">
@@ -168,6 +170,7 @@
               <div class="url-preview"><span>Đường dẫn dự kiến</span><code id="slug-preview">/hoat-dong/ten-bai-viet/</code></div>
               <div class="publish-note"><b>Không đăng ngay.</b> Bài được lưu ở trạng thái bản nháp, sau đó phải gửi duyệt và được một người khác phê duyệt trước khi xuất bản.</div>
               <button id="save-button" class="button primary large" type="submit"><span>Lưu & kiểm tra toàn bộ</span><small>Chưa đưa lên Internet</small></button>
+              <button id="cancel-edit-button" class="button ghost large" type="button" hidden>Hủy sửa bài đã đăng</button>
             </div>
           </aside>
         </section>
@@ -185,6 +188,15 @@
         </div>
       </section>
 
+      <section id="published-post-management" class="panel published-post-management" hidden>
+        <div class="panel-heading"><span class="step-number">BÀI ĐÃ ĐĂNG</span><div><h2>Quản lý bài đã xuất bản</h2><p>Kéo từng bài để đổi thứ tự hiển thị. Admin có thể mở bài, sửa nội dung hoặc xóa khỏi website.</p></div></div>
+        <div class="published-toolbar"><button id="published-refresh" class="button ghost" type="button">Làm mới danh sách</button><span id="published-save-note">Thứ tự mới được lưu tự động sau khi thả.</span></div>
+        <div class="published-columns">
+          <section><h3>Hoạt động và tuyên truyền</h3><div id="published-event-list" class="published-post-list"><p class="empty-admin">Đang tải bài đã đăng…</p></div></section>
+          <section><h3>Bộ kỹ năng An toàn số</h3><div id="published-skill-list" class="published-post-list"><p class="empty-admin">Đang tải bài đã đăng…</p></div></section>
+        </div>
+      </section>
+
       <section id="banner-management" class="panel banner-management" hidden>
         <div class="panel-heading"><span class="step-number">BANNER</span><div><h2>Banner chính của Trang chủ</h2><p>Thêm hoặc xóa ảnh đang chạy và điều chỉnh thời gian chuyển giữa hai ảnh.</p></div></div>
         <div class="banner-admin-toolbar">
@@ -198,8 +210,24 @@
       </section>
 
       <section id="user-management" class="panel user-management" hidden>
-        <div class="panel-heading"><span class="step-number">ADMIN</span><div><h2>Quản lý tài khoản</h2><p>Phân quyền, khóa tài khoản và đặt lại mật khẩu tạm.</p></div></div>
+        <div class="panel-heading"><span class="step-number">ADMIN</span><div><h2>Quản lý tài khoản</h2><p>Tạo tài khoản mới, phân quyền, khóa tài khoản và đặt lại mật khẩu tạm.</p></div></div>
+        <form id="create-user-form" class="create-user-form">
+          <label class="field"><span>Tên đăng nhập mới</span><input id="create-username" minlength="3" maxlength="32" pattern="[a-z][a-z0-9._-]{2,31}" autocomplete="off" required placeholder="Ví dụ: nguyenvana"></label>
+          <label class="field"><span>Họ tên</span><input id="create-full-name" maxlength="160" autocomplete="off" required placeholder="Họ và tên người dùng"></label>
+          <label class="field"><span>Vai trò</span><select id="create-role"><option value="author">Soạn và gửi duyệt</option><option value="approver">Thẩm định và đăng</option><option value="admin">Quản trị toàn quyền</option></select></label>
+          <label class="field"><span>Mật khẩu tạm</span><input id="create-temporary-password" type="password" minlength="12" autocomplete="new-password" required placeholder="Ít nhất 12 ký tự"></label>
+          <button class="button primary" type="submit">＋ Tạo tài khoản</button>
+        </form>
+        <p class="user-create-note">Người dùng mới bắt buộc đổi mật khẩu tạm ở lần đăng nhập đầu tiên.</p>
         <div id="user-list" class="user-list"></div>
+      </section>
+
+      <section id="site-text-management" class="panel site-text-management" hidden>
+        <div class="panel-heading"><span class="step-number">NỘI DUNG</span><div><h2>Chỉnh chữ trên Trang chủ</h2><p>Chỉnh các tiêu đề và đoạn giới thiệu đang hiển thị. Nội dung chỉ là văn bản thuần, không nhận mã HTML.</p></div></div>
+        <form id="site-text-form">
+          <div id="site-text-fields" class="site-text-fields"><p class="empty-admin">Đang tải các khu vực chữ…</p></div>
+          <div class="site-text-actions"><button id="site-text-save" class="button primary" type="submit">Lưu và cập nhật Trang chủ</button><button id="site-text-reload" class="button ghost" type="button">Tải lại nội dung</button></div>
+        </form>
       </section>
 
       <section id="message-management" class="panel message-management" hidden>

@@ -44,6 +44,11 @@ máy chủ. Ba vai trò là `author`, `approver` và `admin`.
 D1 đồng thời lưu thống kê truy cập ẩn danh, tổng lượt xem theo bài, tin nhắn góp ý và
 cấu hình banner Trang chủ. Ảnh banner tải mới được tối ưu ở trình duyệt rồi lưu trong
 KV; các ảnh banner kế thừa được quản lý bằng danh sách cấu hình trong D1.
+Các lựa chọn căn tiêu đề/tóm tắt, thứ tự hiển thị và trạng thái ẩn của bài đã đăng cũng
+được lưu trong D1. Danh sách quản trị hợp nhất nội dung tĩnh kế thừa với nội dung xuất bản
+trực tuyến; khi admin sửa bài tĩnh, bản D1 cùng đường dẫn sẽ được ưu tiên phục vụ.
+Các khối chữ có thể chỉnh trên Trang chủ được giới hạn bằng danh sách khóa/điểm hiển thị cố định,
+chỉ lưu văn bản thuần trong `site_text_overrides` và không cho người dùng chèn HTML hoặc bộ chọn CSS.
 Mã phiên do trình duyệt tạo và mã chống lạm dụng được băm một chiều trước khi lưu;
 hệ thống không đưa họ tên, email hoặc địa chỉ IP rõ vào các bảng thống kê và góp ý.
 
@@ -66,6 +71,8 @@ Máy chủ chỉ giữ một tập thẻ nội tuyến tối thiểu và chỉ c
 ## Bề mặt công khai
 
 - Trang chủ và trang riêng của bài.
+- Thanh thời tiết, thời gian GMT+7 và **Thời sự** chạy tối đa 7 bài hoạt động mới nhất của chính
+  website, hợp nhất dữ liệu tĩnh với bài đã xuất bản qua `/admin`.
 - Cẩm nang/infographic và thư viện ảnh, video do Khoa nhập.
 - Kiểm tra kiến thức nhanh.
 - Liên kết tham khảo tới Bộ Công an, Cục A05 và Học viện CSND.
@@ -82,6 +89,8 @@ chỉ dành cho ba tài khoản được phân quyền; ảnh bản thảo khôn
 
 ## Dịch vụ ngoài còn dùng
 
+- `api.open-meteo.com`: máy chủ gọi để lấy nhiệt độ hiện tại của Hà Nội qua `/api/weather` và
+  lưu đệm tại Cloudflare; trình duyệt chỉ gọi cùng miền, không gửi dữ liệu truy cập cho nguồn thời tiết.
 - `youtube-nocookie.com`: chỉ để nhúng video do biên tập viên chủ động khai báo
   trong bài.
 - Các miền trong `officialSources` và liên kết tham khảo: chỉ mở khi người dùng bấm.

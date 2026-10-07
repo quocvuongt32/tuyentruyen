@@ -51,6 +51,10 @@ function formatDate(date) {
   return `${day}/${month}/${year}`;
 }
 
+function alignment(value) {
+  return ["left", "center", "right", "justify"].includes(value) ? value : "justify";
+}
+
 function imageEntries(item) {
   const raw = Array.isArray(item.images) ? item.images : [];
   const list = raw
@@ -162,9 +166,9 @@ function renderPage(item, kind, navigation = "") {
     <nav class="article-breadcrumb" aria-label="Đường dẫn"><a href="/">Trang chủ</a><span aria-hidden="true">›</span><span>${label}</span></nav>
     <article class="article-card">
       <div class="article-kicker">${label}</div>
-      <h1>${escapeHtml(item.title)}</h1>
+      <h1 class="text-align-${alignment(item.titleAlign)}">${escapeHtml(item.title)}</h1>
       ${meta.length ? `<p class="article-meta">${meta.map(escapeHtml).join(" · ")}</p>` : ""}
-      ${item.summary ? `<p class="article-lead">${escapeHtml(item.summary)}</p>` : ""}
+      ${item.summary ? `<p class="article-lead text-align-${alignment(item.summaryAlign)}">${escapeHtml(item.summary)}</p>` : ""}
       ${renderCover(item)}
       <div class="article-content">${body}</div>
       ${renderDocumentGallery(item)}

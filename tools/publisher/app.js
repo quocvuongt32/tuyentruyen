@@ -6,6 +6,8 @@ const state = {
   permissions: new Set(),
   images: [],
   pending: null,
+  editingPost: null,
+  publishedPosts: [],
   lastEditorRange: null,
   passwordResetTarget: "",
   passwordChangeForced: false,
@@ -105,6 +107,8 @@ function updatePreview() {
   const category = $("#category").selectedOptions[0]?.textContent || "";
   $("#preview-title").textContent = title || "Tiêu đề bài viết sẽ hiện ở đây";
   $("#preview-summary").textContent = summary || "Tóm tắt bài viết sẽ giúp người đọc quyết định mở bài.";
+  $("#preview-title").className = `text-align-${$("#title-align").value}`;
+  $("#preview-summary").className = `text-align-${$("#summary-align").value}`;
   $("#preview-meta").textContent = [formatDate(date), category, type === "event" ? location : ""].filter(Boolean).join(" · ");
   $("#preview-author").textContent = `Tác giả: ${state.user?.fullName || "—"}`;
   const prefix = type === "event" ? "hoat-dong" : "ky-nang";
@@ -113,7 +117,7 @@ function updatePreview() {
   const previewImage = $("#preview-image");
   const cover = currentCover();
   if (cover) {
-    previewImage.style.backgroundImage = `url("${cover.dataUrl}")`;
+    previewImage.style.backgroundImage = `url("${cover.dataUrl || cover.path}")`;
     previewImage.classList.add("has-image");
   } else {
     previewImage.style.backgroundImage = "";
@@ -269,10 +273,11 @@ function insertInlineFigure(item) {
   figure.className = "editor-inline-image";
   figure.dataset.imageId = item.id;
   const image = document.createElement("img");
-  image.src = item.dataUrl;
+  image.src = item.dataUrl || item.path;
   image.alt = "Ảnh chèn trong bài";
   image.contentEditable = "false";
   const caption = document.createElement("figcaption");
+  caption.contentEditable = "true";
   caption.textContent = "Nhập chú thích ảnh…";
   caption.dataset.placeholder = "true";
   caption.addEventListener("focus", () => {
@@ -368,7 +373,7 @@ function renderImages() {
     const card = document.createElement("div");
     card.className = `image-item${item.kind === "cover" ? " cover" : ""}`;
     const image = document.createElement("img");
-    image.src = item.dataUrl;
+    image.src = item.dataUrl || item.path;
     image.alt = item.name;
     card.appendChild(image);
     if (item.kind === "cover") {
@@ -382,7 +387,8 @@ function renderImages() {
     const name = document.createElement("span");
     name.className = "image-item-name";
     const original = item.originalBytes ? `${(item.originalBytes / 1024 / 1024).toFixed(1)} MB → ` : "";
-    name.textContent = `${item.name} · ${original}${(item.bytes / 1024).toFixed(0)} KB`;
+    const optimized = item.bytes ? `${(item.bytes / 1024).toFixed(0)} KB` : "ảnh đang dùng";
+    name.textContent = `${item.name} · ${original}${optimized}`;
     const caption = document.createElement("input");
     caption.className = "image-caption-input";
     caption.maxLength = 260;
@@ -410,6 +416,135 @@ function renderImages() {
     container.appendChild(card);
   });
   updatePreview();
+}
+
+function freshImageId() {
+  return `img-${crypto.randomUUID()}`;
+}
+
+function editableImage(item, index) {
+  return {
+    id: /^img-[a-zA-Z0-9-]{8,80}$/.test(String(item?.id || "")) ? item.id : freshImageId(),
+    name: item?.name || `Ảnh ${index + 1}`,
+    dataUrl: item?.dataUrl || "",
+    path: item?.path || item?.src || "",
+    key: item?.key || "",
+    kind: ["cover", "gallery", "inline"].includes(item?.kind) ? item.kind : index ? "gallery" : "cover",
+    caption: item?.caption || "",
+    width: item?.width,
+    height: item?.height,
+    bytes: item?.bytes,
+    originalBytes: item?.originalBytes,
+  };
+}
+
+function wireExistingInlineFigure(figure, item, captionText) {
+  figure.className = "editor-inline-image";
+  figure.dataset.imageId = item.id;
+  const image = figure.querySelector("img");
+  image.contentEditable = "false";
+  const caption = figure.querySelector("figcaption") || document.createElement("figcaption");
+  if (!caption.parentElement) figure.appendChild(caption);
+  caption.contentEditable = "true";
+  caption.textContent = captionText || "Nhập chú thích ảnh…";
+  caption.dataset.placeholder = captionText ? "false" : "true";
+  caption.addEventListener("focus", () => {
+    if (caption.dataset.placeholder === "true") {
+      caption.textContent = "";
+      caption.dataset.placeholder = "false";
+    }
+  });
+  caption.addEventListener("input", updatePreview);
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "editor-image-remove";
+  remove.contentEditable = "false";
+  remove.textContent = "Xóa ảnh";
+  remove.addEventListener("click", () => {
+    figure.remove();
+    state.images = state.images.filter((candidate) => candidate.id !== item.id);
+    updatePreview();
+  });
+  figure.querySelectorAll("button").forEach((button) => button.remove());
+  figure.appendChild(remove);
+}
+
+function hydrateEditorBody(post) {
+  bodyEditor.innerHTML = post.bodyHtml || "<p><br></p>";
+  bodyEditor.querySelectorAll("figure").forEach((figure) => {
+    const image = figure.querySelector("img");
+    if (!image) return;
+    const path = image.getAttribute("src") || "";
+    let item = state.images.find((candidate) => candidate.path === path || candidate.dataUrl === path);
+    const captionText = figure.querySelector("figcaption")?.textContent?.trim() || "";
+    if (!item) {
+      item = editableImage({ kind: "inline", path, caption: captionText }, state.images.length);
+      state.images.push(item);
+    } else {
+      item.kind = "inline";
+    }
+    wireExistingInlineFigure(figure, item, captionText || item.caption || "");
+  });
+  state.lastEditorRange = null;
+}
+
+function setEditorMode(post = null) {
+  state.editingPost = post;
+  const save = $("#save-button");
+  $("#cancel-edit-button").hidden = !post;
+  save.querySelector("span").textContent = post ? "Lưu thay đổi & cập nhật" : "Lưu & kiểm tra toàn bộ";
+  save.querySelector("small").textContent = post ? "Cập nhật ngay bài đang hiển thị" : "Chưa đưa lên Internet";
+}
+
+function resetPostEditor() {
+  form.reset();
+  setEditorMode(null);
+  state.images = [];
+  state.lastEditorRange = null;
+  bodyEditor.innerHTML = "<p><br></p>";
+  $("#title-align").value = "justify";
+  $("#summary-align").value = "justify";
+  $("#author").value = state.user?.fullName || "";
+  const today = new Date();
+  $("#date").value = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  renderImages();
+  updateType();
+}
+
+async function editPublishedPost(type, slug) {
+  setBusy(true, "Đang mở bài đã đăng…", "Đang tải nội dung và ảnh vào trình soạn thảo.");
+  try {
+    const result = await api(`/api/posts/get?type=${encodeURIComponent(type)}&slug=${encodeURIComponent(slug)}`);
+    const post = result.post;
+    setEditorMode(post);
+    form.hidden = false;
+    const typeInput = form.querySelector(`input[name="type"][value="${post.type}"]`);
+    if (typeInput) typeInput.checked = true;
+    $("#title").value = post.title || "";
+    $("#title-align").value = post.titleAlign || "justify";
+    $("#date").value = post.date || "";
+    $("#placement").value = post.placement || (post.category === "an-ninh-mang" ? "timeline" : "activity");
+    $("#category").value = post.category || "khac";
+    $("#location").value = post.location || "";
+    $("#summary").value = post.summary || "";
+    $("#summary-align").value = post.summaryAlign || "justify";
+    $("#series").value = post.series || "";
+    $("#order").value = post.order || "";
+    $("#link").value = post.link || "";
+    $("#video").value = post.videoUrl || "";
+    $("#featured-banner").checked = post.featured === true;
+    $("#author").value = post.author || state.user?.fullName || "";
+    state.images = (Array.isArray(post.images) ? post.images : []).map(editableImage);
+    hydrateEditorBody(post);
+    updateType();
+    renderImages();
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+    showToast("Đã mở bài đã đăng. Thay đổi sẽ được cập nhật ngay sau khi lưu.");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    setBusy(false);
+  }
 }
 
 function blockAlignment(element) {
@@ -477,12 +612,15 @@ function payload() {
   const inlineIds = new Set(bodyBlocks.filter((block) => block.type === "image").map((block) => block.imageId));
   return {
     type: currentType(),
+    slug: state.editingPost?.slug || "",
     title: $("#title").value,
+    titleAlign: $("#title-align").value,
     date: $("#date").value,
     placement: $("#placement").value,
     category: $("#category").value,
     location: $("#location").value,
     summary: $("#summary").value,
+    summaryAlign: $("#summary-align").value,
     bodyBlocks,
     series: $("#series").value,
     order: $("#order").value,
@@ -491,7 +629,7 @@ function payload() {
     featuredBanner: $("#featured-banner").checked,
     images: state.images
       .filter((item) => item.kind !== "inline" || inlineIds.has(item.id))
-      .map((item) => ({ id: item.id, kind: item.kind, caption: item.caption || "", name: item.name, dataUrl: item.dataUrl, width: item.width, height: item.height })),
+      .map((item) => ({ id: item.id, kind: item.kind, caption: item.caption || "", name: item.name, dataUrl: item.dataUrl, existingPath: item.path || "", width: item.width, height: item.height })),
   };
 }
 
@@ -538,11 +676,22 @@ function renderPending(post) {
 async function savePost(event) {
   event.preventDefault();
   if (!validateForm()) return;
-  setBusy(true, "Đang tải bản nháp lên cổng quản trị…", "Ảnh sẽ được xác minh và lưu vào kho bảo mật trước khi tạo trang xem trước.");
+  const isEditing = Boolean(state.editingPost);
+  setBusy(
+    true,
+    isEditing ? "Đang cập nhật bài đã đăng…" : "Đang tải bản nháp lên cổng quản trị…",
+    isEditing ? "Nội dung và thứ tự ảnh đang được kiểm tra trước khi thay thế bản hiện tại." : "Ảnh sẽ được xác minh và lưu vào kho bảo mật trước khi tạo trang xem trước.",
+  );
   try {
-    const result = await api("/api/create", { method: "POST", body: JSON.stringify(payload()) });
-    showReady(result.post);
-    showToast("Bài đã được lưu và kiểm tra thành công.");
+    const result = await api(isEditing ? "/api/posts/update" : "/api/create", { method: "POST", body: JSON.stringify(payload()) });
+    if (isEditing) {
+      showToast("Đã cập nhật bài đang hiển thị trên website.");
+      resetPostEditor();
+      await loadPublishedPosts();
+    } else {
+      showReady(result.post);
+      showToast("Bài đã được lưu và kiểm tra thành công.");
+    }
   } catch (error) {
     showToast(error.message, true);
   } finally {
@@ -757,6 +906,93 @@ async function loadUsers() {
   });
 }
 
+async function createUserAccount(event) {
+  event.preventDefault();
+  try {
+    const result = await api("/api/users/create", {
+      method: "POST",
+      body: JSON.stringify({
+        username: $("#create-username").value,
+        fullName: $("#create-full-name").value,
+        role: $("#create-role").value,
+        temporaryPassword: $("#create-temporary-password").value,
+      }),
+    });
+    event.currentTarget.reset();
+    showToast(`Đã tạo tài khoản ${result.user.username}. Người dùng phải đổi mật khẩu ở lần đăng nhập đầu.`);
+    await loadUsers();
+  } catch (error) {
+    showToast(error.message, true);
+  }
+}
+
+function renderSiteTextFields(fields) {
+  const container = $("#site-text-fields");
+  container.innerHTML = "";
+  const groups = new Map();
+  (Array.isArray(fields) ? fields : []).forEach((field) => {
+    if (!groups.has(field.group)) groups.set(field.group, []);
+    groups.get(field.group).push(field);
+  });
+  groups.forEach((items, groupName) => {
+    const section = document.createElement("section");
+    section.className = "site-text-group";
+    const heading = document.createElement("h3");
+    heading.textContent = groupName;
+    const grid = document.createElement("div");
+    grid.className = "site-text-grid";
+    items.forEach((field) => {
+      const label = document.createElement("label");
+      label.className = `field${field.multiline ? " multiline" : ""}`;
+      const title = document.createElement("span");
+      title.textContent = field.label;
+      const input = document.createElement(field.multiline ? "textarea" : "input");
+      if (field.multiline) input.rows = 3;
+      input.value = field.value;
+      input.maxLength = Number(field.maxLength || 300);
+      input.required = true;
+      input.dataset.textKey = field.key;
+      input.dataset.defaultValue = field.defaultValue;
+      const foot = document.createElement("span");
+      foot.className = "site-text-field-foot";
+      const status = document.createElement("small");
+      status.className = "site-text-customized";
+      status.textContent = field.customized ? "Đang dùng nội dung đã chỉnh" : "Đang dùng nội dung mặc định";
+      const reset = document.createElement("button");
+      reset.type = "button";
+      reset.className = "site-text-reset";
+      reset.textContent = "Khôi phục mặc định";
+      reset.addEventListener("click", () => {
+        input.value = field.defaultValue;
+        status.textContent = "Sẽ khôi phục khi bấm Lưu";
+      });
+      foot.append(status, reset);
+      label.append(title, input, foot);
+      grid.appendChild(label);
+    });
+    section.append(heading, grid);
+    container.appendChild(section);
+  });
+}
+
+async function loadSiteTextManager() {
+  if (!hasPermission("manage-site-texts")) return;
+  const result = await api("/api/site-texts");
+  renderSiteTextFields(result.fields);
+}
+
+async function saveSiteTexts(event) {
+  event.preventDefault();
+  const texts = Object.fromEntries([...$("#site-text-fields").querySelectorAll("[data-text-key]")].map((input) => [input.dataset.textKey, input.value]));
+  try {
+    const result = await api("/api/site-texts/update", { method: "POST", body: JSON.stringify({ texts }) });
+    renderSiteTextFields(result.fields);
+    showToast("Đã cập nhật các khối chữ trên Trang chủ.");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+}
+
 function updateMessageBadge(count) {
   const badge = $("#messages-badge");
   const total = Number(count || 0);
@@ -914,6 +1150,136 @@ async function uploadBannerFiles(fileList) {
   }
 }
 
+function publishedListElement(type) {
+  return type === "skill" ? $("#published-skill-list") : $("#published-event-list");
+}
+
+function allPublishedOrder() {
+  return ["event", "skill"].flatMap((type) => [...publishedListElement(type).querySelectorAll(".published-post-row")].map((row) => ({
+    type: row.dataset.type,
+    slug: row.dataset.slug,
+  })));
+}
+
+async function savePublishedOrder() {
+  try {
+    await api("/api/posts/reorder", { method: "POST", body: JSON.stringify({ items: allPublishedOrder() }) });
+    showToast("Đã lưu thứ tự hiển thị mới.");
+    await loadPublishedPosts();
+  } catch (error) {
+    showToast(error.message, true);
+    await loadPublishedPosts().catch(() => {});
+  }
+}
+
+function enablePublishedDrag(row, list) {
+  row.addEventListener("dragstart", (event) => {
+    state.draggedPublishedRow = row;
+    row.classList.add("dragging");
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", `${row.dataset.type}:${row.dataset.slug}`);
+  });
+  row.addEventListener("dragend", () => {
+    row.classList.remove("dragging");
+    list.querySelectorAll(".drag-over").forEach((item) => item.classList.remove("drag-over"));
+    state.draggedPublishedRow = null;
+  });
+  row.addEventListener("dragover", (event) => {
+    const dragged = state.draggedPublishedRow;
+    if (!dragged || dragged === row || dragged.parentElement !== list) return;
+    event.preventDefault();
+    const after = event.clientY > row.getBoundingClientRect().top + row.offsetHeight / 2;
+    row.classList.add("drag-over");
+    list.insertBefore(dragged, after ? row.nextSibling : row);
+  });
+  row.addEventListener("dragleave", () => row.classList.remove("drag-over"));
+  row.addEventListener("drop", async (event) => {
+    event.preventDefault();
+    row.classList.remove("drag-over");
+    await savePublishedOrder();
+  });
+}
+
+function renderPublishedPosts(type, posts) {
+  const list = publishedListElement(type);
+  list.innerHTML = "";
+  if (!posts.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-admin";
+    empty.textContent = "Chưa có bài đã đăng trong khu vực này.";
+    list.appendChild(empty);
+    return;
+  }
+  posts.forEach((post, index) => {
+    const row = document.createElement("article");
+    row.className = "published-post-row";
+    row.draggable = true;
+    row.dataset.type = post.type;
+    row.dataset.slug = post.slug;
+
+    const handle = document.createElement("button");
+    handle.type = "button";
+    handle.className = "published-drag-handle";
+    handle.title = "Giữ và kéo để đổi thứ tự";
+    handle.setAttribute("aria-label", `Kéo để sắp xếp ${post.title}`);
+    handle.textContent = "⋮⋮";
+
+    const image = document.createElement("img");
+    image.src = post.image || "/img/badge.png";
+    image.alt = "";
+    image.loading = "lazy";
+
+    const copy = document.createElement("div");
+    copy.className = "published-post-copy";
+    const title = document.createElement("strong");
+    title.textContent = post.title;
+    const meta = document.createElement("small");
+    meta.textContent = `${String(index + 1).padStart(2, "0")} · ${formatDate(post.date) || "Chưa ghi ngày"} · ${post.source === "static" ? "Bài có sẵn" : "Bài quản trị"}`;
+    copy.append(title, meta);
+
+    const actions = document.createElement("div");
+    actions.className = "published-post-actions";
+    const open = document.createElement("a");
+    open.className = "button ghost";
+    open.href = post.pageUrl;
+    open.target = "_blank";
+    open.rel = "noopener";
+    open.textContent = "Xem";
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "button primary";
+    edit.textContent = "Sửa";
+    edit.addEventListener("click", () => editPublishedPost(post.type, post.slug));
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "button danger";
+    remove.textContent = "Xóa";
+    remove.addEventListener("click", async () => {
+      if (!window.confirm(`Xóa bài “${post.title}” khỏi website?`)) return;
+      try {
+        await api("/api/posts/delete", { method: "POST", body: JSON.stringify({ type: post.type, slug: post.slug }) });
+        if (state.editingPost?.type === post.type && state.editingPost?.slug === post.slug) resetPostEditor();
+        showToast("Đã xóa bài khỏi website.");
+        await loadPublishedPosts();
+      } catch (error) {
+        showToast(error.message, true);
+      }
+    });
+    actions.append(open, edit, remove);
+    row.append(handle, image, copy, actions);
+    enablePublishedDrag(row, list);
+    list.appendChild(row);
+  });
+}
+
+async function loadPublishedPosts() {
+  if (!hasPermission("manage-posts")) return;
+  const result = await api("/api/posts");
+  state.publishedPosts = Array.isArray(result.posts) ? result.posts : [];
+  renderPublishedPosts("event", state.publishedPosts.filter((post) => post.type === "event"));
+  renderPublishedPosts("skill", state.publishedPosts.filter((post) => post.type === "skill"));
+}
+
 function applyAccess() {
   if (!state.user) return;
   $("#session-user").textContent = `${state.user.fullName} · ${roleLabel(state.user.role)}`;
@@ -921,6 +1287,8 @@ function applyAccess() {
   $("#manage-users-open").hidden = !hasPermission("manage-users");
   $("#banner-open").hidden = !hasPermission("manage-banner");
   $("#messages-open").hidden = !hasPermission("manage-messages");
+  $("#published-posts-open").hidden = !hasPermission("manage-posts");
+  $("#site-texts-open").hidden = !hasPermission("manage-site-texts");
   form.hidden = !hasPermission("create") || Boolean(state.pending);
   if (!hasPermission("create")) {
     $(".hero-panel h1").textContent = "Khu vực thẩm định bài viết";
@@ -996,6 +1364,12 @@ bodyEditor.addEventListener("paste", (event) => {
 
 form.addEventListener("submit", savePost);
 form.addEventListener("input", updatePreview);
+$("#title-align").addEventListener("change", updatePreview);
+$("#summary-align").addEventListener("change", updatePreview);
+$("#cancel-edit-button").addEventListener("click", () => {
+  resetPostEditor();
+  showToast("Đã thoát chế độ sửa bài đã đăng.");
+});
 document.querySelectorAll('input[name="type"]').forEach((input) => input.addEventListener("change", updateType));
 $("#placement").addEventListener("change", () => { updatePlacement(); updatePreview(); });
 const dropZone = $("#drop-zone");
@@ -1021,6 +1395,7 @@ $("#logout-button").addEventListener("click", async () => {
 $("#change-password-open").addEventListener("click", () => openPasswordModal());
 $("#password-cancel").addEventListener("click", closePasswordModal);
 $("#password-form").addEventListener("submit", savePassword);
+$("#create-user-form").addEventListener("submit", createUserAccount);
 $("#manage-users-open").addEventListener("click", async () => {
   const section = $("#user-management");
   section.hidden = false;
@@ -1044,6 +1419,35 @@ $("#messages-open").addEventListener("click", async () => {
   try {
     await loadMessages();
     section.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) { showToast(error.message, true); }
+});
+$("#published-posts-open").addEventListener("click", async () => {
+  const section = $("#published-post-management");
+  section.hidden = false;
+  try {
+    await loadPublishedPosts();
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) { showToast(error.message, true); }
+});
+$("#published-refresh").addEventListener("click", async () => {
+  try {
+    await loadPublishedPosts();
+    showToast("Đã làm mới danh sách bài đã đăng.");
+  } catch (error) { showToast(error.message, true); }
+});
+$("#site-texts-open").addEventListener("click", async () => {
+  const section = $("#site-text-management");
+  section.hidden = false;
+  try {
+    await loadSiteTextManager();
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) { showToast(error.message, true); }
+});
+$("#site-text-form").addEventListener("submit", saveSiteTexts);
+$("#site-text-reload").addEventListener("click", async () => {
+  try {
+    await loadSiteTextManager();
+    showToast("Đã tải lại nội dung Trang chủ.");
   } catch (error) { showToast(error.message, true); }
 });
 

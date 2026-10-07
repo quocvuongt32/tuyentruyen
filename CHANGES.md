@@ -1,6 +1,32 @@
 # Báo cáo rà soát website
 
-Ngày cập nhật: 1/10/2026
+Ngày cập nhật: 7/10/2026
+
+## Cập nhật 7/10/2026 — Quản trị nội dung toàn trang
+
+- Hiển thị rõ nút **Quản lý bài đã đăng** cho admin; danh sách gồm cả bài cũ của toàn website và
+  bài xuất bản trực tuyến, hỗ trợ sửa, xóa và kéo thả thứ tự.
+- Thêm **Chỉnh chữ Trang chủ** để quản lý các khối văn bản tại Giới thiệu, Nguồn tham khảo,
+  banner, menu, các khu vực nội dung, liên hệ và thống kê mà không sửa mã nguồn.
+- Thêm biểu mẫu tạo tài khoản mới, chọn vai trò và cấp mật khẩu tạm bắt buộc đổi.
+- Tiêu đề và tóm tắt bài mặc định căn đều hai bên; giảm cỡ tối đa của tiêu đề bài riêng từ
+  3,45rem xuống 2,7rem để trang trọng và dễ đọc hơn.
+
+## Cập nhật khôi phục thanh đầu trang
+
+- Khôi phục thời tiết Hà Nội và đồng hồ GMT+7 dưới menu chính.
+- Khôi phục khung **Thời sự** theo dạng chữ chạy, lấy tối đa 7 bài mới nhất từ chính dữ liệu của
+  website và các bài đã xuất bản qua `/admin`; không tải hay đăng lại tin bài từ nguồn ngoài.
+- Trình duyệt gọi `/api/weather` cùng miền; máy chủ chỉ lấy nhiệt độ và mã thời tiết từ Open-Meteo,
+  sau đó lọc và lưu đệm kết quả tại Cloudflare.
+
+## Cập nhật quản lý bài đã đăng
+
+- Tiêu đề và tóm tắt trong trình soạn bài có bốn lựa chọn căn lề; mặc định căn đều hai bên.
+- Admin có danh sách hợp nhất toàn bộ bài đã đăng, gồm bài có sẵn và bài đăng trực tuyến.
+- Admin có thể sửa trực tiếp, xóa khỏi website và kéo thả thứ tự hiển thị của từng nhóm bài.
+- Trạng thái ẩn và thứ tự được lưu trong D1; bài tĩnh sửa lần đầu được tạo thành bản quản trị
+  cùng đường dẫn để không làm mất liên kết đã phổ biến.
 
 ## 1. Chức năng tổng hợp tin đã gỡ
 

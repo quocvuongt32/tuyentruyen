@@ -1,5 +1,14 @@
 # Nhật ký thay đổi
 
+## 7/10/2026 — Quản lý toàn bộ bài, chữ Trang chủ và tài khoản mới
+
+- Admin xem được toàn bộ bài đã đăng, kể cả nội dung tĩnh kế thừa; có thể sửa trực tiếp, xóa
+  khỏi website và kéo thả thứ tự hiển thị theo từng nhóm.
+- Bổ sung trình chỉnh chữ Trang chủ theo nhóm, lưu văn bản thuần trong D1 và áp dụng sau khi tải
+  dữ liệu tĩnh để không phải sửa mã nguồn.
+- Bổ sung tạo tài khoản mới với ba vai trò hiện có; mật khẩu tạm luôn phải đổi ở lần đăng nhập đầu.
+- Tiêu đề/tóm tắt bài mặc định căn đều hai bên và tiêu đề trang bài được thu nhỏ.
+
 ## 1/10/2026 — Khôi phục lượt truy cập và quản lý banner
 
 - Khôi phục 4.155 lượt truy cập lịch sử từ bộ đếm GoatCounter cũ và giữ nguyên toàn
@@ -11,6 +20,13 @@
 - Khởi tạo 15 ảnh banner hiện có vào D1; ảnh mới được tối ưu rồi lưu trong KV.
 - Rút gọn khu gửi tin nhắn, bỏ đoạn mô tả dài; tin gửi tiếp tục vào **Hộp thư góp ý**
   có huy hiệu tin chưa đọc trong `/admin`.
+- Khôi phục thanh thời tiết Hà Nội và thời gian GMT+7 ngay dưới menu chính.
+- Khôi phục khung **Thời sự**, nhưng chỉ chạy 7 bài mới nhất của chính website, gồm cả bài đã
+  xuất bản qua `/admin`; không dùng lại cơ chế tổng hợp tin ngoài trước đây.
+- Thời tiết được lấy qua API cùng miền `/api/weather`, lọc trường dữ liệu và lưu đệm tại Cloudflare.
+- Bổ sung căn lề riêng cho tiêu đề và tóm tắt, mặc định căn đều hai bên.
+- Bổ sung **Quản lý bài đã đăng** cho admin: hợp nhất bài có sẵn và bài trực tuyến, cho phép sửa,
+  xóa và kéo thả thứ tự hiển thị mà vẫn giữ nguyên đường dẫn bài.
 
 ## 30/9/2026 — Thống kê truy cập, bài xem nhiều và tin nhắn góp ý
 

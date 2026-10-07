@@ -17,7 +17,7 @@
 <meta name="twitter:title" content="Cẩm nang An toàn số" />
 <meta name="twitter:description" content="Không gian tuyên truyền an ninh mạng và an toàn thông tin của Khoa Toán - Tin học và Ứng dụng KHCN, Học viện CSND." />
 <meta name="twitter:image" content="https://tuyentruyen.khoaktt.vn/img/og-image.jpg" />
-<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/base.css?v=20261001-3" />
 <link rel="stylesheet" href="css/widgets.css" />
 <link rel="stylesheet" href="css/layout.css" />
 <link rel="stylesheet" href="css/content.css?v=20261001-2" />
@@ -132,6 +132,24 @@
   </div>
 </header>
 
+<section class="news-ticker" id="news-ticker" aria-label="Thời tiết, thời gian và bài mới">
+  <div class="news-ticker-inner">
+    <div class="ticker-meta">
+      <a class="ticker-weather" id="ticker-weather" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" title="Dữ liệu thời tiết Hà Nội từ Open-Meteo">
+        <span class="ticker-weather-icon" id="ticker-weather-icon" aria-hidden="true">🌤️</span>
+        <span id="ticker-weather-text">Hà Nội · đang cập nhật</span>
+      </a>
+      <time class="ticker-datetime" id="ticker-datetime"></time>
+    </div>
+    <span class="news-ticker-label">Thời sự</span>
+    <div class="news-ticker-viewport">
+      <div class="news-ticker-track" id="news-ticker-track" aria-live="polite">
+        <span class="news-ticker-loading">Đang tải các bài mới nhất…</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <main>
 
   <section id="trang-chu" class="hero">
@@ -176,22 +194,22 @@
       <div class="stat-tile">
         <svg class="stat-icon" aria-hidden="true"><use href="#icon-stat-activity" /></svg>
         <strong class="js-stat-events">0</strong>
-        <span>Hoạt động</span>
+        <span id="stat-label-activities">Hoạt động</span>
       </div>
       <button type="button" class="stat-tile stat-tile-link js-stat-media-tile">
         <svg class="stat-icon" aria-hidden="true"><use href="#icon-stat-gallery" /></svg>
         <strong class="js-stat-images">0</strong>
-        <span>Thư viện ảnh &amp; video</span>
+        <span id="stat-label-media">Thư viện ảnh &amp; video</span>
       </button>
       <div class="stat-tile">
         <svg class="stat-icon" aria-hidden="true"><use href="#icon-stat-clock" /></svg>
         <strong class="js-stat-updated">—</strong>
-        <span>Cập nhật gần nhất</span>
+        <span id="stat-label-updated">Cập nhật gần nhất</span>
       </div>
       <div class="stat-tile">
         <svg class="stat-icon" aria-hidden="true"><use href="#icon-stat-visits" /></svg>
         <strong class="js-traffic-total">—</strong>
-        <span>Lượt truy cập</span>
+        <span id="stat-label-visits">Lượt truy cập</span>
       </div>
     </div>
 
@@ -219,9 +237,9 @@
 
   <section id="nguon-chinh-thong" class="official-sources-section" aria-labelledby="official-sources-heading">
     <div class="section-inner">
-      <p class="section-kicker official-sources-kicker">Nguồn tham khảo</p>
+      <p id="official-sources-kicker" class="section-kicker official-sources-kicker">Nguồn tham khảo</p>
       <h2 id="official-sources-heading" class="official-sources-title">Cổng thông tin và nguồn tham khảo</h2>
-      <p class="section-hint">Liên kết trực tiếp tới Cổng Thông tin điện tử Bộ Công an, chuyên trang của Cục A05 và Cổng Thông tin điện tử Học viện CSND. Website không tự động lấy hoặc đăng lại nội dung từ các nguồn này.</p>
+      <p id="official-sources-hint" class="section-hint">Liên kết trực tiếp tới Cổng Thông tin điện tử Bộ Công an, chuyên trang của Cục A05 và Cổng Thông tin điện tử Học viện CSND. Website không tự động lấy hoặc đăng lại nội dung từ các nguồn này.</p>
       <div id="official-sources-grid" class="official-sources-grid"></div>
     </div>
   </section>
@@ -237,7 +255,7 @@
           </div>
         </div>
         <aside class="popular-sidebar" aria-labelledby="popular-heading">
-          <p class="popular-kicker">Góc được quan tâm</p>
+          <p id="popular-kicker" class="popular-kicker">Góc được quan tâm</p>
           <h2 id="popular-heading">Bài được xem nhiều nhất</h2>
           <ol id="popular-articles" class="popular-list">
             <li class="popular-empty">Đang cập nhật dữ liệu lượt xem…</li>
@@ -263,7 +281,7 @@
       <h2 id="skills-heading">Bộ kỹ năng An toàn số</h2>
       <p class="section-hint" id="skills-hint">Ảnh, infographic về các phương thức, thủ đoạn lừa đảo và cách phòng ngừa dành cho công dân. Bấm vào ảnh để xem cỡ lớn.</p>
 
-      <h3 class="skills-subheading">Infographic kỹ năng</h3>
+      <h3 id="skills-subheading" class="skills-subheading">Infographic kỹ năng</h3>
       <div id="skills-grid-image" class="skills-grid">
         <p class="loading">Đang tải dữ liệu…</p>
       </div>
@@ -273,8 +291,8 @@
 
   <section id="quiz-section" class="quiz-section">
     <div class="section-inner">
-      <h2>Kiểm tra nhanh: Bạn đã an toàn số chưa?</h2>
-      <p class="section-hint">6 câu hỏi trắc nghiệm ngắn giúp bạn tự đánh giá kỹ năng an toàn số đã học ở trên. Chọn đáp án rồi bấm "Xem kết quả" để biết đúng/sai kèm giải thích.</p>
+      <h2 id="quiz-heading">Kiểm tra nhanh: Bạn đã an toàn số chưa?</h2>
+      <p id="quiz-hint" class="section-hint">6 câu hỏi trắc nghiệm ngắn giúp bạn tự đánh giá kỹ năng an toàn số đã học ở trên. Chọn đáp án rồi bấm "Xem kết quả" để biết đúng/sai kèm giải thích.</p>
 
       <form id="quiz-form" class="quiz-form">
         <div class="quiz-question" data-qid="1" data-correct="b">
@@ -345,7 +363,7 @@
   <section id="gop-y" class="engagement-section" aria-labelledby="feedback-heading">
     <div class="section-inner engagement-grid">
       <div class="feedback-card">
-        <p class="engagement-kicker">Kết nối với Cẩm nang</p>
+        <p id="feedback-kicker" class="engagement-kicker">Kết nối với Cẩm nang</p>
         <h2 id="feedback-heading">Gửi tin nhắn</h2>
         <form id="feedback-form" class="feedback-form">
           <label for="feedback-content">Nội dung</label>
@@ -359,7 +377,7 @@
       </div>
 
       <div class="traffic-card" aria-labelledby="traffic-heading">
-        <p class="engagement-kicker">Số liệu trực tiếp</p>
+        <p id="traffic-kicker" class="engagement-kicker">Số liệu trực tiếp</p>
         <h2 id="traffic-heading">Thống kê truy cập</h2>
         <div class="traffic-list">
           <div><span class="traffic-icon" aria-hidden="true">●</span><span>Đang truy cập</span><strong class="js-traffic-online">—</strong></div>
@@ -488,10 +506,10 @@
 <script src="js/events.js" defer></script>
 <script src="js/media.js" defer></script>
 <script src="js/ui.js" defer></script>
-<script src="js/content.js" defer></script>
+<script src="js/content.js?v=20261001-3" defer></script>
 <script src="js/forms.js" defer></script>
 <script src="js/engagement.js" defer></script>
-<script src="js/main.js" defer></script>
+<script src="js/main.js?v=20261001-3" defer></script>
 
 </body>
 </html>

@@ -15,10 +15,11 @@ function setupThemeToggle() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadSite();
-  loadEvents();
-  loadAbout();
-  loadSkills();
+  setupTickerClock();
+  loadTickerWeather();
+  loadSiteNewsTicker();
+  window.setInterval(loadTickerWeather, 15 * 60 * 1000);
+  Promise.allSettled([loadSite(), loadEvents(), loadAbout(), loadSkills()]).then(loadManagedSiteTexts);
   setupNav();
   setupHeroCarousel();
   setupHeaderCategoryLinks();

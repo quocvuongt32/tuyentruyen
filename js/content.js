@@ -1,3 +1,38 @@
+function mergeManagedPosts(dynamicPosts, staticPosts, controls, type) {
+  const relevantControls = (Array.isArray(controls) ? controls : []).filter((item) => item?.type === type);
+  const controlMap = new Map(relevantControls.map((item) => [item.slug, item]));
+  const managedSlugs = new Set((Array.isArray(dynamicPosts) ? dynamicPosts : []).map((item) => item?.slug).filter(Boolean));
+  const addControl = (item) => {
+    const value = controlMap.get(item.slug)?.displayOrder;
+    return { ...item, displayOrder: value !== null && value !== undefined && Number.isInteger(Number(value)) ? Number(value) : null };
+  };
+  return [
+    ...(Array.isArray(dynamicPosts) ? dynamicPosts : []).filter((item) => item?.slug && controlMap.get(item.slug)?.hidden !== true).map(addControl),
+    ...(Array.isArray(staticPosts) ? staticPosts : []).filter((item) => item?.slug && !managedSlugs.has(item.slug) && controlMap.get(item.slug)?.hidden !== true).map(addControl),
+  ].sort((left, right) => {
+    const leftManaged = Number.isInteger(left.displayOrder);
+    const rightManaged = Number.isInteger(right.displayOrder);
+    if (leftManaged && rightManaged) return left.displayOrder - right.displayOrder;
+    if (leftManaged !== rightManaged) return leftManaged ? -1 : 1;
+    return 0;
+  });
+}
+
+async function loadManagedSiteTexts() {
+  try {
+    const response = await fetch("/api/public/site-texts", { cache: "no-store" });
+    if (!response.ok) return;
+    const payload = await response.json();
+    for (const field of Array.isArray(payload.fields) ? payload.fields : []) {
+      if (!field?.selector || typeof field.value !== "string") continue;
+      document.querySelectorAll(field.selector).forEach((element) => {
+        if (field.attribute === "placeholder") element.setAttribute("placeholder", field.value);
+        else element.textContent = field.value;
+      });
+    }
+  } catch (_) {}
+}
+
 async function loadSite() {
   try {
     const res = await fetch("data/site.json"); // revalidate qua ETag, xem loadEvents()
@@ -81,7 +116,7 @@ async function loadAbout() {
     const partnersEl = document.getElementById("about-partners");
     if (partnersEl) {
       partnersEl.innerHTML = "";
-      (Array.isArray(data.partners) ? data.partners : []).forEach((p) => {
+      (Array.isArray(data.partners) ? data.partners : []).forEach((p, index) => {
         const box = document.createElement("div");
         box.className = "partner-badge";
         const img = document.createElement("img");
@@ -90,6 +125,7 @@ async function loadAbout() {
         img.alt = "";
         img.loading = "lazy";
         const span = document.createElement("span");
+        span.id = `about-partner-${index + 1}`;
         span.textContent = p.text;
         box.appendChild(img);
         box.appendChild(span);
@@ -121,8 +157,9 @@ async function loadAbout() {
     const directiveListEl = document.getElementById("about-directive-list");
     if (directiveListEl) {
       directiveListEl.innerHTML = "";
-      (Array.isArray(data.directives) ? data.directives : []).forEach((d) => {
+      (Array.isArray(data.directives) ? data.directives : []).forEach((d, index) => {
         const li = document.createElement("li");
+        li.id = `about-directive-${index + 1}`;
         const strong = document.createElement("strong");
         strong.textContent = d.title;
         li.appendChild(strong);
@@ -204,7 +241,7 @@ async function loadSkills() {
     const data = await res.json();
     const cloudSkills = Array.isArray(cloudResult.posts) ? cloudResult.posts : [];
     const staticSkills = Array.isArray(data.skills) ? data.skills : [];
-    const skills = [...cloudSkills, ...staticSkills].filter((skill, index, list) => skill?.slug && list.findIndex((item) => item?.slug === skill.slug) === index);
+    const skills = mergeManagedPosts(cloudSkills, staticSkills, cloudResult.controls, "skill");
 
     const imageSkills = skills.filter((s) => s.image);
     const imageSkillSrcs = imageSkills.map((s) => s.image);
@@ -228,7 +265,7 @@ function renderOfficialSources(rawSources) {
   const sources = Array.isArray(rawSources) ? rawSources : [];
   grid.innerHTML = "";
 
-  for (const source of sources) {
+  for (const [index, source] of sources.entries()) {
     if (!source || !source.name || !/^https:\/\//i.test(source.url || "")) continue;
     const card = document.createElement("article");
     card.className = "official-source-card";
@@ -239,8 +276,10 @@ function renderOfficialSources(rawSources) {
     icon.textContent = source.icon === "academy" ? "HV" : source.icon === "cyber" ? "A05" : source.icon === "broadcast" ? "TV" : source.icon === "government" ? "CP" : "BCA";
 
     const title = document.createElement("h3");
+    title.id = `official-source-${index + 1}-name`;
     title.textContent = source.name;
     const description = document.createElement("p");
+    description.id = `official-source-${index + 1}-description`;
     description.textContent = source.description || "";
     const link = document.createElement("a");
     link.href = source.url;
@@ -255,4 +294,115 @@ function renderOfficialSources(rawSources) {
   if (!grid.children.length) {
     grid.innerHTML = '<p class="empty">Danh mục liên kết đang được cập nhật.</p>';
   }
+}
+
+const TICKER_WEATHER_ICONS = [
+  { codes: [0], icon: "☀️" },
+  { codes: [1, 2], icon: "🌤️" },
+  { codes: [3], icon: "☁️" },
+  { codes: [45, 48], icon: "🌫️" },
+  { codes: [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82], icon: "🌧️" },
+  { codes: [71, 73, 75, 77, 85, 86], icon: "🌨️" },
+  { codes: [95, 96, 99], icon: "⛈️" },
+];
+
+function tickerWeatherIcon(code) {
+  return TICKER_WEATHER_ICONS.find((group) => group.codes.includes(Number(code)))?.icon || "🌤️";
+}
+
+function setupTickerClock() {
+  const element = document.getElementById("ticker-datetime");
+  if (!element) return;
+  const formatter = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const update = () => {
+    const label = formatter.format(new Date()).replace(/^./, (character) => character.toUpperCase());
+    element.textContent = `${label} · GMT+7`;
+    element.dateTime = new Date().toISOString();
+  };
+  update();
+  window.setInterval(update, 30_000);
+}
+
+async function loadTickerWeather() {
+  const icon = document.getElementById("ticker-weather-icon");
+  const text = document.getElementById("ticker-weather-text");
+  if (!icon || !text) return;
+  try {
+    const response = await fetch("/api/weather", { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const payload = await response.json();
+    if (typeof payload.temperature !== "number") throw new Error("Thiếu nhiệt độ");
+    icon.textContent = tickerWeatherIcon(payload.weatherCode);
+    text.textContent = `${payload.location || "Hà Nội"} ${payload.temperature.toFixed(1)}°C`;
+  } catch (_) {
+    icon.textContent = "🌤️";
+    text.textContent = "Hà Nội · chưa cập nhật";
+  }
+}
+
+function tickerDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return "Bài mới";
+  const [year, month, day] = value.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+function tickerPostLink(post) {
+  if (typeof post.pageUrl === "string" && post.pageUrl.startsWith("/")) return post.pageUrl;
+  return `/hoat-dong/${encodeURIComponent(post.slug)}/`;
+}
+
+function buildTickerPost(post, duplicate = false) {
+  const link = document.createElement("a");
+  link.className = "news-ticker-item";
+  link.href = tickerPostLink(post);
+  if (duplicate) {
+    link.setAttribute("aria-hidden", "true");
+    link.tabIndex = -1;
+  }
+
+  const date = document.createElement("span");
+  date.className = "news-ticker-date";
+  date.textContent = tickerDate(post.date);
+  const title = document.createElement("span");
+  title.textContent = post.title;
+  link.append(date, title);
+  return link;
+}
+
+async function loadSiteNewsTicker() {
+  const track = document.getElementById("news-ticker-track");
+  if (!track) return;
+  const [staticPayload, cloudPayload] = await Promise.all([
+    fetch("data/events.json").then((response) => response.ok ? response.json() : { events: [] }).catch(() => ({ events: [] })),
+    fetch("/api/public/posts?type=event", { cache: "no-store" }).then((response) => response.ok ? response.json() : { posts: [] }).catch(() => ({ posts: [] })),
+  ]);
+  const merged = mergeManagedPosts(cloudPayload.posts, staticPayload.events, cloudPayload.controls, "event");
+  const latest = merged
+    .filter((post) => post?.slug && post?.title)
+    .sort((left, right) => String(right.date || "").localeCompare(String(left.date || ""), "en"))
+    .slice(0, 7);
+
+  track.innerHTML = "";
+  if (!latest.length) {
+    const empty = document.createElement("span");
+    empty.className = "news-ticker-loading";
+    empty.textContent = "Chưa có bài mới để hiển thị.";
+    track.appendChild(empty);
+    track.style.animation = "none";
+    return;
+  }
+
+  latest.forEach((post) => track.appendChild(buildTickerPost(post)));
+  latest.forEach((post) => track.appendChild(buildTickerPost(post, true)));
+  const characterCount = latest.reduce((total, post) => total + post.title.length, 0);
+  track.style.setProperty("--ticker-duration", `${Math.max(60, Math.min(110, Math.round(characterCount * 0.18)))}s`);
 }

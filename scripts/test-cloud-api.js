@@ -60,6 +60,16 @@ async function main() {
   const feedbackContent = `Tin nhắn kiểm thử hệ thống ${idSuffix}`;
   await request("/api/messages/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ visitorToken, content: feedbackContent, website: "" }) });
   const adminHeaders = { "Content-Type": "application/json", Cookie: admin.cookie, "X-Publisher-Token": admin.csrfToken };
+  const invalidUser = await fetch(`${base}/api/users/create`, { method: "POST", headers: adminHeaders, body: JSON.stringify({ username: "!", fullName: "Tài khoản thử", role: "author", temporaryPassword: "TemporaryTest2026!" }) });
+  assert.strictEqual(invalidUser.status, 400, "API tạo tài khoản chưa kiểm tra tên đăng nhập.");
+  const siteTextFields = (await request("/api/site-texts", { headers: { Cookie: admin.cookie } })).data.fields;
+  const siteText = siteTextFields.find((field) => field.key === "quiz.heading");
+  assert(siteText, "Admin chưa tải được danh sách khối chữ Trang chủ.");
+  const temporarySiteText = `${siteText.value} [kiểm thử]`;
+  await request("/api/site-texts/update", { method: "POST", headers: adminHeaders, body: JSON.stringify({ texts: { [siteText.key]: temporarySiteText } }) });
+  const publicSiteTexts = (await request("/api/public/site-texts")).data.fields;
+  assert(publicSiteTexts.some((field) => field.key === siteText.key && field.value === temporarySiteText));
+  await request("/api/site-texts/update", { method: "POST", headers: adminHeaders, body: JSON.stringify({ texts: { [siteText.key]: siteText.value } }) });
   const publicBannerBefore = (await request("/api/public/banner")).data;
   assert(publicBannerBefore.images.length >= 1, "Banner công khai chưa có danh sách ảnh ban đầu.");
   const adminBanner = (await request("/api/banner", { headers: { Cookie: admin.cookie } })).data;
@@ -87,11 +97,13 @@ async function main() {
   const payload = {
     type: "event",
     title: `Bài kiểm thử cổng quản trị trực tuyến ${idSuffix}`,
+    titleAlign: "justify",
     date: "2026-09-30",
     placement: "timeline",
     category: "an-ninh-mang",
     location: "Hà Nội",
     summary: "Bản thử nghiệm quy trình đăng bài, chèn ảnh và thẩm định trực tuyến.",
+    summaryAlign: "justify",
     bodyBlocks: [
       { type: "heading2", html: "Nội dung <strong>kiểm thử</strong>", align: "left" },
       { type: "paragraph", html: "Đây là đoạn nội dung thường có đủ số lượng ký tự để xác minh toàn bộ quy trình.", align: "justify" },
@@ -132,6 +144,7 @@ async function main() {
   const article = await request(new URL(published.url).pathname);
   assert(article.text.includes("Đại úy Nguyễn Quốc Vương"));
   assert(article.text.includes("Chú thích ảnh màu xanh lá"));
+  assert(article.text.includes('class="text-align-justify"'));
   const mediaResponse = await fetch(`${base}${post.images[0].src}`);
   assert.strictEqual(mediaResponse.status, 200);
   assert.strictEqual(mediaResponse.headers.get("content-type"), "image/jpeg");
@@ -142,8 +155,35 @@ async function main() {
   const analytics = (await request("/api/analytics/summary")).data;
   assert(analytics.stats.total >= 1 && analytics.stats.today >= 1 && analytics.stats.month >= 1);
   assert(analytics.popular.some((item) => item.path === new URL(published.url).pathname));
+  const managedBefore = (await request("/api/posts", { headers: { Cookie: admin.cookie } })).data.posts;
+  assert(managedBefore.some((item) => item.slug === published.slug), "Bài đã đăng chưa xuất hiện trong danh sách quản trị.");
+  const editable = (await request(`/api/posts/get?type=event&slug=${encodeURIComponent(published.slug)}`, { headers: { Cookie: admin.cookie } })).data.post;
+  const editedTitle = `${editable.title} - đã sửa`;
+  const updated = (await request("/api/posts/update", {
+    method: "POST",
+    headers: adminHeaders,
+    body: JSON.stringify({
+      ...editable,
+      title: editedTitle,
+      titleAlign: "center",
+      summaryAlign: "justify",
+      images: editable.images.map((item) => ({ ...item, existingPath: item.path })),
+    }),
+  })).data.post;
+  assert.strictEqual(updated.title, editedTitle);
+  const editedArticle = await request(new URL(published.url).pathname);
+  assert(editedArticle.text.includes('class="text-align-center"'));
+  assert(editedArticle.text.includes(editedTitle));
+  const managedAfter = (await request("/api/posts", { headers: { Cookie: admin.cookie } })).data.posts;
+  await request("/api/posts/reorder", {
+    method: "POST",
+    headers: adminHeaders,
+    body: JSON.stringify({ items: managedAfter.map((item) => ({ type: item.type, slug: item.slug })) }),
+  });
+  await request("/api/posts/delete", { method: "POST", headers: adminHeaders, body: JSON.stringify({ type: "event", slug: published.slug }) });
+  assert.strictEqual((await fetch(`${base}${new URL(published.url).pathname}`)).status, 404);
   await request("/api/messages/delete", { method: "POST", headers: adminHeaders, body: JSON.stringify({ id: feedback.id }) });
-  console.log(JSON.stringify({ wrongPassword: rejected.status, created: created.workflowStatus, reviewed: reviewed.workflowStatus, draftMediaAnonymous: 404, published: published.workflowStatus, url: published.url, publicPosts: publicPosts.length, media: mediaResponse.status, traffic: analytics.stats, popularTracked: true, messageWorkflow: "NEW → READ → DELETED", bannerWorkflow: "LIST → UPLOAD → SPEED → DELETE" }, null, 2));
+  console.log(JSON.stringify({ wrongPassword: rejected.status, invalidNewUser: invalidUser.status, siteTextWorkflow: "LOAD → EDIT → RESTORE", created: created.workflowStatus, reviewed: reviewed.workflowStatus, draftMediaAnonymous: 404, published: published.workflowStatus, url: published.url, publicPosts: publicPosts.length, media: mediaResponse.status, traffic: analytics.stats, popularTracked: true, postManagement: "LIST → EDIT → REORDER → DELETE", messageWorkflow: "NEW → READ → DELETED", bannerWorkflow: "LIST → UPLOAD → SPEED → DELETE" }, null, 2));
 }
 
 main().catch((error) => {

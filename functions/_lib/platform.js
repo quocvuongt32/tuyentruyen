@@ -9,7 +9,7 @@ export const MAX_IMAGE_BYTES = 2_500_000;
 export const MAX_REQUEST_BYTES = 58 * 1024 * 1024;
 
 export const ROLE_PERMISSIONS = Object.freeze({
-  admin: ["create", "submit", "approve", "publish", "discard", "manage-users", "manage-messages", "manage-banner"],
+  admin: ["create", "submit", "approve", "publish", "discard", "manage-users", "manage-messages", "manage-banner", "manage-posts", "manage-site-texts"],
   author: ["create", "submit", "discard"],
   approver: ["approve", "publish"],
 });
@@ -124,6 +124,10 @@ export function permissionsFor(user) {
 
 export function requirePermission(session, permission) {
   if (!permissionsFor(session?.user).includes(permission)) throw new HttpError(403, "Tài khoản không có quyền thực hiện thao tác này.");
+}
+
+export function cleanAlignment(value, fallback = "justify") {
+  return ["left", "center", "right", "justify"].includes(value) ? value : fallback;
 }
 
 export function parseCookies(request) {
@@ -320,6 +324,8 @@ export function pendingFromRow(row, origin) {
     id: row.id,
     type: row.type,
     title: row.title,
+    titleAlign: cleanAlignment(row.title_align),
+    summaryAlign: cleanAlignment(row.summary_align),
     slug: row.slug,
     url: `${origin}/${prefix}/${encodeURIComponent(row.slug)}/`,
     previewUrl: `/preview/${prefix}/${encodeURIComponent(row.slug)}/`,
@@ -355,7 +361,9 @@ export function publicPostFromRow(row) {
     type: row.type,
     slug: row.slug,
     title: row.title,
+    titleAlign: cleanAlignment(row.title_align),
     summary: row.summary,
+    summaryAlign: cleanAlignment(row.summary_align),
     date: row.publish_date,
     category: row.category,
     categoryLabel: CATEGORY_LABELS[row.category] || CATEGORY_LABELS.khac,
@@ -380,6 +388,11 @@ export async function getPostBySlug(env, type, slug, includeUnpublished = false)
     ? "SELECT * FROM posts WHERE type = ? AND slug = ? LIMIT 1"
     : "SELECT * FROM posts WHERE type = ? AND slug = ? AND status = 'PUBLISHED' LIMIT 1";
   return env.DB.prepare(query).bind(type, slug).first();
+}
+
+export async function isPostHidden(env, type, slug) {
+  const row = await env.DB.prepare("SELECT hidden FROM published_post_controls WHERE type=? AND slug=? LIMIT 1").bind(type, slug).first();
+  return Number(row?.hidden || 0) === 1;
 }
 
 export function base64Jpeg(dataUrl, index) {
@@ -420,9 +433,11 @@ export async function renderArticle(context, row, preview = false) {
   const siteName = footer.siteName || "Website chuyên đề Cẩm nang An toàn số";
   const meta = [formatDate(row.publish_date), CATEGORY_LABELS[row.category], row.location].filter(Boolean).map(escapeHtml).join(" · ");
   const references = [row.reference_link ? `<a class="article-reference" href="${escapeHtml(row.reference_link)}" target="_blank" rel="noopener noreferrer">Xem nguồn tham khảo ↗</a>` : "", row.video_url ? `<a class="article-reference" href="${escapeHtml(row.video_url)}" target="_blank" rel="noopener noreferrer">Xem video ↗</a>` : ""].filter(Boolean).join("");
+  const titleAlign = cleanAlignment(row.title_align);
+  const summaryAlign = cleanAlignment(row.summary_align);
   const page = `<!doctype html><html lang="vi-VN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(row.title)} | Cẩm nang An toàn số</title><meta name="description" content="${escapeHtml(row.summary)}"><link rel="canonical" href="${canonical}"><meta property="og:type" content="article"><meta property="og:locale" content="vi_VN"><meta property="og:site_name" content="Cẩm nang An toàn số"><meta property="og:title" content="${escapeHtml(row.title)}"><meta property="og:description" content="${escapeHtml(row.summary)}"><meta property="og:url" content="${canonical}">${cover ? `<meta property="og:image" content="${new URL(cover.src, canonical).href}">` : ""}<link rel="icon" href="/img/favicon.png"><link rel="stylesheet" href="/css/article.css"></head><body>
   <header class="article-header"><a class="article-brand" href="/" aria-label="Về trang chủ"><img src="/img/badge.png" alt="Logo Cẩm nang An toàn số của Khoa KTT" width="76" height="58"><span><strong>CẨM NANG AN TOÀN SỐ</strong><small>Của Khoa KTT, Học viện CSND</small></span></a><a class="back-home" href="/">← Trang chủ</a></header>
-  <main class="article-shell"><nav class="article-breadcrumb" aria-label="Đường dẫn"><a href="/">Trang chủ</a><span aria-hidden="true">›</span><span>${kindLabel}</span></nav><article class="article-card">${preview ? `<div class="article-preview-notice">BẢN XEM TRƯỚC · ${escapeHtml(row.status)}</div>` : ""}<div class="article-kicker">${kindLabel}</div><h1>${escapeHtml(row.title)}</h1>${meta ? `<p class="article-meta">${meta}</p>` : ""}<p class="article-lead">${escapeHtml(row.summary)}</p>${cover ? `<figure class="article-cover"><img src="${escapeHtml(cover.src)}" alt="${escapeHtml(cover.caption || row.title)}" decoding="async">${cover.caption ? `<figcaption>${escapeHtml(cover.caption)}</figcaption>` : ""}</figure>` : ""}<div class="article-content">${row.body_html}</div>${gallery.length ? `<section class="article-documentary-images" aria-label="Ảnh tư liệu"><h2>Ảnh tư liệu</h2><div class="article-gallery">${gallery.map((item) => `<figure><a href="${escapeHtml(item.src)}" target="_blank" rel="noopener"><img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.caption || row.title)}" loading="lazy" decoding="async"></a>${item.caption ? `<figcaption>${escapeHtml(item.caption)}</figcaption>` : ""}</figure>`).join("")}</div></section>` : ""}${references ? `<div class="article-references">${references}</div>` : ""}<p class="article-author">Tác giả: ${escapeHtml(row.author_name)}</p><div class="article-actions"><button type="button" id="copy-link" class="primary-action">Sao chép liên kết</button><button type="button" id="share-link" class="secondary-action">Chia sẻ bài</button></div><p id="share-status" class="share-status" aria-live="polite"></p></article></main>
+  <main class="article-shell"><nav class="article-breadcrumb" aria-label="Đường dẫn"><a href="/">Trang chủ</a><span aria-hidden="true">›</span><span>${kindLabel}</span></nav><article class="article-card">${preview ? `<div class="article-preview-notice">BẢN XEM TRƯỚC · ${escapeHtml(row.status)}</div>` : ""}<div class="article-kicker">${kindLabel}</div><h1 class="text-align-${titleAlign}">${escapeHtml(row.title)}</h1>${meta ? `<p class="article-meta">${meta}</p>` : ""}<p class="article-lead text-align-${summaryAlign}">${escapeHtml(row.summary)}</p>${cover ? `<figure class="article-cover"><img src="${escapeHtml(cover.src)}" alt="${escapeHtml(cover.caption || row.title)}" decoding="async">${cover.caption ? `<figcaption>${escapeHtml(cover.caption)}</figcaption>` : ""}</figure>` : ""}<div class="article-content">${row.body_html}</div>${gallery.length ? `<section class="article-documentary-images" aria-label="Ảnh tư liệu"><h2>Ảnh tư liệu</h2><div class="article-gallery">${gallery.map((item) => `<figure><a href="${escapeHtml(item.src)}" target="_blank" rel="noopener"><img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.caption || row.title)}" loading="lazy" decoding="async"></a>${item.caption ? `<figcaption>${escapeHtml(item.caption)}</figcaption>` : ""}</figure>`).join("")}</div></section>` : ""}${references ? `<div class="article-references">${references}</div>` : ""}<p class="article-author">Tác giả: ${escapeHtml(row.author_name)}</p><div class="article-actions"><button type="button" id="copy-link" class="primary-action">Sao chép liên kết</button><button type="button" id="share-link" class="secondary-action">Chia sẻ bài</button></div><p id="share-status" class="share-status" aria-live="polite"></p></article></main>
   <footer class="article-footer"><strong>${escapeHtml(academy.toUpperCase())}</strong><span>${escapeHtml(unit.toUpperCase())}</span><span>${escapeHtml(siteName.toUpperCase())}</span><span>Cơ quan chủ quản: ${escapeHtml(academy)}</span><span>Đơn vị quản lý: ${escapeHtml(unit)}</span><span>Chịu trách nhiệm quản lý nội dung: ${escapeHtml(footer.contentManager || "")}</span><span>Quản trị kỹ thuật: ${escapeHtml(footer.technicalManager || "")}</span>${footer.notice ? `<span class="article-footer-notice">${escapeHtml(footer.notice)}</span>` : ""}${footer.statusNotice ? `<span class="article-footer-status">${escapeHtml(footer.statusNotice)}</span>` : ""}<nav aria-label="Thông tin pháp lý và liên hệ"><a href="/#gioi-thieu">Giới thiệu</a><a href="/terms/">Điều khoản sử dụng</a><a href="/privacy/">Chính sách bảo vệ dữ liệu cá nhân</a><a href="/nguon-tin/">Bản quyền và nguồn thông tin</a><a href="/contact/">Liên hệ</a></nav></footer><script src="/js/article.js" defer></script><script src="/js/engagement.js" defer></script></body></html>`;
   return new Response(page, { headers: { "Content-Type": "text/html; charset=utf-8", ...securityHeaders(preview ? "no-store" : "public, max-age=60, stale-while-revalidate=300"), "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; frame-ancestors 'none'" } });
 }

@@ -34,6 +34,11 @@ if (!adminHtml.includes('/admin/app.js') || !loginHtml.includes('/admin/login.js
 if (/Dang-bai\.bat|127\.0\.0\.1|localhost/i.test(`${adminHtml}\n${loginHtml}`)) errors.push("Giao diện /admin public còn hướng dẫn dành riêng cho cổng cục bộ.");
 if (!adminHtml.includes('id="banner-management"') || !adminHtml.includes('id="banner-interval-seconds"')) errors.push("Cổng /admin chưa có chức năng quản lý ảnh và tốc độ banner.");
 if (!adminHtml.includes("Hộp thư góp ý") || !adminHtml.includes('id="message-management"')) errors.push("Cổng /admin chưa có hộp thư góp ý cho quản trị viên.");
+if (!adminHtml.includes('id="title-align"') || !adminHtml.includes('id="summary-align"')) errors.push("Trình soạn bài chưa có điều khiển căn tiêu đề và tóm tắt.");
+if (!adminHtml.includes('value="justify" selected')) errors.push("Tiêu đề và tóm tắt chưa mặc định căn đều hai bên.");
+if (!adminHtml.includes('id="published-post-management"') || !adminHtml.includes('id="published-event-list"') || !adminHtml.includes('id="published-skill-list"')) errors.push("Cổng /admin chưa có khu quản lý bài đã đăng.");
+if (!adminHtml.includes('id="create-user-form"') || !adminHtml.includes('id="create-temporary-password"')) errors.push("Cổng /admin chưa có biểu mẫu tạo thêm tài khoản.");
+if (!adminHtml.includes('id="site-text-management"') || !adminHtml.includes('id="site-text-fields"')) errors.push("Cổng /admin chưa có khu chỉnh chữ trên Trang chủ.");
 
 const html = fs.readFileSync(path.join(dist, "index.html"), "utf8");
 for (const match of html.matchAll(/(?:src|href)="((?:css|js|img)\/[^"?#]+)"/g)) requireFile(match[1]);
@@ -43,7 +48,9 @@ if (!html.includes("Cổng thông tin và nguồn tham khảo")) errors.push("Tr
 if (!html.includes('id="popular-articles"') || !html.includes('class="popular-sidebar"') || !html.includes('class="timeline-layout"')) errors.push("Khu vực Tuyên truyền chưa có cột bài xem nhiều nhất.");
 if (!html.includes('id="feedback-form"') || !html.includes("Thống kê truy cập")) errors.push("Trang chủ chưa có biểu mẫu tin nhắn hoặc thống kê truy cập.");
 if (html.includes("Gửi góp ý về nội dung, nguồn tham khảo hoặc lỗi hiển thị")) errors.push("Khối gửi tin nhắn vẫn còn đoạn mô tả dài cần loại bỏ.");
-if (/quick-news|news-ticker|tin-nhanh|Tổng hợp tin tức|Tin mới từ Bộ Công an|Làm mới tin/i.test(html)) errors.push("Trang chủ vẫn còn dấu vết khối tổng hợp tin cũ.");
+if (!html.includes('id="news-ticker"') || !html.includes('id="ticker-weather"') || !html.includes('id="ticker-datetime"')) errors.push("Trang chủ chưa có thanh thời tiết, thời gian và Thời sự.");
+if (!html.includes('id="official-sources-kicker"') || !html.includes('id="official-sources-hint"') || !html.includes('id="quiz-heading"')) errors.push("Các khối chữ Trang chủ chưa có điểm neo để admin cập nhật.");
+if (/quick-news|tin-nhanh|Tổng hợp tin tức|Tin mới từ Bộ Công an|Làm mới tin/i.test(html)) errors.push("Trang chủ vẫn còn dấu vết khối tổng hợp tin ngoài cũ.");
 if (!html.includes("sản phẩm dự thi Cuộc thi")) errors.push("Footer chưa nêu trạng thái sản phẩm dự thi.");
 
 const events = JSON.parse(fs.readFileSync(path.join(dist, "data/events.json"), "utf8")).events || [];
@@ -73,6 +80,7 @@ if (samplePage) {
   if (!pageHtml.includes('/img/badge.png')) errors.push("Trang bài riêng chưa dùng logo Cẩm nang An toàn số.");
   if (!pageHtml.includes("Của Khoa KTT, Học viện CSND")) errors.push("Trang bài riêng chưa ghi rõ Cẩm nang của Khoa KTT, Học viện CSND.");
   if (!pageHtml.includes("KHOA TOÁN - TIN HỌC VÀ ỨNG DỤNG KHCN TRONG PCTP")) errors.push("Footer trang bài riêng chưa đúng tên đơn vị.");
+  if (!pageHtml.includes('class="text-align-justify"')) errors.push("Trang bài riêng chưa mặc định căn đều tiêu đề hoặc tóm tắt.");
 }
 
 const site = JSON.parse(fs.readFileSync(path.join(dist, "data/site.json"), "utf8"));
@@ -92,9 +100,16 @@ const publicScripts = fs.readdirSync(path.join(dist, "js"))
   .filter((name) => name.endsWith(".js"))
   .map((name) => fs.readFileSync(path.join(dist, "js", name), "utf8"))
   .join("\n");
-if (/\/api\/quick-news|api\/rss|parseHvcsnd|activity-feed|news-ticker/i.test(publicScripts)) {
+if (/\/api\/quick-news|api\/rss|parseHvcsnd|activity-feed/i.test(publicScripts)) {
   errors.push("JavaScript public vẫn còn cơ chế tải hoặc phân tích tin ngoài.");
 }
+if (!publicScripts.includes('/api/public/posts?type=event') || !publicScripts.includes('/api/weather')) {
+  errors.push("Thanh Thời sự chưa lấy bài nội bộ hoặc chưa gọi API thời tiết cùng miền.");
+}
+if (!publicScripts.includes('/api/public/site-texts')) errors.push("Trang chủ chưa tải các khối chữ do admin quản lý.");
+
+const articleCss = fs.readFileSync(path.join(dist, "css", "article.css"), "utf8");
+if (!articleCss.includes("2.7rem") || !articleCss.includes(".text-align-justify")) errors.push("Cỡ tiêu đề bài hoặc kiểu căn đều chưa được cập nhật.");
 if (/goatcounter|google-analytics|googletagmanager|plausible|matomo/i.test(`${html}\n${publicScripts}`)) {
   errors.push("Website public vẫn còn mã phân tích hoặc bộ đếm truy cập bên thứ ba.");
 }

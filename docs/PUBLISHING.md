@@ -23,6 +23,21 @@ Admin có thể đổi họ tên, vai trò, trạng thái hoạt động, đặt
 tài khoản khác và xử lý góp ý trong mục **Hộp thư góp ý**. Hệ thống không cho tài khoản đang
 đăng nhập tự khóa hoặc tự đổi vai trò tại màn hình này.
 
+### Tạo thêm tài khoản
+
+1. Mở **Quản lý tài khoản**, nhập tên đăng nhập chữ thường, họ tên, vai trò và mật khẩu tạm.
+2. Chọn **Tạo tài khoản**. Tên đăng nhập phải duy nhất; mật khẩu phải đáp ứng quy tắc an toàn.
+3. Chuyển riêng tên đăng nhập và mật khẩu tạm cho người được cấp. Ở lần đăng nhập đầu, hệ thống
+   bắt buộc người dùng đặt mật khẩu mới trước khi dùng các chức năng khác.
+
+## Chỉnh chữ trên Trang chủ
+
+1. Admin chọn **Chỉnh chữ Trang chủ** trên thanh công cụ.
+2. Chỉnh các trường theo nhóm: nhận diện/menu, banner mở đầu, giới thiệu, nguồn tham khảo,
+   khu vực nội dung và liên hệ/thống kê.
+3. Chọn **Lưu và cập nhật Trang chủ**. Website chỉ nhận văn bản thuần và tự cập nhật sau khi tải lại.
+4. Chọn **Khôi phục mặc định** tại từng trường rồi lưu nếu muốn dùng lại nội dung trong mã nguồn.
+
 ## Quản lý banner Trang chủ
 
 1. Đăng nhập bằng tài khoản `admin`, chọn **Banner trang chủ** trên thanh công cụ.
@@ -48,6 +63,8 @@ hiển thị huy hiệu của Cẩm nang và không phát sinh khung ảnh lỗi
 
 - **Tiêu đề**: nhập bình thường; trang bài viết tự hiển thị chữ hoa và đậm.
 - **Tóm tắt**: trang bài viết tự hiển thị đậm và in nghiêng.
+- **Căn lề tiêu đề và tóm tắt**: chọn căn trái, giữa, phải hoặc đều hai bên ngay cạnh trường
+  tương ứng. Cả hai trường mặc định căn đều hai bên và giữ nguyên lựa chọn khi xuất bản.
 - **Nội dung**: có kiểu đoạn thường, tiêu đề mục, tiêu đề nhỏ, trích dẫn; hỗ trợ chữ
   đậm, nghiêng, gạch chân, danh sách, liên kết và căn lề.
 - **Ảnh giữa bài**: đặt con trỏ tại vị trí cần chèn rồi chọn **Ảnh trong bài**. Chú
@@ -58,6 +75,18 @@ hiển thị huy hiệu của Cẩm nang và không phát sinh khung ảnh lỗi
 
 Ảnh được tự xoay, thu nhỏ, chuẩn hóa JPEG và điều chỉnh chất lượng theo dung lượng
 mục tiêu. Tổng số ảnh đại diện, ảnh giữa bài và ảnh tư liệu tối đa là 30 ảnh/bài.
+
+## Quản lý bài đã đăng
+
+1. Đăng nhập bằng tài khoản `admin`, chọn **Quản lý bài đã đăng** trên thanh công cụ.
+2. Danh sách hiển thị cả bài có sẵn của website và bài đã xuất bản qua `/admin`, chia theo
+   Hoạt động/Tuyên truyền và Bộ kỹ năng An toàn số.
+3. Chọn **Sửa** để nạp bài vào trình soạn thảo; nút lưu lúc này cập nhật ngay bài đang công khai
+   nhưng vẫn giữ nguyên đường dẫn. Chọn **Hủy sửa bài đã đăng** để quay lại soạn bài mới.
+4. Chọn **Xóa** để gỡ bài khỏi website. Với bài có sẵn, hệ thống lưu trạng thái ẩn để bài không
+   xuất hiện trở lại sau lần build tiếp theo.
+5. Giữ biểu tượng kéo và thả bài lên/xuống trong từng nhóm. Thứ tự mới được lưu tự động và được
+   áp dụng ở các khu vực danh sách trên website.
 
 ## Luồng duyệt và đăng
 
