@@ -39,6 +39,7 @@ try {
   const html = renderBlocks(blocks);
   assert(html.includes("<strong>an toàn</strong>"));
   assert(html.includes("/uploads/test.jpg"));
+  assert(html.includes("<figcaption>Chú thích ảnh minh họa</figcaption>"));
   assert(!html.includes("<script"));
   assert(!html.includes("javascript:"));
   assert(plainTextFromBlocks(blocks).includes("nội dung"));

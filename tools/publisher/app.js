@@ -29,6 +29,28 @@ const form = $("#post-form");
 const bodyEditor = $("#body-editor");
 const busy = $("#busy-overlay");
 const toast = $("#toast");
+const INLINE_CAPTION_PLACEHOLDER = "Nhập chú thích ảnh…";
+
+function inlineCaptionText(caption) {
+  const value = String(caption?.textContent || "").replace(/\s+/g, " ").trim();
+  return value === INLINE_CAPTION_PLACEHOLDER ? "" : value.slice(0, 260);
+}
+
+function wireInlineCaption(caption, item, initialValue = "") {
+  const value = String(initialValue || "").trim();
+  caption.contentEditable = "plaintext-only";
+  caption.setAttribute("role", "textbox");
+  caption.setAttribute("aria-label", "Chú thích ảnh");
+  caption.dataset.placeholder = INLINE_CAPTION_PLACEHOLDER;
+  caption.textContent = value === INLINE_CAPTION_PLACEHOLDER ? "" : value;
+  item.caption = inlineCaptionText(caption);
+  caption.addEventListener("input", () => {
+    const normalized = inlineCaptionText(caption);
+    if (caption.textContent.length > 260) caption.textContent = normalized;
+    item.caption = normalized;
+    updatePreview();
+  });
+}
 
 function showToast(message, isError = false) {
   toast.textContent = message;
@@ -277,13 +299,7 @@ function insertInlineFigure(item) {
   image.alt = "Ảnh chèn trong bài";
   image.contentEditable = "false";
   const caption = document.createElement("figcaption");
-  caption.contentEditable = "true";
-  caption.textContent = "Nhập chú thích ảnh…";
-  caption.dataset.placeholder = "true";
-  caption.addEventListener("focus", () => {
-    if (caption.dataset.placeholder === "true") { caption.textContent = ""; caption.dataset.placeholder = "false"; }
-  });
-  caption.addEventListener("input", updatePreview);
+  wireInlineCaption(caption, item, item.caption || "");
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "editor-image-remove";
@@ -445,16 +461,7 @@ function wireExistingInlineFigure(figure, item, captionText) {
   image.contentEditable = "false";
   const caption = figure.querySelector("figcaption") || document.createElement("figcaption");
   if (!caption.parentElement) figure.appendChild(caption);
-  caption.contentEditable = "true";
-  caption.textContent = captionText || "Nhập chú thích ảnh…";
-  caption.dataset.placeholder = captionText ? "false" : "true";
-  caption.addEventListener("focus", () => {
-    if (caption.dataset.placeholder === "true") {
-      caption.textContent = "";
-      caption.dataset.placeholder = "false";
-    }
-  });
-  caption.addEventListener("input", updatePreview);
+  wireInlineCaption(caption, item, captionText || item.caption || "");
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "editor-image-remove";
@@ -563,7 +570,9 @@ function serializeEditorBlocks() {
     const tag = node.tagName.toLowerCase();
     if (tag === "figure" && node.dataset.imageId) {
       const captionElement = node.querySelector("figcaption");
-      const caption = captionElement?.dataset.placeholder === "true" ? "" : captionElement?.textContent.trim() || "";
+      const caption = inlineCaptionText(captionElement);
+      const imageItem = state.images.find((item) => item.id === node.dataset.imageId);
+      if (imageItem) imageItem.caption = caption;
       blocks.push({ type: "image", imageId: node.dataset.imageId, caption });
     } else if (tag === "hr") {
       blocks.push({ type: "separator" });

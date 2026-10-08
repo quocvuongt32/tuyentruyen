@@ -1,5 +1,11 @@
 # Nhật ký thay đổi
 
+## 8/10/2026 — Hiển thị ổn định chú thích ảnh trong bài viết
+
+- Sửa trình soạn thảo để nội dung chú thích ảnh chèn giữa bài không còn bị coi nhầm là chữ gợi ý rồi bị xóa khi lưu.
+- Đồng bộ chú thích vào cả khối nội dung và thông tin ảnh; trang xem trước, trang bài và cửa sổ bài ở Trang chủ đều dựng lại từ dữ liệu khối đã lưu.
+- Chú thích tiếp tục hiển thị ngay dưới ảnh bằng chữ nghiêng màu xanh lá trên máy tính và thiết bị di động.
+
 ## 7/10/2026 — Quản lý toàn bộ bài, chữ Trang chủ và tài khoản mới
 
 - Admin xem được toàn bộ bài đã đăng, kể cả nội dung tĩnh kế thừa; có thể sửa trực tiếp, xóa

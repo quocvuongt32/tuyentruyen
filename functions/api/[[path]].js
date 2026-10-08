@@ -595,8 +595,9 @@ function parseStoredJson(value, fallback) {
 }
 
 function adminPostFromRow(row) {
+  const post = publicPostFromRow(row);
   return {
-    ...publicPostFromRow(row),
+    ...post,
     source: "cloud",
     images: parseStoredJson(row.images_json, []).map((item) => ({
       id: item.id,
@@ -606,7 +607,7 @@ function adminPostFromRow(row) {
       caption: item.caption || "",
     })),
     bodyBlocks: parseStoredJson(row.body_blocks_json, []),
-    bodyHtml: row.body_html,
+    bodyHtml: post.bodyHtml,
     author: row.author_name,
   };
 }

@@ -90,7 +90,7 @@ main { width: min(1400px, calc(100% - 32px)); margin: 28px auto 70px; }
 .editor-inline-image { position: relative; margin: 26px auto; padding: 12px; border: 1px solid #cfe0e7; background: #f8fbfc; }
 .editor-inline-image img { display: block; width: 100%; max-height: 640px; object-fit: contain; background: #e7eef2; }
 .editor-inline-image figcaption { min-height: 1.7em; margin-top: 10px; color: #24824f; font-style: italic; text-align: center; outline: 0; }
-.editor-inline-image figcaption[data-placeholder="true"] { color: #6c9b7d; }
+.editor-inline-image figcaption:empty::before { content: attr(data-placeholder); color: #6c9b7d; pointer-events: none; }
 .editor-image-remove { position: absolute; top: 18px; right: 18px; border: 0; color: white; background: rgba(142,34,45,.9); padding: 7px 9px; cursor: pointer; font: inherit; font-size: .72rem; font-weight: 800; }
 .advanced { border: 1px solid var(--line); background: #f8fafc; }
 .advanced summary { cursor: pointer; padding: 13px; font-weight: 750; color: #38526b; }
